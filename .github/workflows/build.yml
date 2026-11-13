@@ -22,11 +22,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          accept-license: true
-
       - name: Build Android APK
         run: |
           mkdir -p www
@@ -40,8 +35,12 @@ jobs:
           }' > capacitor.config.json
 
           npm install
+          npx @capacitor/cli create android-project --app-id com.pulsecity.app --name PulseCity --web-dir www --no-templating || true
+          
+          # Альтернативная стандартная инициализация Capacitor без лишних запросов
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap add android
+          npx cap add android --web-dir www
+          
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
