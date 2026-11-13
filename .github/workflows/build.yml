@@ -40,17 +40,18 @@ jobs:
           npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
           
-          # Очищаем и создаем андроид-платформу заново
           rm -rf android
           npx cap add android
 
-          # Принимаем лицензии SDK для сборщика
           export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
           yes | sdkmanager --licenses || true
 
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          
+          # Очищаем битый кэш и собираем без демона
+          rm -rf ~/.gradle/caches/
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
