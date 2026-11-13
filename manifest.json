@@ -10,15 +10,15 @@
   "theme_color": "#00f3ff",
   "icons": [
     {
-      "src": "/pulsecity-/icon.jpg",
+      "src": "/pulsecity-/icon.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pulsecity-/icon.jpg",
+      "src": "/pulsecity-/icon.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     }
   ]
