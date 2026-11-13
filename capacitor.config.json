@@ -1,0 +1,6 @@
+{
+  "appId": "com.pulsecity.app",
+  "appName": "PulseCity",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
