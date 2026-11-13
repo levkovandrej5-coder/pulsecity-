@@ -22,15 +22,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          accept-license: true
-          sources: false
-          cmake: false
-          ndk: false
-
       - name: Build Android APK
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
           mkdir -p www
           cp index.html style.css app.js www/
@@ -46,6 +41,9 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap add android
           
+          # Автоматически принимаем все лицензии Android SDK
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
