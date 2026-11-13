@@ -22,6 +22,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          accept-license: true
+          sources: false
+          cmake: false
+          ndk: false
+
       - name: Build Android APK
         run: |
           mkdir -p www
