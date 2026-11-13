@@ -1,10 +1,13 @@
 {
-  "name": "PulseCity",
-  "short_name": "PulseCity",
-  "start_url": "/pulsecity-/",
-  "scope": "/pulsecity-/",
-  "display": "standalone",
   "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "PulseCity",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "PulseCity",
+  "start_url": "/",
   "theme_color": "#ffffff",
-  "id": "com.pulsecity.app"
+  "id": "com.pulsecity.app",
+  "description": "Киберпанк-мессенджер и городская новостная лента"
 }
