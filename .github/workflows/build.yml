@@ -35,11 +35,8 @@ jobs:
           }' > capacitor.config.json
 
           npm install
-          npx @capacitor/cli create android-project --app-id com.pulsecity.app --name PulseCity --web-dir www --no-templating || true
-          
-          # Альтернативная стандартная инициализация Capacitor без лишних запросов
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap add android --web-dir www
+          npx cap add android
           
           cd android
           chmod +x gradlew
