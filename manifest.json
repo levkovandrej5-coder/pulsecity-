@@ -1,0 +1,10 @@
+{
+  "name": "PulseCity",
+  "short_name": "PulseCity",
+  "start_url": "/pulsecity-/",
+  "scope": "/pulsecity-/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "id": "com.pulsecity.app"
+}
