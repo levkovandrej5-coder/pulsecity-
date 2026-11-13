@@ -18,8 +18,11 @@ jobs:
 
       - name: Build Android APK
         run: |
+          mkdir www
+          cp index.html style.css app.js www/
           npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init PulseCity com.pulsecity.app --web-dir www
           npx cap add android
           cd android
           chmod +x gradlew
