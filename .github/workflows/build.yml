@@ -16,16 +16,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Build Android APK
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-          ANDROID_HOME: /usr/local/lib/android/sdk
+      - name: Build Web & Package
         run: |
           mkdir -p www
           cp index.html style.css app.js www/
@@ -38,19 +29,10 @@ jobs:
           }' > capacitor.config.json
 
           npm install
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap add android
-          
-          # Безопасное принятие лицензий SDK по актуальному пути
-          export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
-          yes | sdkmanager --licenses || true
+          npx @capacitor/cli copy android
 
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK
+      - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: web-files
+          path: www/
