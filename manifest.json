@@ -2,7 +2,7 @@
   "name": "PulseCity",
   "short_name": "PulseCity",
   "id": "com.pulsecity.app",
-  "description": мессенджер и городская новостная лента",
+  "description": "Городская новостная лента и мессенджер",
   "start_url": "/pulsecity-/",
   "scope": "/pulsecity-/",
   "display": "standalone",
@@ -23,3 +23,4 @@
     }
   ]
 }
+
