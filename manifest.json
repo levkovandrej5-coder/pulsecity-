@@ -1,13 +1,19 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "PulseCity",
-  "orientation": "any",
-  "scope": "/",
   "short_name": "PulseCity",
-  "start_url": "/",
-  "theme_color": "#ffffff",
   "id": "com.pulsecity.app",
-  "description": "Киберпанк-мессенджер и городская новостная лента"
+  "description": "Киберпанк-мессенджер и городская новостная лента",
+  "start_url": "/pulsecity-/",
+  "scope": "/pulsecity-/",
+  "display": "standalone",
+  "background_color": "#050510",
+  "theme_color": "#00f3ff",
+  "icons": [
+    {
+      "src": "/pulsecity-/icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
 }
