@@ -16,11 +16,10 @@ jobs:
         with:
           node-version: 18
 
-      - name: Initialize Capacitor & Build APK
+      - name: Build Android APK
         run: |
-          npm init -y
+          npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init PulseCity com.pulsecity.app --web-dir .
           npx cap add android
           cd android
           chmod +x gradlew
