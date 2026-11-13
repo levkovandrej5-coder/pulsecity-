@@ -41,8 +41,9 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap add android
           
-          # Автоматически принимаем все лицензии Android SDK
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # Безопасное принятие лицензий SDK по актуальному пути
+          export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
+          yes | sdkmanager --licenses || true
 
           cd android
           chmod +x gradlew
