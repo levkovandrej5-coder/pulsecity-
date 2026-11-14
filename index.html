@@ -516,4 +516,257 @@
                         </div>
                     </div>
                     <div class="contact-item" onclick="openPrivateChat('Елена Волкова', 'Е')">
-                        <div class="avatar" style
+                        <div class="avatar" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">Е<span class="online-dot"></span></div>
+                        <div class="contact-info">
+                            <div class="contact-name">Елена Волкова</div>
+                            <div class="contact-last" id="last-Елена Волкова">Видела новость про центр города 👍</div>
+                        </div>
+                    </div>
+                    <div class="contact-item" onclick="openPrivateChat('Поддержка PulseCity', 'P')">
+                        <div class="avatar" style="background: linear-gradient(135deg, #10b981, #059669);">P<span class="online-dot"></span></div>
+                        <div class="contact-info">
+                            <div class="contact-name">Поддержка PulseCity</div>
+                            <div class="contact-last" id="last-Поддержка PulseCity">Всегда на связи, если нужна помощь!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Режим 3: Окно личной переписки -->
+            <div id="private-dialog-view" style="display: none;">
+                <div class="card">
+                    <div class="chat-header-bar">
+                        <button class="back-btn" onclick="backToContacts()">← Назад</button>
+                        <h3 id="dmPartnerName" style="margin: 0; font-size: 17px;">Имя</h3>
+                    </div>
+                    <div class="chat-box" id="dmMessages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="dmInput" placeholder="Личное сообщение...">
+                        <button onclick="sendPrivateMessage()">➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Профиль -->
+        <div id="tab-profile" class="content">
+            <div class="card">
+                <h3>Личный кабинет</h3>
+                <p>Ваш город: <strong id="profileCity" style="color:#00f3ff;">Иркутск</strong><br>Статус: Премиум доступ активен</p>
+                <button class="btn-add-news" onclick="openModal('cityModal')">📍 Сменить город</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Окно выбора города -->
+    <div id="cityModal" class="modal" onclick="if(event.target===this) closeModal('cityModal')">
+        <div class="modal-card">
+            <h3>Выберите ваш город</h3>
+            <button class="city-option" onclick="selectCity('Иркутск')">📍 Иркутск</button>
+            <button class="city-option" onclick="selectCity('Новосибирск')">📍 Новосибирск</button>
+            <button class="city-option" onclick="selectCity('Москва')">📍 Москва</button>
+            <button class="city-option" onclick="selectCity('Санкт-Петербург')">📍 Санкт-Петербург</button>
+            <button class="btn-secondary" style="width:100%; margin-top:6px;" onclick="closeModal('cityModal')">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Окно добавления новости -->
+    <div id="newsModal" class="modal" onclick="if(event.target===this) closeModal('newsModal')">
+        <div class="modal-card">
+            <h3>Новая публикация</h3>
+            <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
+            <textarea id="newsTextInput" placeholder="Что нового произошло в городе?"></textarea>
+            <div class="modal-actions">
+                <button class="btn-secondary" style="flex:1;" onclick="closeModal('newsModal')">Отмена</button>
+                <button class="btn-add-news" style="flex:2;" onclick="publishNews()">Опубликовать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Окно нового личного сообщения -->
+    <div id="newDmModal" class="modal" onclick="if(event.target===this) closeModal('newDmModal')">
+        <div class="modal-card">
+            <h3>Новый диалог</h3>
+            <input type="text" id="newContactName" placeholder="Введите имя или @ник пользователя...">
+            <div class="modal-actions">
+                <button class="btn-secondary" style="flex:1;" onclick="closeModal('newDmModal')">Отмена</button>
+                <button class="btn-add-news" style="flex:2;" onclick="startNewChat()">Начать чат</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Выразительное парящее меню -->
+    <div class="nav-wrapper">
+        <nav>
+            <button class="active" onclick="switchTab('feed', this)">
+                <span class="icon">📰</span>
+                <span>Лента</span>
+            </button>
+            <button id="nav-chat" onclick="switchTab('chat', this)">
+                <span class="icon">💬</span>
+                <span>Чаты</span>
+            </button>
+            <button onclick="switchTab('profile', this)">
+                <span class="icon">👤</span>
+                <span>Профиль</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        let selectedCity = 'Иркутск';
+        let activeDmUser = '';
+        const dmHistory = {
+            'Алексей Смирнов': [{ text: 'Привет! Как продвигается запуск?', mine: false }],
+            'Елена Волкова': [{ text: 'Видела новость про центр города 👍', mine: false }],
+            'Поддержка PulseCity': [{ text: 'Всегда на связи, если нужна помощь!', mine: false }]
+        };
+
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function switchChatMode(mode) {
+            document.getElementById('btn-public-chat').classList.toggle('active', mode === 'public');
+            document.getElementById('btn-private-chat').classList.toggle('active', mode === 'private');
+            
+            document.getElementById('public-chat-view').style.display = mode === 'public' ? 'block' : 'none';
+            document.getElementById('private-list-view').style.display = mode === 'private' ? 'block' : 'none';
+            document.getElementById('private-dialog-view').style.display = 'none';
+        }
+
+        function openPrivateChat(name) {
+            activeDmUser = name;
+            if (!dmHistory[name]) dmHistory[name] = [];
+            
+            document.getElementById('dmPartnerName').textContent = name;
+            document.getElementById('private-list-view').style.display = 'none';
+            document.getElementById('private-dialog-view').style.display = 'block';
+            renderDmMessages();
+        }
+
+        function backToContacts() {
+            document.getElementById('private-dialog-view').style.display = 'none';
+            document.getElementById('private-list-view').style.display = 'block';
+        }
+
+        function renderDmMessages() {
+            const box = document.getElementById('dmMessages');
+            box.innerHTML = '';
+            const msgs = dmHistory[activeDmUser] || [];
+            if (msgs.length === 0) {
+                box.innerHTML = '<div style="color:#64748b; text-align:center; font-size:14px;">Начните диалог с ' + activeDmUser + '</div>';
+                return;
+            }
+            msgs.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'message' + (m.mine ? ' mine' : '');
+                div.textContent = m.text;
+                box.appendChild(div);
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendPrivateMessage() {
+            const input = document.getElementById('dmInput');
+            const text = input.value.trim();
+            if (!text || !activeDmUser) return;
+
+            dmHistory[activeDmUser].push({ text: text, mine: true });
+            const lastEl = document.getElementById('last-' + activeDmUser);
+            if (lastEl) lastEl.textContent = 'Вы: ' + text;
+            
+            input.value = '';
+            renderDmMessages();
+        }
+
+        function startNewChat() {
+            const nameInput = document.getElementById('newContactName');
+            const name = nameInput.value.trim();
+            if (!name) return;
+
+            if (!dmHistory[name]) {
+                dmHistory[name] = [];
+                const letter = name[0].toUpperCase();
+                const list = document.getElementById('contactsList');
+                const item = document.createElement('div');
+                item.className = 'contact-item';
+                item.onclick = () => openPrivateChat(name);
+                item.innerHTML = `
+                    <div class="avatar">${letter}<span class="online-dot"></span></div>
+                    <div class="contact-info">
+                        <div class="contact-name">${name}</div>
+                        <div class="contact-last" id="last-${name}">Новый диалог</div>
+                    </div>
+                `;
+                list.prepend(item);
+            }
+            nameInput.value = '';
+            closeModal('newDmModal');
+            openPrivateChat(name);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function selectCity(city) {
+            selectedCity = city;
+            document.getElementById('currentCity').textContent = city;
+            document.getElementById('feedCityTag').textContent = city + ' • Главное';
+            document.getElementById('chatTitle').textContent = 'Городской чат • ' + city;
+            document.getElementById('profileCity').textContent = city;
+            closeModal('cityModal');
+        }
+
+        function publishNews() {
+            const title = document.getElementById('newsTitleInput').value.trim();
+            const text = document.getElementById('newsTextInput').value.trim();
+            if (!title || !text) return;
+
+            const newsList = document.getElementById('newsList');
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <span class="card-tag">${selectedCity} • Только что</span>
+                <h3>${title}</h3>
+                <p>${text}</p>
+                <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
+            `;
+            newsList.prepend(card);
+
+            document.getElementById('newsTitleInput').value = '';
+            document.getElementById('newsTextInput').value = '';
+            closeModal('newsModal');
+        }
+
+        function likePost(btn) {
+            btn.innerHTML = '❤️ Вы поддержали';
+            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        }
+
+        function sendPublicMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (text === '') return;
+
+            const chatBox = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message mine';
+            msgDiv.textContent = text;
+            
+            chatBox.appendChild(msgDiv);
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
