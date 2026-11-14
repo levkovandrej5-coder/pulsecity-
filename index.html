@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PulseCity</title>
-    <link rel="manifest" href="/pulsecity-/manifest.json">
-    <!-- Подключаем Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
         
-        .welcome-screen{position:fixed;inset:0;background:radial-gradient(circle at top,#1b2547,#06070a 75%);z-index:3000;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 24px 36px;text-align:center}
-        .welcome-screen.active{display:flex;animation:fadeIn .35s ease}
+        /* Мини-строка статуса для проверки на телефоне */
+        #debugBar{background:#0f172a;color:#00f3ff;font-size:11px;padding:4px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);z-index:5000}
+
+        .welcome-screen{position:fixed;inset:0;background:radial-gradient(circle at top,#1b2547,#06070a 75%);z-index:3000;display:none;pointer-events:none;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 24px 36px;text-align:center}
+        .welcome-screen.active{display:flex;pointer-events:auto;animation:fadeIn .35s ease}
         .welcome-badge{background:rgba(0,243,255,0.12);border:1px solid rgba(0,243,255,0.3);color:#00f3ff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.5px}
         .welcome-hero{margin:auto 0;max-width:340px}
         .welcome-icon{width:92px;height:92px;margin:0 auto 24px;border-radius:28px;background:linear-gradient(135deg,#00f3ff,#2563eb);display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 16px 40px rgba(0,243,255,0.4)}
@@ -44,7 +45,6 @@
         
         .card h3{font-size:20px;font-weight:700;margin-bottom:8px;color:#f8fafc}
         .card p{font-size:15px;color:#cbd5e1;line-height:1.5;margin-bottom:16px}
-        .news-media{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block}
         
         .btn-action{width:100%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
@@ -52,58 +52,45 @@
         .chat-tabs{display:flex;background:rgba(255,255,255,0.06);padding:6px;border-radius:18px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
         .chat-tab-btn{flex:1;padding:12px;border:none;border-radius:14px;background:transparent;color:#94a3b8;font-size:14px;font-weight:700;cursor:pointer}
         .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;box-shadow:0 4px 15px rgba(0,243,255,0.3)}
-        .contact-item{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:14px;border-radius:20px;margin-bottom:12px;cursor:pointer}
-        .avatar{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,#00f3ff,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;position:relative;flex-shrink:0;overflow:hidden}
-        .avatar img{width:100%;height:100%;object-fit:cover}
-        .online-dot{width:12px;height:12px;background:#10b981;border:2px solid #141829;border-radius:50%;position:absolute;bottom:0;right:0}
-        .contact-info{flex:1;min-width:0}
-        .contact-name{font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:3px}
-        .contact-last{font-size:13px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .chat-header-bar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08)}
-        .back-btn{background:rgba(255,255,255,0.08);border:none;color:#00f3ff;font-size:14px;font-weight:700;padding:8px 14px;border-radius:12px;cursor:pointer}
         
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:45vh;overflow-y:auto;padding-right:4px}
         .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:90%}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
-        .msg-avatar{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
-        .msg-avatar img{width:100%;height:100%;object-fit:cover}
+        .msg-avatar{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
         .msg-bubble{background:rgba(255,255,255,0.09);padding:12px 16px;border-radius:18px 18px 18px 6px;font-size:15px;line-height:1.4;word-break:break-word}
         .msg-row.mine .msg-bubble{border-radius:18px 18px 6px 18px;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;font-weight:500}
         .msg-author{font-size:12px;font-weight:700;color:#00f3ff;margin-bottom:4px}
         .msg-row.mine .msg-author{display:none}
-        .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover}
         
         .chat-input-area{display:flex;gap:10px;align-items:center}
-        .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
         .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:14px;height:48px;padding:0 20px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
-        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
-        .modal.open{display:flex}
+        .modal{display:none;pointer-events:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
+        .modal.open{display:flex;pointer-events:auto}
         .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8)}
         .modal-card h3{font-size:20px;margin-bottom:16px}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
         .modal-card textarea{height:90px;resize:none}
         .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:14px 16px;border-radius:14px;font-size:16px;font-weight:600;margin-bottom:10px;cursor:pointer}
-        .notif-item{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:14px;border-radius:16px;margin-bottom:10px;font-size:14px;color:#cbd5e1}
         
         .nav-wrapper{position:fixed;bottom:16px;left:16px;right:16px;z-index:1000}
-        nav{background:linear-gradient(180deg,rgba(26,32,54,0.95),rgba(14,18,32,0.99));backdrop-filter:blur(25px);border:1px solid rgba(255,255,255,0.2);border-radius:30px;display:flex;padding:8px;box-shadow:0 20px 45px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.2);gap:8px}
-        nav button{flex:1;background:rgba(255,255,255,0.03);border:1px solid transparent;border-radius:24px;padding:14px 8px;color:#94a3b8;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all .25s cubic-bezier(0.34,1.56,0.64,1)}
-        nav button span.icon{font-size:26px;line-height:1;transition:transform .2s}
-        nav button:active{transform:scale(0.92)}
-        nav button.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:rgba(255,255,255,0.4);box-shadow:0 10px 25px rgba(0,243,255,0.5);transform:translateY(-3px)}
-        nav button.active span.icon{transform:scale(1.15)}
+        nav{background:linear-gradient(180deg,rgba(26,32,54,0.95),rgba(14,18,32,0.99));backdrop-filter:blur(25px);border:1px solid rgba(255,255,255,0.2);border-radius:30px;display:flex;padding:8px;box-shadow:0 20px 45px rgba(0,0,0,0.85);gap:8px}
+        nav button{flex:1;background:rgba(255,255,255,0.03);border:1px solid transparent;border-radius:24px;padding:14px 8px;color:#94a3b8;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+        nav button span.icon{font-size:26px;line-height:1}
+        nav button.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:rgba(255,255,255,0.4);box-shadow:0 10px 25px rgba(0,243,255,0.5)}
     </style>
 </head>
 <body>
+
+<div id="debugBar">Статус: Загрузка...</div>
 
 <div id="welcomeScreen" class="welcome-screen">
     <div class="welcome-badge">ГОРОДСКАЯ ПЛАТФОРМА №1</div>
     <div class="welcome-hero">
         <div class="welcome-icon">⚡</div>
         <h1 class="welcome-title">PulseCity</h1>
-        <p class="welcome-desc">Главные новости твоего города, живые чаты с соседями и защищенные личные диалоги в одном приложении.</p>
+        <p class="welcome-desc">Главные новости твоего города, живые чаты с соседями и защищенные личные диалоги.</p>
     </div>
     <button class="btn-main" style="margin-bottom:0;max-width:340px" onclick="goToRegistration()">Начать →</button>
 </div>
@@ -125,72 +112,17 @@
             <button class="chip" onclick="filterNews('events',this)">🎉 События</button>
             <button class="chip" onclick="filterNews('transport',this)">🚗 Транспорт</button>
         </div>
-        <div id="newsList">
-            <div class="card" data-category="events">
-                <div class="card-top">
-                    <span class="card-tag" id="feedCityTag">Иркутск • Главное</span>
-                    <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить</button>
-                </div>
-                <h3>Добро пожаловать в PulseCity!</h3>
-                <p>Главная городская платформа новостей и живого общения. Будь в курсе всего, что происходит рядом.</p>
-                <button class="btn-action" onclick="likePost(this)">🔥 Поддержать запуск (129)</button>
-            </div>
-        </div>
+        <div id="newsList"></div>
     </div>
 
     <div id="tab-chat" class="content">
-        <div class="chat-tabs">
-            <button class="chat-tab-btn active" id="btn-public-chat" onclick="switchChatMode('public')">🌐 Общий чат</button>
-            <button class="chat-tab-btn" id="btn-private-chat" onclick="switchChatMode('private')">👤 Личные</button>
-        </div>
-
         <div id="public-chat-view">
             <div class="card">
                 <h3 id="chatTitle">Городской чат • Иркутск</h3>
-                <div class="chat-box" id="chatMessages">
-                    <div class="msg-row">
-                        <div class="msg-avatar" style="background:linear-gradient(135deg,#00f3ff,#2563eb)">А</div>
-                        <div class="msg-bubble">
-                            <div class="msg-author">Алексей</div>
-                            Привет всем жителям PulseCity! 👋
-                        </div>
-                    </div>
-                </div>
+                <div class="chat-box" id="chatMessages"></div>
                 <div class="chat-input-area">
-                    <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this,'public')">
-                    <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
-                    <input type="text" id="messageInput" placeholder="Сообщение или фото/видео...">
+                    <input type="text" id="messageInput" placeholder="Написать в общий чат...">
                     <button class="send-btn" onclick="sendPublicMessage()">➤</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="private-list-view" style="display:none">
-            <button class="btn-main" style="margin-bottom:14px" onclick="openModal('newDmModal')">✉️ Написать человеку</button>
-            <div id="contactsList">
-                <div class="contact-item" onclick="openPrivateChat('Алексей Смирнов')">
-                    <div class="avatar">А<span class="online-dot"></span></div>
-                    <div class="contact-info">
-                        <div class="contact-name">Алексей Смирнов</div>
-                        <div class="contact-last" id="last-Алексей Смирнов">Привет! Как продвигается запуск?</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="private-dialog-view" style="display:none">
-            <div class="card">
-                <div class="chat-header-bar">
-                    <button class="back-btn" onclick="backToContacts()">← Назад</button>
-                    <div class="msg-avatar" id="dmPartnerAvatar">А</div>
-                    <h3 id="dmPartnerName" style="margin:0;font-size:17px">Имя</h3>
-                </div>
-                <div class="chat-box" id="dmMessages"></div>
-                <div class="chat-input-area">
-                    <input type="file" id="dmMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this,'private')">
-                    <button class="attach-btn" onclick="document.getElementById('dmMediaInput').click()">📎</button>
-                    <input type="text" id="dmInput" placeholder="Личное сообщение...">
-                    <button class="send-btn" onclick="sendPrivateMessage()">➤</button>
                 </div>
             </div>
         </div>
@@ -198,33 +130,20 @@
 
     <div id="tab-profile" class="content">
         <div class="card">
-            <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
-                <div class="avatar" id="myProfileAvatar" style="width:70px;height:70px;font-size:28px;border-radius:22px">А</div>
-                <div>
-                    <h3 id="displayProfileName" style="margin-bottom:4px;font-size:20px">Андрей</h3>
-                    <div id="displayProfileEmail" style="font-size:12px;color:#94a3b8;margin-bottom:8px">Почта не указана</div>
-                    <button class="back-btn" onclick="document.getElementById('avatarUpload').click()">📷 Сменить фото</button>
-                    <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="changeMyAvatar(this)">
-                </div>
-            </div>
+            <h3 id="displayProfileName" style="margin-bottom:8px;font-size:20px">Андрей</h3>
             <label style="font-size:13px;color:#94a3b8">Ваш никнейм:</label>
             <input type="text" id="profileNameInput" value="Андрей" oninput="updateProfileName(this.value)" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px;color:#fff;font-size:15px;margin:6px 0 14px">
-            
             <p style="margin-bottom:12px;font-size:15px">Город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
             <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
-            <button class="btn-sec" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3);margin-bottom:12px" onclick="openModeratorPanel()">🛡️ Кабинет модератора</button>
-            <button class="btn-sec" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.25)" onclick="logoutUser()">🚪 Выйти из аккаунта</button>
         </div>
     </div>
 </div>
 
 <div id="authModal" class="modal">
     <div class="modal-card">
-        <h3>📝 Регистрация</h3>
-        <p style="font-size:14px;color:#94a3b8;margin-bottom:14px">Создайте профиль для общения (без СМС):</p>
+        <h3>📝 Вход в PulseCity</h3>
         <input type="text" id="regNameInput" placeholder="Ваше имя или ник...">
-        <input type="email" id="regEmailInput" placeholder="Электронная почта...">
-        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Создать аккаунт</button>
+        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Продолжить</button>
     </div>
 </div>
 
@@ -234,7 +153,6 @@
         <button class="city-option" onclick="selectCity('Иркутск')">📍 Иркутск</button>
         <button class="city-option" onclick="selectCity('Новосибирск')">📍 Новосибирск</button>
         <button class="city-option" onclick="selectCity('Москва')">📍 Москва</button>
-        <button class="city-option" onclick="selectCity('Санкт-Петербург')">📍 Санкт-Петербург</button>
         <button class="btn-sec" onclick="closeModal('cityModal')">Закрыть</button>
     </div>
 </div>
@@ -249,11 +167,6 @@
         </select>
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
-        <div style="margin-bottom: 12px;">
-            <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
-            <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
-            <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Медиафайл прикреплен</div>
-        </div>
         <div style="display:flex;gap:10px">
             <button class="btn-sec" onclick="closeModal('newsModal')">Отмена</button>
             <button class="btn-main" style="margin:0" onclick="publishNews()">Опубликовать</button>
@@ -261,30 +174,10 @@
     </div>
 </div>
 
-<div id="modModal" class="modal" onclick="if(event.target===this)closeModal('modModal')">
-    <div class="modal-card" style="max-width:440px">
-        <h3>🛡️ Панель модератора</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Управление постами в городе <span id="modCityName" style="color:#00f3ff">Иркутск</span>:</p>
-        <div id="modNewsList" style="max-height:220px;overflow-y:auto;margin-bottom:14px"></div>
-        <button class="btn-sec" onclick="closeModal('modModal')">Закрыть кабинет</button>
-    </div>
-</div>
-
-<div id="newDmModal" class="modal" onclick="if(event.target===this)closeModal('newDmModal')">
-    <div class="modal-card">
-        <h3>Новый диалог</h3>
-        <input type="text" id="newContactName" placeholder="Имя или @ник...">
-        <div style="display:flex;gap:10px">
-            <button class="btn-sec" onclick="closeModal('newDmModal')">Отмена</button>
-            <button class="btn-main" style="margin:0" onclick="startNewChat()">Начать</button>
-        </div>
-    </div>
-</div>
-
 <div id="notifModal" class="modal" onclick="if(event.target===this)closeModal('notifModal')">
     <div class="modal-card">
         <h3>Уведомления</h3>
-        <div class="notif-item">☁️ Облачная база данных Supabase подключена!</div>
+        <p style="color:#cbd5e1;margin-bottom:14px">Система готова к работе.</p>
         <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
     </div>
 </div>
@@ -298,295 +191,165 @@
 </div>
 
 <script>
+    const bar = document.getElementById('debugBar');
+    function logStatus(msg, isErr = false) {
+        bar.textContent = msg;
+        bar.style.color = isErr ? '#ef4444' : '#10b981';
+    }
+
+    window.onerror = function(msg) {
+        logStatus('Ошибка JS: ' + msg, true);
+    };
+
     let supabaseClient = null;
     try {
         if (window.supabase) {
-            const SUPABASE_URL = 'https://igmgobjvjovfscjehcuu.supabase.co';
-            const SUPABASE_KEY = 'Sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8';
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-    } catch (err) {
-        console.log('Supabase init notice:', err);
-    }
-
-    let selectedCity='Иркутск', activeDmUser='', myName='Гость', myEmail='', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
-    const dmHistory={
-        'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}]
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('pulseCity_v3_name');
-        const savedEmail = localStorage.getItem('pulseCity_v3_email');
-        if (!savedName) {
-            document.getElementById('welcomeScreen').classList.add('active');
+            supabaseClient = window.supabase.createClient(
+                'https://igmgobjvjovfscjehcuu.supabase.co',
+                'Sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
+            );
+            logStatus('База подключена • Кнопки активны');
         } else {
-            myName = savedName;
-            myEmail = savedEmail || '';
-            applyUserProfile();
+            logStatus('SDK не загружен (проверьте интернет)', true);
         }
-        loadPostsFromCloud();
-        loadPublicMessages();
-    });
-
-    function goToRegistration(){
-        document.getElementById('welcomeScreen').classList.remove('active');
-        document.getElementById('authModal').classList.add('open');
+    } catch (e) {
+        logStatus('Ошибка инициализации: ' + e.message, true);
     }
 
-    function completeRegistration(){
-        const name = document.getElementById('regNameInput').value.trim();
-        const email = document.getElementById('regEmailInput').value.trim();
-        if(!name) { alert('Укажите имя!'); return; }
-        myName = name;
-        myEmail = email || 'Участник';
-        localStorage.setItem('pulseCity_v3_name', myName);
-        localStorage.setItem('pulseCity_v3_email', myEmail);
-        applyUserProfile();
-        document.getElementById('authModal').classList.remove('open');
+    let selectedCity = 'Иркутск';
+    let myName = localStorage.getItem('pulseCity_v4_name') || 'Андрей';
+
+    document.getElementById('displayProfileName').textContent = myName;
+    document.getElementById('profileNameInput').value = myName;
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
     }
 
-    function applyUserProfile(){
-        document.getElementById('displayProfileName').textContent = myName;
-        document.getElementById('displayProfileEmail').textContent = myEmail;
-        document.getElementById('profileNameInput').value = myName;
-        if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+    function switchTab(t, btn) {
+        document.querySelectorAll('.content').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('tab-' + t).classList.add('active');
+        btn.classList.add('active');
     }
 
-    function logoutUser(){
-        localStorage.removeItem('pulseCity_v3_name');
-        localStorage.removeItem('pulseCity_v3_email');
-        document.getElementById('welcomeScreen').classList.add('active');
+    function selectCity(c) {
+        selectedCity = c;
+        document.getElementById('currentCity').textContent = c;
+        document.getElementById('chatTitle').textContent = 'Городской чат • ' + c;
+        document.getElementById('profileCity').textContent = c;
+        closeModal('cityModal');
     }
 
-    function getMyAvatarHtml(){
-        return myAvatarUrl ? `<img src="${myAvatarUrl}">` : myName[0].toUpperCase();
-    }
-
-    function changeMyAvatar(input){
-        if(input.files && input.files[0]){
-            myAvatarUrl = URL.createObjectURL(input.files[0]);
-            document.getElementById('myProfileAvatar').innerHTML = `<img src="${myAvatarUrl}">`;
-        }
-    }
-
-    function updateProfileName(val){
+    function updateProfileName(val) {
         myName = val.trim() || 'Гость';
-        localStorage.setItem('pulseCity_v3_name', myName);
+        localStorage.setItem('pulseCity_v4_name', myName);
         document.getElementById('displayProfileName').textContent = myName;
-        if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
     }
 
-    function previewNewsMedia(input){
-        if(input.files && input.files[0]){
-            const file = input.files[0];
-            tempNewsMediaUrl = URL.createObjectURL(file);
-            document.getElementById('newsMediaPreview').style.display = 'block';
+    function filterNews(cat, btn) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#newsList .card').forEach(c => {
+            c.style.display = (cat === 'all' || c.getAttribute('data-category') === cat) ? 'block' : 'none';
+        });
+    }
+
+    async function loadPostsFromCloud() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
+        if (error) {
+            logStatus('Ошибка чтения постов: ' + error.message, true);
+            return;
         }
+        const list = document.getElementById('newsList');
+        list.innerHTML = '';
+        if (!data || data.length === 0) {
+            list.innerHTML = '<div class="card"><p style="margin:0;text-align:center;color:#94a3b8">Пока нет новостей. Нажмите «Добавить новость» сверху!</p></div>';
+            return;
+        }
+        data.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-category', p.category);
+            card.innerHTML = `
+                <div class="card-top">
+                    <span class="card-tag">${p.city}</span>
+                    <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Чат</button>
+                </div>
+                <h3>${p.title}</h3>
+                <p>${p.content}</p>
+            `;
+            list.appendChild(card);
+        });
     }
 
-    async function loadPostsFromCloud(){
-        if(!supabaseClient) return;
-        try {
-            const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
-            if(error) { console.log('Load error:', error.message); return; }
-            if(!data) return;
-            const list = document.getElementById('newsList');
-            list.innerHTML = '';
-            data.forEach(p => {
-                appendPostToDOM(p.id, p.city, p.category, p.title, p.content, p.media_url);
-            });
-        } catch(e) { console.log(e); }
-    }
+    async function publishNews() {
+        const title = document.getElementById('newsTitleInput').value.trim();
+        const text = document.getElementById('newsTextInput').value.trim();
+        const cat = document.getElementById('newsCategorySelect').value;
+        if (!title || !text) { alert('Введите заголовок и текст!'); return; }
 
-    async function publishNews(){
-        const title=document.getElementById('newsTitleInput').value.trim();
-        const text=document.getElementById('newsTextInput').value.trim();
-        const cat=document.getElementById('newsCategorySelect').value;
-        if(!title || !text) { alert('Заполните заголовок и текст!'); return; }
+        logStatus('Отправка новости в базу...');
+        const { error } = await supabaseClient.from('posts').insert([{
+            city: selectedCity,
+            category: cat,
+            title: title,
+            content: text
+        }]);
 
-        if(!supabaseClient) {
-            alert('Ошибка: Supabase не инициализирован');
+        if (error) {
+            logStatus('Ошибка записи: ' + error.message, true);
+            alert('Ошибка базы данных: ' + error.message);
             return;
         }
 
-        try {
-            // Убираем временную локальную ссылку на медиа для чистого теста отправки текста
-            const { data, error } = await supabaseClient.from('posts').insert([{
-                city: selectedCity,
-                category: cat,
-                title: title,
-                content: text,
-                media_url: null 
-            }]).select();
-
-            if(error) {
-                alert('Ошибка Supabase: ' + error.message);
-                return;
-            }
-
-            if(data){
-                loadPostsFromCloud();
-            }
-        } catch(e) { 
-            alert('Ошибка сети: ' + e.message);
-        }
-
-        document.getElementById('newsTitleInput').value='';
-        document.getElementById('newsTextInput').value='';
-        document.getElementById('newsMediaInput').value='';
-        document.getElementById('newsMediaPreview').style.display='none';
-        tempNewsMediaUrl='';
+        logStatus('Новость опубликована!');
+        document.getElementById('newsTitleInput').value = '';
+        document.getElementById('newsTextInput').value = '';
         closeModal('newsModal');
+        loadPostsFromCloud();
     }
 
-    function appendPostToDOM(id, city, cat, title, text, mediaUrl){
-        let mediaTag = '';
-        if(mediaUrl){
-            mediaTag = mediaUrl.includes('video') || mediaUrl.startsWith('blob:') 
-                ? `<video src="${mediaUrl}" class="news-media" controls playsinline></video>` 
-                : `<img src="${mediaUrl}" class="news-media">`;
-        }
-
-        const card=document.createElement('div');
-        card.className='card';
-        card.setAttribute('data-category',cat);
-        card.setAttribute('data-id', id);
-        card.innerHTML=`
-            <div class="card-top">
-                <span class="card-tag">${city} • Публикация</span>
-                <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить</button>
-            </div>
-            <h3>${title}</h3>
-            ${mediaTag}
-            <p>${text}</p>
-            <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
-        `;
-        document.getElementById('newsList').appendChild(card);
-    }
-
-    async function loadPublicMessages(){
-        if(!supabaseClient) return;
-        try {
-            const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
-            if(error || !data) return;
-            const box = document.getElementById('chatMessages');
-            box.innerHTML = '';
-            data.forEach(m => {
-                appendMsgToDOM('chatMessages', m.text, m.sender === myName, m.media_url, m.sender);
-            });
-        } catch(e) { console.log(e); }
-    }
-
-    async function sendPublicMessage(){
-        const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if(!text) return;
-
-        if(supabaseClient) {
-            try {
-                const { error } = await supabaseClient.from('messages').insert([{
-                    chat_type: 'public',
-                    sender: myName,
-                    text: text
-                }]);
-                if(error) { alert('Ошибка чата: ' + error.message); return; }
-                loadPublicMessages();
-            } catch(e) { console.log(e); }
-        }
-
-        input.value = '';
-    }
-
-    async function handleMediaUpload(input, chatType){
-        if(!input.files || !input.files[0]) return;
-        const file = input.files[0];
-        const url = URL.createObjectURL(file);
-        const isVideo = file.type.startsWith('video/');
-        const mediaTag = isVideo ? `<video src="${url}" class="msg-media" controls playsinline></video>` : `<img src="${url}" class="msg-media">`;
-
-        if(chatType === 'public'){
-            if(supabaseClient) {
-                try {
-                    await supabaseClient.from('messages').insert([{
-                        chat_type: 'public',
-                        sender: myName,
-                        text: isVideo ? '🎥 Видео' : '🖼️ Фото',
-                        media_url: url
-                    }]);
-                    loadPublicMessages();
-                } catch(e) { console.log(e); }
-            }
-        } else if(chatType === 'private' && activeDmUser){
-            dmHistory[activeDmUser].push({text: isVideo ? '🎥 Видео' : '🖼️ Фото', media: mediaTag, mine: true});
-            const lastEl = document.getElementById('last-' + activeDmUser);
-            if(lastEl) lastEl.textContent = isVideo ? 'Вы: 🎥 Видео' : 'Вы: 🖼️ Фото';
-            renderDmMessages();
-        }
-        input.value = '';
-    }
-
-    function appendMsgToDOM(boxId, text, mine, mediaHtml='', senderName=''){
-        const box = document.getElementById(boxId);
-        const row = document.createElement('div');
-        row.className = 'msg-row' + (mine ? ' mine' : '');
-        const avHtml = mine ? getMyAvatarHtml() : (senderName ? senderName[0].toUpperCase() : 'У');
-        let mediaTag = mediaHtml ? (mediaHtml.startsWith('http') || mediaHtml.startsWith('blob:') ? `<img src="${mediaHtml}" class="msg-media">` : mediaHtml) : '';
-        row.innerHTML = `
-            <div class="msg-avatar">${avHtml}</div>
-            <div class="msg-bubble">
-                <div class="msg-author">${senderName}</div>
-                ${text}${mediaTag}
-            </div>
-        `;
-        box.appendChild(row);
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function sendPrivateMessage(){
-        const input = document.getElementById('dmInput');
-        const text = input.value.trim();
-        if(!text || !activeDmUser) return;
-        dmHistory[activeDmUser].push({text, mine: true});
-        const lastEl = document.getElementById('last-' + activeDmUser);
-        if(lastEl) lastEl.textContent = 'Вы: ' + text;
-        input.value = '';
-        renderDmMessages();
-    }
-
-    function renderDmMessages(){
-        const box = document.getElementById('dmMessages');
+    async function loadPublicMessages() {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
+        if (error) return;
+        const box = document.getElementById('chatMessages');
         box.innerHTML = '';
-        const msgs = dmHistory[activeDmUser] || [];
-        if(!msgs.length){
-            box.innerHTML = '<div style="color:#64748b;text-align:center;font-size:14px">Защищенный диалог. Отправьте сообщение или фото.</div>';
-            return;
-        }
-        msgs.forEach(m => {
+        (data || []).forEach(m => {
             const row = document.createElement('div');
-            row.className = 'msg-row' + (m.mine ? ' mine' : '');
-            row.innerHTML = `<div class="msg-avatar">${m.mine ? getMyAvatarHtml() : activeDmUser[0].toUpperCase()}</div><div class="msg-bubble">${m.media || m.text}</div>`;
+            row.className = 'msg-row' + (m.sender === myName ? ' mine' : '');
+            row.innerHTML = `<div class="msg-avatar">${m.sender[0].toUpperCase()}</div><div class="msg-bubble"><div class="msg-author">${m.sender}</div>${m.text}</div>`;
             box.appendChild(row);
         });
         box.scrollTop = box.scrollHeight;
     }
 
-    function switchTab(t,btn){
-        document.querySelectorAll('.content').forEach(e=>e.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(e=>e.classList.remove('active'));
-        document.getElementById('tab-'+t).classList.add('active');
-        btn.classList.add('active');
+    async function sendPublicMessage() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const { error } = await supabaseClient.from('messages').insert([{
+            chat_type: 'public',
+            sender: myName,
+            text: text
+        }]);
+
+        if (error) {
+            logStatus('Ошибка чата: ' + error.message, true);
+            return;
+        }
+        input.value = '';
+        loadPublicMessages();
     }
 
-    function switchChatMode(m){
-        document.getElementById('btn-public-chat').classList.toggle('active',m==='public');
-        document.getElementById('btn-private-chat').classList.toggle('active',m==='private');
-        document.getElementById('public-chat-view').style.display=m==='public'?'block':'none';
-        document.getElementById('private-list-view').style.display=m==='private'?'block':'none';
-        document.getElementById('private-dialog-view').style.display='none';
-    }
-
-    function openPrivateChat(name){
-        activeDmUser=name;
-        if(!dmHistory[name]) dmHistory[name]=[];
-        document.getElementById('dmPartnerName').textContent=name;
-        document
+    loadPostsFromCloud();
+    loadPublicMessages();
+</script>
+</body>
+</html>
