@@ -166,22 +166,134 @@
         .btn-secondary:active {
             transform: scale(0.95);
         }
+
+        /* ПЕРЕКЛЮЧАТЕЛЬ ВНУТРИ ЧАТОВ */
+        .chat-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 5px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .chat-tab-btn {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chat-tab-btn.active {
+            background: linear-gradient(135deg, #00f3ff, #2563eb);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
+        }
+
+        /* СПИСОК ЛИЧНЫХ ДИАЛОГОВ */
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.15s;
+        }
+        .contact-item:active {
+            transform: scale(0.97);
+            background: rgba(255, 255, 255, 0.09);
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #00f3ff, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .online-dot {
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border: 2px solid #141829;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+        }
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .contact-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 3px;
+        }
+        .contact-last {
+            font-size: 13px;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-header-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #00f3ff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
         /* Чат */
         .chat-box {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin: 14px 0 18px;
-            max-height: 48vh;
+            max-height: 44vh;
             overflow-y: auto;
         }
         .message {
             background: rgba(255, 255, 255, 0.09);
-            padding: 14px 18px;
+            padding: 13px 16px;
             border-radius: 18px 18px 18px 4px;
             font-size: 15px;
             max-width: 85%;
             line-height: 1.4;
+        }
+        .message.mine {
+            margin-left: auto;
+            border-radius: 18px 18px 4px 18px;
+            background: linear-gradient(135deg, #00f3ff, #2563eb);
+            color: #ffffff;
+            font-weight: 500;
         }
         .chat-input-area {
             display: flex;
@@ -368,144 +480,40 @@
 
         <!-- Вкладка Мессенджер -->
         <div id="tab-chat" class="content">
-            <div class="card">
-                <h3 id="chatTitle">Городской чат • Иркутск</h3>
-                <div class="chat-box" id="chatMessages">
-                    <div class="message">Привет всем жителям PulseCity! 👋</div>
+            <!-- Переключатель: Общий чат / Личные -->
+            <div class="chat-tabs">
+                <button class="chat-tab-btn active" id="btn-public-chat" onclick="switchChatMode('public')">🌐 Общий чат</button>
+                <button class="chat-tab-btn" id="btn-private-chat" onclick="switchChatMode('private')">👤 Личные</button>
+            </div>
+
+            <!-- Режим 1: Общий городской чат -->
+            <div id="public-chat-view">
+                <div class="card">
+                    <h3 id="chatTitle">Городской чат • Иркутск</h3>
+                    <div class="chat-box" id="chatMessages">
+                        <div class="message">Привет всем жителям PulseCity! 👋</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="messageInput" placeholder="Написать в общий чат...">
+                        <button onclick="sendPublicMessage()">➤</button>
+                    </div>
                 </div>
-                <div class="chat-input-area">
-                    <input type="text" id="messageInput" placeholder="Написать сообщение...">
-                    <button onclick="sendMessage()">➤</button>
-                </div>
             </div>
-        </div>
 
-        <!-- Вкладка Профиль -->
-        <div id="tab-profile" class="content">
-            <div class="card">
-                <h3>Личный кабинет</h3>
-                <p>Ваш город: <strong id="profileCity" style="color:#00f3ff;">Иркутск</strong><br>Статус: Премиум доступ активен</p>
-                <button class="btn-add-news" onclick="openModal('cityModal')">📍 Сменить город</button>
-            </div>
-        </div>
-    </div>
+            <!-- Режим 2: Список личных диалогов -->
+            <div id="private-list-view" style="display: none;">
+                <button class="btn-add-news" style="margin-bottom: 14px;" onclick="openModal('newDmModal')">
+                    <span>✉️</span>
+                    <span>Написать человеку</span>
+                </button>
 
-    <!-- Окно выбора города -->
-    <div id="cityModal" class="modal" onclick="if(event.target===this) closeModal('cityModal')">
-        <div class="modal-card">
-            <h3>Выберите ваш город</h3>
-            <button class="city-option" onclick="selectCity('Иркутск')">📍 Иркутск</button>
-            <button class="city-option" onclick="selectCity('Новосибирск')">📍 Новосибирск</button>
-            <button class="city-option" onclick="selectCity('Москва')">📍 Москва</button>
-            <button class="city-option" onclick="selectCity('Санкт-Петербург')">📍 Санкт-Петербург</button>
-            <button class="btn-secondary" style="width:100%; margin-top:6px;" onclick="closeModal('cityModal')">Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Окно добавления новости -->
-    <div id="newsModal" class="modal" onclick="if(event.target===this) closeModal('newsModal')">
-        <div class="modal-card">
-            <h3>Новая публикация</h3>
-            <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
-            <textarea id="newsTextInput" placeholder="Что нового произошло в городе?"></textarea>
-            <div class="modal-actions">
-                <button class="btn-secondary" style="flex:1;" onclick="closeModal('newsModal')">Отмена</button>
-                <button class="btn-add-news" style="flex:2;" onclick="publishNews()">Опубликовать</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Выразительное парящее меню -->
-    <div class="nav-wrapper">
-        <nav>
-            <button class="active" onclick="switchTab('feed', this)">
-                <span class="icon">📰</span>
-                <span>Лента</span>
-            </button>
-            <button id="nav-chat" onclick="switchTab('chat', this)">
-                <span class="icon">💬</span>
-                <span>Чаты</span>
-            </button>
-            <button onclick="switchTab('profile', this)">
-                <span class="icon">👤</span>
-                <span>Профиль</span>
-            </button>
-        </nav>
-    </div>
-
-    <script>
-        let selectedCity = 'Иркутск';
-
-        function switchTab(tabName, btn) {
-            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById('tab-' + tabName).classList.add('active');
-            btn.classList.add('active');
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.add('open');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('open');
-        }
-
-        function selectCity(city) {
-            selectedCity = city;
-            document.getElementById('currentCity').textContent = city;
-            document.getElementById('feedCityTag').textContent = city + ' • Главное';
-            document.getElementById('chatTitle').textContent = 'Городской чат • ' + city;
-            document.getElementById('profileCity').textContent = city;
-            closeModal('cityModal');
-        }
-
-        function publishNews() {
-            const title = document.getElementById('newsTitleInput').value.trim();
-            const text = document.getElementById('newsTextInput').value.trim();
-            if (!title || !text) return;
-
-            const newsList = document.getElementById('newsList');
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <span class="card-tag">${selectedCity} • Только что</span>
-                <h3>${title}</h3>
-                <p>${text}</p>
-                <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
-            `;
-            newsList.prepend(card);
-
-            document.getElementById('newsTitleInput').value = '';
-            document.getElementById('newsTextInput').value = '';
-            closeModal('newsModal');
-        }
-
-        function likePost(btn) {
-            btn.innerHTML = '❤️ Вы поддержали';
-            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (text === '') return;
-
-            const chatBox = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            msgDiv.style.marginLeft = 'auto';
-            msgDiv.style.borderRadius = '18px 18px 4px 18px';
-            msgDiv.style.background = 'linear-gradient(135deg, #00f3ff, #2563eb)';
-            msgDiv.style.color = '#ffffff';
-            msgDiv.style.fontWeight = '500';
-            msgDiv.textContent = text;
-            
-            chatBox.appendChild(msgDiv);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+                <div id="contactsList">
+                    <div class="contact-item" onclick="openPrivateChat('Алексей Смирнов', 'А')">
+                        <div class="avatar">А<span class="online-dot"></span></div>
+                        <div class="contact-info">
+                            <div class="contact-name">Алексей Смирнов</div>
+                            <div class="contact-last" id="last-Алексей Смирнов">Привет! Как продвигается запуск?</div>
+                        </div>
+                    </div>
+                    <div class="contact-item" onclick="openPrivateChat('Елена Волкова', 'Е')">
+                        <div class="avatar" style
