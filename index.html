@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PulseCity</title>
     <link rel="manifest" href="/pulsecity-/manifest.json">
+    <!-- Подключаем библиотеку Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
         
-        /* ЭКРАН ПРИВЕТСТВИЯ (ONBOARDING) */
         .welcome-screen{position:fixed;inset:0;background:radial-gradient(circle at top,#1b2547,#06070a 75%);z-index:3000;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 24px 36px;text-align:center}
         .welcome-screen.active{display:flex;animation:fadeIn .35s ease}
         .welcome-badge{background:rgba(0,243,255,0.12);border:1px solid rgba(0,243,255,0.3);color:#00f3ff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.5px}
@@ -35,7 +36,6 @@
         .chip.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(0,243,255,0.35)}
         
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
-        .btn-main:active{transform:scale(0.97)}
         
         .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5);position:relative}
         .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
@@ -78,7 +78,6 @@
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
         .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:14px;height:48px;padding:0 20px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
-        /* Модалки */
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
         .modal.open{display:flex}
         .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8)}
@@ -99,7 +98,6 @@
 </head>
 <body>
 
-<!-- ШАГ 1: ПЕРВЫЙ ЭКРАН ПРИВЕТСТВИЯ -->
 <div id="welcomeScreen" class="welcome-screen">
     <div class="welcome-badge">ГОРОДСКАЯ ПЛАТФОРМА №1</div>
     <div class="welcome-hero">
@@ -119,7 +117,6 @@
 </header>
 
 <div class="container">
-    <!-- ЛЕНТА -->
     <div id="tab-feed" class="content active">
         <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
         <div class="filter-scroll">
@@ -141,7 +138,6 @@
         </div>
     </div>
 
-    <!-- ЧАТЫ -->
     <div id="tab-chat" class="content">
         <div class="chat-tabs">
             <button class="chat-tab-btn active" id="btn-public-chat" onclick="switchChatMode('public')">🌐 Общий чат</button>
@@ -200,7 +196,6 @@
         </div>
     </div>
 
-    <!-- ПРОФИЛЬ -->
     <div id="tab-profile" class="content">
         <div class="card">
             <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
@@ -218,23 +213,21 @@
             <p style="margin-bottom:12px;font-size:15px">Город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
             <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
             <button class="btn-sec" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3);margin-bottom:12px" onclick="openModeratorPanel()">🛡️ Кабинет модератора</button>
-            <button class="btn-sec" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.25)" onclick="logoutUser()">🚪 Выйти из аккаунта (тест входа)</button>
+            <button class="btn-sec" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.25)" onclick="logoutUser()">🚪 Выйти из аккаунта</button>
         </div>
     </div>
 </div>
 
-<!-- ШАГ 2: ОКНО РЕГИСТРАЦИИ ПО ПОЧТЕ -->
 <div id="authModal" class="modal">
     <div class="modal-card">
         <h3>📝 Регистрация</h3>
-        <p style="font-size:14px;color:#94a3b8;margin-bottom:14px">Создайте профиль для общения и публикаций (без СМС):</p>
+        <p style="font-size:14px;color:#94a3b8;margin-bottom:14px">Создайте профиль для общения (без СМС):</p>
         <input type="text" id="regNameInput" placeholder="Ваше имя или ник...">
-        <input type="email" id="regEmailInput" placeholder="Электронная почта (email@mail.ru)">
+        <input type="email" id="regEmailInput" placeholder="Электронная почта...">
         <button class="btn-main" style="margin:0" onclick="completeRegistration()">Создать аккаунт</button>
     </div>
 </div>
 
-<!-- Остальные модалки -->
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
         <h3>Выберите город</h3>
@@ -291,7 +284,7 @@
 <div id="notifModal" class="modal" onclick="if(event.target===this)closeModal('notifModal')">
     <div class="modal-card">
         <h3>Уведомления</h3>
-        <div class="notif-item">👋 Приветственный экран и регистрация по почте активны!</div>
+        <div class="notif-item">☁️ Облачная база данных Supabase успешно подключена!</div>
         <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
     </div>
 </div>
@@ -305,43 +298,43 @@
 </div>
 
 <script>
+    // Инициализация Supabase с вашими реальными данными
+    const SUPABASE_URL = 'https://igmgobjvjovfscjehcuu.supabase.co';
+    const SUPABASE_KEY = 'Sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     let selectedCity='Иркутск', activeDmUser='', myName='Гость', myEmail='', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
     const dmHistory={
         'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}]
     };
 
-    // Запуск при загрузке страницы
     window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('pulseCity_v2_name');
-        const savedEmail = localStorage.getItem('pulseCity_v2_email');
+        const savedName = localStorage.getItem('pulseCity_v3_name');
+        const savedEmail = localStorage.getItem('pulseCity_v3_email');
         if (!savedName) {
-            // Показываем Шаг 1: Приветственный экран
             document.getElementById('welcomeScreen').classList.add('active');
         } else {
             myName = savedName;
             myEmail = savedEmail || '';
             applyUserProfile();
         }
+        loadPostsFromCloud();
+        loadPublicMessages();
     });
 
-    // Переход с приветственного экрана на окно регистрации
     function goToRegistration(){
         document.getElementById('welcomeScreen').classList.remove('active');
         document.getElementById('authModal').classList.add('open');
     }
 
-    // Завершение регистрации
     function completeRegistration(){
         const name = document.getElementById('regNameInput').value.trim();
         const email = document.getElementById('regEmailInput').value.trim();
-        if(!name) {
-            alert('Пожалуйста, укажите ваше имя!');
-            return;
-        }
+        if(!name) { alert('Укажите имя!'); return; }
         myName = name;
-        myEmail = email || 'Участник PulseCity';
-        localStorage.setItem('pulseCity_v2_name', myName);
-        localStorage.setItem('pulseCity_v2_email', myEmail);
+        myEmail = email || 'Участник';
+        localStorage.setItem('pulseCity_v3_name', myName);
+        localStorage.setItem('pulseCity_v3_email', myEmail);
         applyUserProfile();
         document.getElementById('authModal').classList.remove('open');
     }
@@ -353,12 +346,9 @@
         if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
     }
 
-    // Выход из аккаунта для проверки приветствия и регистрации
     function logoutUser(){
-        localStorage.removeItem('pulseCity_v2_name');
-        localStorage.removeItem('pulseCity_v2_email');
-        document.getElementById('regNameInput').value = '';
-        document.getElementById('regEmailInput').value = '';
+        localStorage.removeItem('pulseCity_v3_name');
+        localStorage.removeItem('pulseCity_v3_email');
         document.getElementById('welcomeScreen').classList.add('active');
     }
 
@@ -375,7 +365,7 @@
 
     function updateProfileName(val){
         myName = val.trim() || 'Гость';
-        localStorage.setItem('pulseCity_v2_name', myName);
+        localStorage.setItem('pulseCity_v3_name', myName);
         document.getElementById('displayProfileName').textContent = myName;
         if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
     }
@@ -389,7 +379,95 @@
         }
     }
 
-    function handleMediaUpload(input, chatType){
+    // Загрузка постов из Supabase
+    async function loadPostsFromCloud(){
+        const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
+        if(error || !data) return;
+        const list = document.getElementById('newsList');
+        list.innerHTML = '';
+        data.forEach(p => {
+            appendPostToDOM(p.id, p.city, p.category, p.title, p.content, p.media_url);
+        });
+    }
+
+    async function publishNews(){
+        const title=document.getElementById('newsTitleInput').value.trim();
+        const text=document.getElementById('newsTextInput').value.trim();
+        const cat=document.getElementById('newsCategorySelect').value;
+        if(!title||!text)return;
+
+        const { data, error } = await supabaseClient.from('posts').insert([{
+            city: selectedCity,
+            category: cat,
+            title: title,
+            content: text,
+            media_url: tempNewsMediaUrl || null
+        }]).select();
+
+        if(!error && data){
+            loadPostsFromCloud();
+        }
+
+        document.getElementById('newsTitleInput').value='';
+        document.getElementById('newsTextInput').value='';
+        document.getElementById('newsMediaInput').value='';
+        document.getElementById('newsMediaPreview').style.display='none';
+        tempNewsMediaUrl='';
+        closeModal('newsModal');
+    }
+
+    function appendPostToDOM(id, city, cat, title, text, mediaUrl){
+        let mediaTag = '';
+        if(mediaUrl){
+            mediaTag = mediaUrl.includes('video') || mediaUrl.startsWith('blob:') 
+                ? `<video src="${mediaUrl}" class="news-media" controls playsinline></video>` 
+                : `<img src="${mediaUrl}" class="news-media">`;
+        }
+
+        const card=document.createElement('div');
+        card.className='card';
+        card.setAttribute('data-category',cat);
+        card.setAttribute('data-id', id);
+        card.innerHTML=`
+            <div class="card-top">
+                <span class="card-tag">${city} • Публикация</span>
+                <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить</button>
+            </div>
+            <h3>${title}</h3>
+            ${mediaTag}
+            <p>${text}</p>
+            <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
+        `;
+        document.getElementById('newsList').appendChild(card);
+    }
+
+    // Загрузка сообщений общего чата из Supabase
+    async function loadPublicMessages(){
+        const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
+        if(error || !data) return;
+        const box = document.getElementById('chatMessages');
+        box.innerHTML = '';
+        data.forEach(m => {
+            appendMsgToDOM('chatMessages', m.text, m.sender === myName, m.media_url, m.sender);
+        });
+    }
+
+    async function sendPublicMessage(){
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if(!text) return;
+
+        await supabaseClient.from('messages').insert([{
+            chat_type: 'public',
+            sender: myName,
+            text: text
+        }]);
+
+        input.value = '';
+        loadPublicMessages();
+    }
+
+    async function handleMediaUpload(input, chatType){
         if(!input.files || !input.files[0]) return;
         const file = input.files[0];
         const url = URL.createObjectURL(file);
@@ -397,7 +475,13 @@
         const mediaTag = isVideo ? `<video src="${url}" class="msg-media" controls playsinline></video>` : `<img src="${url}" class="msg-media">`;
 
         if(chatType === 'public'){
-            appendMsg('chatMessages', '', true, mediaTag);
+            await supabaseClient.from('messages').insert([{
+                chat_type: 'public',
+                sender: myName,
+                text: isVideo ? '🎥 Видео' : '🖼️ Фото',
+                media_url: url
+            }]);
+            loadPublicMessages();
         } else if(chatType === 'private' && activeDmUser){
             dmHistory[activeDmUser].push({text: isVideo ? '🎥 Видео' : '🖼️ Фото', media: mediaTag, mine: true});
             const lastEl = document.getElementById('last-' + activeDmUser);
@@ -407,25 +491,21 @@
         input.value = '';
     }
 
-    function appendMsg(boxId, text, mine, mediaHtml=''){
+    function appendMsgToDOM(boxId, text, mine, mediaHtml='', senderName=''){
         const box = document.getElementById(boxId);
         const row = document.createElement('div');
         row.className = 'msg-row' + (mine ? ' mine' : '');
-        const avHtml = mine ? getMyAvatarHtml() : activeDmUser[0].toUpperCase();
+        const avHtml = mine ? getMyAvatarHtml() : (senderName ? senderName[0].toUpperCase() : 'У');
+        let mediaTag = mediaHtml ? (mediaHtml.startsWith('http') || mediaHtml.startsWith('blob:') ? `<img src="${mediaHtml}" class="msg-media">` : mediaHtml) : '';
         row.innerHTML = `
             <div class="msg-avatar">${avHtml}</div>
-            <div class="msg-bubble">${text}${mediaHtml}</div>
+            <div class="msg-bubble">
+                <div class="msg-author">${senderName}</div>
+                ${text}${mediaTag}
+            </div>
         `;
         box.appendChild(row);
         box.scrollTop = box.scrollHeight;
-    }
-
-    function sendPublicMessage(){
-        const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if(!text) return;
-        appendMsg('chatMessages', text, true);
-        input.value = '';
     }
 
     function sendPrivateMessage(){
@@ -447,7 +527,13 @@
             box.innerHTML = '<div style="color:#64748b;text-align:center;font-size:14px">Защищенный диалог. Отправьте сообщение или фото.</div>';
             return;
         }
-        msgs.forEach(m => appendMsg('dmMessages', m.media ? '' : m.text, m.mine, m.media || ''));
+        msgs.forEach(m => {
+            const row = document.createElement('div');
+            row.className = 'msg-row' + (m.mine ? ' mine' : '');
+            row.innerHTML = `<div class="msg-avatar">${m.mine ? getMyAvatarHtml() : activeDmUser[0].toUpperCase()}</div><div class="msg-bubble">${m.media || m.text}</div>`;
+            box.appendChild(row);
+        });
+        box.scrollTop = box.scrollHeight;
     }
 
     function switchTab(t,btn){
@@ -517,69 +603,18 @@
         closeModal('cityModal');
     }
 
-    function publishNews(){
-        const title=document.getElementById('newsTitleInput').value.trim();
-        const text=document.getElementById('newsTextInput').value.trim();
-        const cat=document.getElementById('newsCategorySelect').value;
-        if(!title||!text)return;
-
-        let mediaTag = '';
-        if(tempNewsMediaUrl){
-            mediaTag = tempNewsIsVideo 
-                ? `<video src="${tempNewsMediaUrl}" class="news-media" controls playsinline></video>` 
-                : `<img src="${tempNewsMediaUrl}" class="news-media">`;
-        }
-
-        const card=document.createElement('div');
-        card.className='card';
-        card.setAttribute('data-category',cat);
-        card.innerHTML=`
-            <div class="card-top">
-                <span class="card-tag">${selectedCity} • Только что</span>
-                <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить</button>
-            </div>
-            <h3>${title}</h3>
-            ${mediaTag}
-            <p>${text}</p>
-            <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
-        `;
-        document.getElementById('newsList').prepend(card);
-
-        document.getElementById('newsTitleInput').value='';
-        document.getElementById('newsTextInput').value='';
-        document.getElementById('newsMediaInput').value='';
-        document.getElementById('newsMediaPreview').style.display='none';
-        tempNewsMediaUrl='';
-
-        closeModal('newsModal');
-    }
-
-    function openModeratorPanel(){
+    async function openModeratorPanel(){
         const listDiv = document.getElementById('modNewsList');
-        listDiv.innerHTML = '';
-        const cards = document.querySelectorAll('#newsList .card');
-        if(cards.length === 0){
-            listDiv.innerHTML = '<div style="color:#94a3b8;font-size:13px">Нет активных постов для модерации.</div>';
-        } else {
-            cards.forEach((card) => {
-                const title = card.querySelector('h3').textContent;
-                const item = document.createElement('div');
-                item.style.cssText = 'background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px';
-                item.innerHTML = `<span><b>${title}</b></span><button style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700">Удалить</button>`;
-                item.querySelector('button').onclick = () => {
-                    card.remove();
-                    item.remove();
-                };
-                listDiv.appendChild(item);
-            });
-        }
+        listDiv.innerHTML = 'Загрузка...';
         openModal('modModal');
-    }
 
-    function likePost(btn){
-        btn.innerHTML='❤️ Вы поддержали';
-        btn.style.background='linear-gradient(135deg,#10b981,#059669)';
-    }
-</script>
-</body>
-</html>
+        const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
+        listDiv.innerHTML = '';
+        if(!data || data.length === 0){
+            listDiv.innerHTML = '<div style="color:#94a3b8;font-size:13px">Нет постов в базе.</div>';
+            return;
+        }
+        data.forEach(p => {
+            const item = document.createElement('div');
+            item.style.cssText = 'background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px';
+            
