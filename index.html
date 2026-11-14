@@ -27,7 +27,6 @@
         
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
         
-        /* Карточка новости */
         .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5);position:relative}
         .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
         .card-tag{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;color:#00f3ff;background:rgba(0,243,255,0.12);padding:6px 12px;border-radius:10px}
@@ -71,7 +70,7 @@
         .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:14px;height:48px;padding:0 20px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
         /* Модалки */
-        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:2000;align-items:center;justify-content:center;padding:20px}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2000;align-items:center;justify-content:center;padding:20px}
         .modal.open{display:flex}
         .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8)}
         .modal-card h3{font-size:20px;margin-bottom:16px}
@@ -198,8 +197,7 @@
             <p style="margin-bottom:12px;font-size:15px">Город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
             <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
             
-            <!-- Кнопка входа в кабинет модератора -->
-            <button class="btn-action" style="background:linear-gradient(135deg,#00f3ff,#2563eb);margin-bottom:12px" onclick="openModal('authModal')">🔐 Вход по почте / Регистрация</button>
+            <button class="btn-action" style="background:linear-gradient(135deg,#00f3ff,#2563eb);margin-bottom:12px" onclick="openModal('authModal')">🔐 Сменить аккаунт / Почта</button>
             <button class="btn-sec" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3)" onclick="openModeratorPanel()">🛡️ Кабинет модератора</button>
         </div>
     </div>
@@ -217,7 +215,6 @@
     </div>
 </div>
 
-<!-- МОДАЛКА НОВОСТИ С ПОДДЕРЖКОЙ ФОТО И ВИДЕО -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
@@ -242,28 +239,22 @@
     </div>
 </div>
 
-<!-- МОДАЛКА РЕГИСТРАЦИИ ПО ПОЧТЕ (БЕЗ СМС) -->
-<div id="authModal" class="modal" onclick="if(event.target===this)closeModal('authModal')">
-    <div class="modal-card">
-        <h3>Вход / Регистрация</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:12px">Быстрый вход через электронную почту без СМС.</p>
-        <input type="email" id="authEmail" placeholder="Ваша почта (email@domain.ru)">
-        <input type="password" id="authPass" placeholder="Пароль">
-        <div style="display:flex;gap:10px">
-            <button class="btn-sec" onclick="closeModal('authModal')">Отмена</button>
-            <button class="btn-main" style="margin:0" onclick="alert('Вы успешно авторизовались!'); closeModal('authModal')">Войти</button>
-        </div>
+<!-- ОБЯЗАТЕЛЬНОЕ ОКНО РЕГИСТРАЦИИ ПРИ ПЕРВОМ ВХОДЕ -->
+<div id="authModal" class="modal" style="display:none;">
+    <div class="modal-card" style="pointer-events: auto;">
+        <h3>👋 Добро пожаловать в PulseCity!</h3>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Представьтесь и укажите почту для создания аккаунта:</p>
+        <input type="text" id="regNameInput" placeholder="Ваше имя или ник...">
+        <input type="email" id="regEmailInput" placeholder="Электронная почта (email@domain.ru)">
+        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Войти в PulseCity</button>
     </div>
 </div>
 
-<!-- КАБИНЕТ МОДЕРАТОРА -->
 <div id="modModal" class="modal" onclick="if(event.target===this)closeModal('modModal')">
     <div class="modal-card" style="max-width:440px">
         <h3>🛡️ Панель модератора</h3>
         <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Управление контентом в городе <span id="modCityName" style="color:#00f3ff">Иркутск</span>:</p>
-        <div id="modNewsList" style="max-height:220px;overflow-y:auto;margin-bottom:14px">
-            <!-- Список постов для модерации -->
-        </div>
+        <div id="modNewsList" style="max-height:220px;overflow-y:auto;margin-bottom:14px"></div>
         <button class="btn-sec" onclick="closeModal('modModal')">Закрыть кабинет</button>
     </div>
 </div>
@@ -282,8 +273,7 @@
 <div id="notifModal" class="modal" onclick="if(event.target===this)closeModal('notifModal')">
     <div class="modal-card">
         <h3>Уведомления</h3>
-        <div class="notif-item">🛡️ Кнопка «Обсудить» теперь закреплена сверху карточек!</div>
-        <div class="notif-item">🎥 В новости и чаты теперь можно прикреплять видео!</div>
+        <div class="notif-item">🛡️ Авторизация по почте работает без СМС!</div>
         <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
     </div>
 </div>
@@ -297,10 +287,37 @@
 </div>
 
 <script>
-    let selectedCity='Иркутск', activeDmUser='', myName='Андрей', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
+    let selectedCity='Иркутск', activeDmUser='', myName='Гость', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
     const dmHistory={
         'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}]
     };
+
+    // Проверка при загрузке: если пользователь еще не зарегистрирован, показываем модалку входа
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = localStorage.getItem('pulseCity_userName');
+        if (!savedName) {
+            document.getElementById('authModal').classList.add('open');
+        } else {
+            myName = savedName;
+            document.getElementById('displayProfileName').textContent = myName;
+            document.getElementById('profileNameInput').value = myName;
+            if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+        }
+    });
+
+    function completeRegistration(){
+        const name = document.getElementById('regNameInput').value.trim();
+        if(!name) {
+            alert('Пожалуйста, введите ваше имя!');
+            return;
+        }
+        myName = name;
+        localStorage.setItem('pulseCity_userName', myName);
+        document.getElementById('displayProfileName').textContent = myName;
+        document.getElementById('profileNameInput').value = myName;
+        document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+        document.getElementById('authModal').classList.remove('open');
+    }
 
     function getMyAvatarHtml(){
         return myAvatarUrl ? `<img src="${myAvatarUrl}">` : myName[0].toUpperCase();
@@ -314,7 +331,8 @@
     }
 
     function updateProfileName(val){
-        myName = val.trim() || 'Андрей';
+        myName = val.trim() || 'Гость';
+        localStorage.setItem('pulseCity_userName', myName);
         document.getElementById('displayProfileName').textContent = myName;
         if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
     }
@@ -493,7 +511,6 @@
         closeModal('newsModal');
     }
 
-    // Кабинет модератора: просмотр и удаление постов ленты
     function openModeratorPanel(){
         const listDiv = document.getElementById('modNewsList');
         listDiv.innerHTML = '';
@@ -501,11 +518,11 @@
         if(cards.length === 0){
             listDiv.innerHTML = '<div style="color:#94a3b8;font-size:13px">Нет активных постов для модерации.</div>';
         } else {
-            cards.forEach((card, idx) => {
+            cards.forEach((card) => {
                 const title = card.querySelector('h3').textContent;
                 const item = document.createElement('div');
                 item.style.cssText = 'background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px';
-                item.innerHTML = `<span><b>${title}</b></span><button style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700" onclick="deletePost(this)">Удалить</button>`;
+                item.innerHTML = `<span><b>${title}</b></span><button style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700">Удалить</button>`;
                 item.querySelector('button').onclick = () => {
                     card.remove();
                     item.remove();
