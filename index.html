@@ -26,11 +26,16 @@
         .chip.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(0,243,255,0.35)}
         
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
-        .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5)}
-        .card-tag{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;color:#00f3ff;background:rgba(0,243,255,0.12);padding:6px 12px;border-radius:10px;margin-bottom:10px}
+        
+        /* Карточка новости */
+        .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5);position:relative}
+        .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .card-tag{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;color:#00f3ff;background:rgba(0,243,255,0.12);padding:6px 12px;border-radius:10px}
+        .btn-discuss-top{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;padding:6px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+        
         .card h3{font-size:20px;font-weight:700;margin-bottom:8px;color:#f8fafc}
         .card p{font-size:15px;color:#cbd5e1;line-height:1.5;margin-bottom:16px}
-        .news-img{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block}
+        .news-media{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block}
         
         .btn-action{width:100%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
@@ -106,16 +111,13 @@
         </div>
         <div id="newsList">
             <div class="card" data-category="events">
-                <span class="card-tag" id="feedCityTag">Иркутск • Главное</span>
+                <div class="card-top">
+                    <span class="card-tag" id="feedCityTag">Иркутск • Главное</span>
+                    <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить</button>
+                </div>
                 <h3>Добро пожаловать в PulseCity!</h3>
                 <p>Главная городская платформа новостей и живого общения. Будь в курсе всего, что происходит рядом.</p>
                 <button class="btn-action" onclick="likePost(this)">🔥 Поддержать запуск (129)</button>
-            </div>
-            <div class="card" data-category="transport">
-                <span class="card-tag">Городская среда</span>
-                <h3>События города</h3>
-                <p>В центре города открылась новая зона отдыха с бесплатным Wi-Fi и кофейнями.</p>
-                <button class="btn-sec" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить в чате</button>
             </div>
         </div>
     </div>
@@ -127,7 +129,6 @@
             <button class="chat-tab-btn" id="btn-private-chat" onclick="switchChatMode('private')">👤 Личные</button>
         </div>
 
-        <!-- Общий чат -->
         <div id="public-chat-view">
             <div class="card">
                 <h3 id="chatTitle">Городской чат • Иркутск</h3>
@@ -143,13 +144,12 @@
                 <div class="chat-input-area">
                     <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this,'public')">
                     <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
-                    <input type="text" id="messageInput" placeholder="Сообщение или фото...">
+                    <input type="text" id="messageInput" placeholder="Сообщение или фото/видео...">
                     <button class="send-btn" onclick="sendPublicMessage()">➤</button>
                 </div>
             </div>
         </div>
 
-        <!-- Личные чаты -->
         <div id="private-list-view" style="display:none">
             <button class="btn-main" style="margin-bottom:14px" onclick="openModal('newDmModal')">✉️ Написать человеку</button>
             <div id="contactsList">
@@ -163,7 +163,6 @@
             </div>
         </div>
 
-        <!-- Диалог ЛС -->
         <div id="private-dialog-view" style="display:none">
             <div class="card">
                 <div class="chat-header-bar">
@@ -182,7 +181,7 @@
         </div>
     </div>
 
-    <!-- ПРОФИЛЬ -->
+    <!-- ПРОФИЛЬ И КАБИНЕТ МОДЕРАТОРА -->
     <div id="tab-profile" class="content">
         <div class="card">
             <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
@@ -195,8 +194,13 @@
             </div>
             <label style="font-size:13px;color:#94a3b8">Ваш никнейм:</label>
             <input type="text" id="profileNameInput" value="Андрей" oninput="updateProfileName(this.value)" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px;color:#fff;font-size:15px;margin:6px 0 14px">
+            
             <p style="margin-bottom:12px;font-size:15px">Город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
-            <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
+            <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
+            
+            <!-- Кнопка входа в кабинет модератора -->
+            <button class="btn-action" style="background:linear-gradient(135deg,#00f3ff,#2563eb);margin-bottom:12px" onclick="openModal('authModal')">🔐 Вход по почте / Регистрация</button>
+            <button class="btn-sec" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3)" onclick="openModeratorPanel()">🛡️ Кабинет модератора</button>
         </div>
     </div>
 </div>
@@ -213,7 +217,7 @@
     </div>
 </div>
 
-<!-- МОДАЛКА ДОБАВЛЕНИЯ НОВОСТИ С ФОТО -->
+<!-- МОДАЛКА НОВОСТИ С ПОДДЕРЖКОЙ ФОТО И ВИДЕО -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
@@ -225,17 +229,42 @@
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
         
-        <!-- Кнопка прикрепления фото к новости -->
         <div style="margin-bottom: 12px;">
-            <input type="file" id="newsImageInput" accept="image/*" style="display:none" onchange="previewNewsImage(this)">
-            <button class="btn-sec" onclick="document.getElementById('newsImageInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📷 Прикрепить фото к посту</button>
-            <div id="newsImagePreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Фото выбрано</div>
+            <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
+            <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
+            <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Медиафайл прикреплен</div>
         </div>
 
         <div style="display:flex;gap:10px">
             <button class="btn-sec" onclick="closeModal('newsModal')">Отмена</button>
             <button class="btn-main" style="margin:0" onclick="publishNews()">Опубликовать</button>
         </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА РЕГИСТРАЦИИ ПО ПОЧТЕ (БЕЗ СМС) -->
+<div id="authModal" class="modal" onclick="if(event.target===this)closeModal('authModal')">
+    <div class="modal-card">
+        <h3>Вход / Регистрация</h3>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:12px">Быстрый вход через электронную почту без СМС.</p>
+        <input type="email" id="authEmail" placeholder="Ваша почта (email@domain.ru)">
+        <input type="password" id="authPass" placeholder="Пароль">
+        <div style="display:flex;gap:10px">
+            <button class="btn-sec" onclick="closeModal('authModal')">Отмена</button>
+            <button class="btn-main" style="margin:0" onclick="alert('Вы успешно авторизовались!'); closeModal('authModal')">Войти</button>
+        </div>
+    </div>
+</div>
+
+<!-- КАБИНЕТ МОДЕРАТОРА -->
+<div id="modModal" class="modal" onclick="if(event.target===this)closeModal('modModal')">
+    <div class="modal-card" style="max-width:440px">
+        <h3>🛡️ Панель модератора</h3>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Управление контентом в городе <span id="modCityName" style="color:#00f3ff">Иркутск</span>:</p>
+        <div id="modNewsList" style="max-height:220px;overflow-y:auto;margin-bottom:14px">
+            <!-- Список постов для модерации -->
+        </div>
+        <button class="btn-sec" onclick="closeModal('modModal')">Закрыть кабинет</button>
     </div>
 </div>
 
@@ -253,8 +282,8 @@
 <div id="notifModal" class="modal" onclick="if(event.target===this)closeModal('notifModal')">
     <div class="modal-card">
         <h3>Уведомления</h3>
-        <div class="notif-item">🛡️ Личные чаты защищены. Доступ только у собеседников.</div>
-        <div class="notif-item">📷 Теперь в ленту можно выкладывать свои фото!</div>
+        <div class="notif-item">🛡️ Кнопка «Обсудить» теперь закреплена сверху карточек!</div>
+        <div class="notif-item">🎥 В новости и чаты теперь можно прикреплять видео!</div>
         <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
     </div>
 </div>
@@ -268,7 +297,7 @@
 </div>
 
 <script>
-    let selectedCity='Иркутск', activeDmUser='', myName='Андрей', myAvatarUrl='', tempNewsImageUrl='';
+    let selectedCity='Иркутск', activeDmUser='', myName='Андрей', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
     const dmHistory={
         'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}]
     };
@@ -290,10 +319,12 @@
         if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
     }
 
-    function previewNewsImage(input){
+    function previewNewsMedia(input){
         if(input.files && input.files[0]){
-            tempNewsImageUrl = URL.createObjectURL(input.files[0]);
-            document.getElementById('newsImagePreview').style.display = 'block';
+            const file = input.files[0];
+            tempNewsMediaUrl = URL.createObjectURL(file);
+            tempNewsIsVideo = file.type.startsWith('video/');
+            document.getElementById('newsMediaPreview').style.display = 'block';
         }
     }
 
@@ -421,6 +452,7 @@
         document.getElementById('feedCityTag').textContent=c+' • Главное';
         document.getElementById('chatTitle').textContent='Городской чат • '+c;
         document.getElementById('profileCity').textContent=c;
+        document.getElementById('modCityName').textContent=c;
         closeModal('cityModal');
     }
 
@@ -430,27 +462,58 @@
         const cat=document.getElementById('newsCategorySelect').value;
         if(!title||!text)return;
 
-        const imgTag = tempNewsImageUrl ? `<img src="${tempNewsImageUrl}" class="news-img">` : '';
+        let mediaTag = '';
+        if(tempNewsMediaUrl){
+            mediaTag = tempNewsIsVideo 
+                ? `<video src="${tempNewsMediaUrl}" class="news-media" controls playsinline></video>` 
+                : `<img src="${tempNewsMediaUrl}" class="news-media">`;
+        }
 
         const card=document.createElement('div');
-        card.className='card';card.setAttribute('data-category',cat);
+        card.className='card';
+        card.setAttribute('data-category',cat);
         card.innerHTML=`
-            <span class="card-tag">${selectedCity} • Только что</span>
+            <div class="card-top">
+                <span class="card-tag">${selectedCity} • Только что</span>
+                <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Обсудить</button>
+            </div>
             <h3>${title}</h3>
-            ${imgTag}
+            ${mediaTag}
             <p>${text}</p>
             <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
         `;
         document.getElementById('newsList').prepend(card);
 
-        // Сброс полей
         document.getElementById('newsTitleInput').value='';
         document.getElementById('newsTextInput').value='';
-        document.getElementById('newsImageInput').value='';
-        document.getElementById('newsImagePreview').style.display='none';
-        tempNewsImageUrl = '';
+        document.getElementById('newsMediaInput').value='';
+        document.getElementById('newsMediaPreview').style.display='none';
+        tempNewsMediaUrl='';
 
         closeModal('newsModal');
+    }
+
+    // Кабинет модератора: просмотр и удаление постов ленты
+    function openModeratorPanel(){
+        const listDiv = document.getElementById('modNewsList');
+        listDiv.innerHTML = '';
+        const cards = document.querySelectorAll('#newsList .card');
+        if(cards.length === 0){
+            listDiv.innerHTML = '<div style="color:#94a3b8;font-size:13px">Нет активных постов для модерации.</div>';
+        } else {
+            cards.forEach((card, idx) => {
+                const title = card.querySelector('h3').textContent;
+                const item = document.createElement('div');
+                item.style.cssText = 'background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px';
+                item.innerHTML = `<span><b>${title}</b></span><button style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700" onclick="deletePost(this)">Удалить</button>`;
+                item.querySelector('button').onclick = () => {
+                    card.remove();
+                    item.remove();
+                };
+                listDiv.appendChild(item);
+            });
+        }
+        openModal('modModal');
     }
 
     function likePost(btn){
