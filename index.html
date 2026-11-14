@@ -9,6 +9,15 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
         
+        /* ЭКРАН ПРИВЕТСТВИЯ (ONBOARDING) */
+        .welcome-screen{position:fixed;inset:0;background:radial-gradient(circle at top,#1b2547,#06070a 75%);z-index:3000;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 24px 36px;text-align:center}
+        .welcome-screen.active{display:flex;animation:fadeIn .35s ease}
+        .welcome-badge{background:rgba(0,243,255,0.12);border:1px solid rgba(0,243,255,0.3);color:#00f3ff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.5px}
+        .welcome-hero{margin:auto 0;max-width:340px}
+        .welcome-icon{width:92px;height:92px;margin:0 auto 24px;border-radius:28px;background:linear-gradient(135deg,#00f3ff,#2563eb);display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 16px 40px rgba(0,243,255,0.4)}
+        .welcome-title{font-size:32px;font-weight:800;margin-bottom:14px;background:linear-gradient(90deg,#ffffff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .welcome-desc{font-size:16px;color:#cbd5e1;line-height:1.5}
+        
         header{background:rgba(18,23,38,0.85);backdrop-filter:blur(20px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);z-index:20}
         .logo{font-size:22px;font-weight:800;background:linear-gradient(90deg,#00f3ff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .header-actions{display:flex;gap:10px;align-items:center}
@@ -26,6 +35,7 @@
         .chip.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(0,243,255,0.35)}
         
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
+        .btn-main:active{transform:scale(0.97)}
         
         .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5);position:relative}
         .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
@@ -39,7 +49,6 @@
         .btn-action{width:100%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
         
-        /* Чаты */
         .chat-tabs{display:flex;background:rgba(255,255,255,0.06);padding:6px;border-radius:18px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
         .chat-tab-btn{flex:1;padding:12px;border:none;border-radius:14px;background:transparent;color:#94a3b8;font-size:14px;font-weight:700;cursor:pointer}
         .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;box-shadow:0 4px 15px rgba(0,243,255,0.3)}
@@ -70,7 +79,7 @@
         .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:14px;height:48px;padding:0 20px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
         /* Модалки */
-        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2000;align-items:center;justify-content:center;padding:20px}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
         .modal.open{display:flex}
         .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8)}
         .modal-card h3{font-size:20px;margin-bottom:16px}
@@ -89,6 +98,17 @@
     </style>
 </head>
 <body>
+
+<!-- ШАГ 1: ПЕРВЫЙ ЭКРАН ПРИВЕТСТВИЯ -->
+<div id="welcomeScreen" class="welcome-screen">
+    <div class="welcome-badge">ГОРОДСКАЯ ПЛАТФОРМА №1</div>
+    <div class="welcome-hero">
+        <div class="welcome-icon">⚡</div>
+        <h1 class="welcome-title">PulseCity</h1>
+        <p class="welcome-desc">Главные новости твоего города, живые чаты с соседями и защищенные личные диалоги в одном приложении.</p>
+    </div>
+    <button class="btn-main" style="margin-bottom:0;max-width:340px" onclick="goToRegistration()">Начать →</button>
+</div>
 
 <header>
     <div class="logo">PulseCity</div>
@@ -180,13 +200,14 @@
         </div>
     </div>
 
-    <!-- ПРОФИЛЬ И КАБИНЕТ МОДЕРАТОРА -->
+    <!-- ПРОФИЛЬ -->
     <div id="tab-profile" class="content">
         <div class="card">
             <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
                 <div class="avatar" id="myProfileAvatar" style="width:70px;height:70px;font-size:28px;border-radius:22px">А</div>
                 <div>
-                    <h3 id="displayProfileName" style="margin-bottom:6px;font-size:20px">Андрей</h3>
+                    <h3 id="displayProfileName" style="margin-bottom:4px;font-size:20px">Андрей</h3>
+                    <div id="displayProfileEmail" style="font-size:12px;color:#94a3b8;margin-bottom:8px">Почта не указана</div>
                     <button class="back-btn" onclick="document.getElementById('avatarUpload').click()">📷 Сменить фото</button>
                     <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="changeMyAvatar(this)">
                 </div>
@@ -196,14 +217,24 @@
             
             <p style="margin-bottom:12px;font-size:15px">Город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
             <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
-            
-            <button class="btn-action" style="background:linear-gradient(135deg,#00f3ff,#2563eb);margin-bottom:12px" onclick="openModal('authModal')">🔐 Сменить аккаунт / Почта</button>
-            <button class="btn-sec" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3)" onclick="openModeratorPanel()">🛡️ Кабинет модератора</button>
+            <button class="btn-sec" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3);margin-bottom:12px" onclick="openModeratorPanel()">🛡️ Кабинет модератора</button>
+            <button class="btn-sec" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.25)" onclick="logoutUser()">🚪 Выйти из аккаунта (тест входа)</button>
         </div>
     </div>
 </div>
 
-<!-- Модалки -->
+<!-- ШАГ 2: ОКНО РЕГИСТРАЦИИ ПО ПОЧТЕ -->
+<div id="authModal" class="modal">
+    <div class="modal-card">
+        <h3>📝 Регистрация</h3>
+        <p style="font-size:14px;color:#94a3b8;margin-bottom:14px">Создайте профиль для общения и публикаций (без СМС):</p>
+        <input type="text" id="regNameInput" placeholder="Ваше имя или ник...">
+        <input type="email" id="regEmailInput" placeholder="Электронная почта (email@mail.ru)">
+        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Создать аккаунт</button>
+    </div>
+</div>
+
+<!-- Остальные модалки -->
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
         <h3>Выберите город</h3>
@@ -225,13 +256,11 @@
         </select>
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
-        
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
             <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
             <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Медиафайл прикреплен</div>
         </div>
-
         <div style="display:flex;gap:10px">
             <button class="btn-sec" onclick="closeModal('newsModal')">Отмена</button>
             <button class="btn-main" style="margin:0" onclick="publishNews()">Опубликовать</button>
@@ -239,21 +268,10 @@
     </div>
 </div>
 
-<!-- ОБЯЗАТЕЛЬНОЕ ОКНО РЕГИСТРАЦИИ ПРИ ПЕРВОМ ВХОДЕ -->
-<div id="authModal" class="modal" style="display:none;">
-    <div class="modal-card" style="pointer-events: auto;">
-        <h3>👋 Добро пожаловать в PulseCity!</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Представьтесь и укажите почту для создания аккаунта:</p>
-        <input type="text" id="regNameInput" placeholder="Ваше имя или ник...">
-        <input type="email" id="regEmailInput" placeholder="Электронная почта (email@domain.ru)">
-        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Войти в PulseCity</button>
-    </div>
-</div>
-
 <div id="modModal" class="modal" onclick="if(event.target===this)closeModal('modModal')">
     <div class="modal-card" style="max-width:440px">
         <h3>🛡️ Панель модератора</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Управление контентом в городе <span id="modCityName" style="color:#00f3ff">Иркутск</span>:</p>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Управление постами в городе <span id="modCityName" style="color:#00f3ff">Иркутск</span>:</p>
         <div id="modNewsList" style="max-height:220px;overflow-y:auto;margin-bottom:14px"></div>
         <button class="btn-sec" onclick="closeModal('modModal')">Закрыть кабинет</button>
     </div>
@@ -273,7 +291,7 @@
 <div id="notifModal" class="modal" onclick="if(event.target===this)closeModal('notifModal')">
     <div class="modal-card">
         <h3>Уведомления</h3>
-        <div class="notif-item">🛡️ Авторизация по почте работает без СМС!</div>
+        <div class="notif-item">👋 Приветственный экран и регистрация по почте активны!</div>
         <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
     </div>
 </div>
@@ -287,36 +305,61 @@
 </div>
 
 <script>
-    let selectedCity='Иркутск', activeDmUser='', myName='Гость', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
+    let selectedCity='Иркутск', activeDmUser='', myName='Гость', myEmail='', myAvatarUrl='', tempNewsMediaUrl='', tempNewsIsVideo=false;
     const dmHistory={
         'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}]
     };
 
-    // Проверка при загрузке: если пользователь еще не зарегистрирован, показываем модалку входа
+    // Запуск при загрузке страницы
     window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('pulseCity_userName');
+        const savedName = localStorage.getItem('pulseCity_v2_name');
+        const savedEmail = localStorage.getItem('pulseCity_v2_email');
         if (!savedName) {
-            document.getElementById('authModal').classList.add('open');
+            // Показываем Шаг 1: Приветственный экран
+            document.getElementById('welcomeScreen').classList.add('active');
         } else {
             myName = savedName;
-            document.getElementById('displayProfileName').textContent = myName;
-            document.getElementById('profileNameInput').value = myName;
-            if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+            myEmail = savedEmail || '';
+            applyUserProfile();
         }
     });
 
+    // Переход с приветственного экрана на окно регистрации
+    function goToRegistration(){
+        document.getElementById('welcomeScreen').classList.remove('active');
+        document.getElementById('authModal').classList.add('open');
+    }
+
+    // Завершение регистрации
     function completeRegistration(){
         const name = document.getElementById('regNameInput').value.trim();
+        const email = document.getElementById('regEmailInput').value.trim();
         if(!name) {
-            alert('Пожалуйста, введите ваше имя!');
+            alert('Пожалуйста, укажите ваше имя!');
             return;
         }
         myName = name;
-        localStorage.setItem('pulseCity_userName', myName);
-        document.getElementById('displayProfileName').textContent = myName;
-        document.getElementById('profileNameInput').value = myName;
-        document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+        myEmail = email || 'Участник PulseCity';
+        localStorage.setItem('pulseCity_v2_name', myName);
+        localStorage.setItem('pulseCity_v2_email', myEmail);
+        applyUserProfile();
         document.getElementById('authModal').classList.remove('open');
+    }
+
+    function applyUserProfile(){
+        document.getElementById('displayProfileName').textContent = myName;
+        document.getElementById('displayProfileEmail').textContent = myEmail;
+        document.getElementById('profileNameInput').value = myName;
+        if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+    }
+
+    // Выход из аккаунта для проверки приветствия и регистрации
+    function logoutUser(){
+        localStorage.removeItem('pulseCity_v2_name');
+        localStorage.removeItem('pulseCity_v2_email');
+        document.getElementById('regNameInput').value = '';
+        document.getElementById('regEmailInput').value = '';
+        document.getElementById('welcomeScreen').classList.add('active');
     }
 
     function getMyAvatarHtml(){
@@ -332,7 +375,7 @@
 
     function updateProfileName(val){
         myName = val.trim() || 'Гость';
-        localStorage.setItem('pulseCity_userName', myName);
+        localStorage.setItem('pulseCity_v2_name', myName);
         document.getElementById('displayProfileName').textContent = myName;
         if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
     }
