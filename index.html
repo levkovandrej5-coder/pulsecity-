@@ -9,7 +9,6 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
         
-        /* Крупная премиальная шапка */
         header{background:rgba(18,23,38,0.85);backdrop-filter:blur(20px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);z-index:20}
         .logo{font-size:22px;font-weight:800;background:linear-gradient(90deg,#00f3ff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .header-actions{display:flex;gap:10px;align-items:center}
@@ -17,23 +16,22 @@
         .badge{position:absolute;top:-2px;right:-2px;width:12px;height:12px;background:#ef4444;border-radius:50%;border:2px solid #141829}
         .city-btn{background:rgba(0,243,255,0.15);color:#00f3ff;font-size:14px;font-weight:700;padding:10px 16px;border-radius:18px;border:1px solid rgba(0,243,255,0.35);cursor:pointer;display:flex;align-items:center;gap:6px}
         
-        /* Основной контейнер с отступом для огромного бара */
         .container{flex:1;overflow-y:auto;padding:20px;padding-bottom:130px}
         .content{display:none;animation:fadeIn .25s ease}
         .content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         
-        /* Фильтры */
         .filter-scroll{display:flex;gap:10px;overflow-x:auto;margin-bottom:16px;padding-bottom:6px;scrollbar-width:none}
         .chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:10px 18px;border-radius:16px;font-size:14px;font-weight:700;white-space:nowrap;cursor:pointer}
         .chip.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(0,243,255,0.35)}
         
-        /* Карточки */
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
         .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5)}
         .card-tag{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;color:#00f3ff;background:rgba(0,243,255,0.12);padding:6px 12px;border-radius:10px;margin-bottom:10px}
         .card h3{font-size:20px;font-weight:700;margin-bottom:8px;color:#f8fafc}
         .card p{font-size:15px;color:#cbd5e1;line-height:1.5;margin-bottom:16px}
+        .news-img{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block}
+        
         .btn-action{width:100%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
         
@@ -51,7 +49,6 @@
         .chat-header-bar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08)}
         .back-btn{background:rgba(255,255,255,0.08);border:none;color:#00f3ff;font-size:14px;font-weight:700;padding:8px 14px;border-radius:12px;cursor:pointer}
         
-        /* Сообщения */
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:45vh;overflow-y:auto;padding-right:4px}
         .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:90%}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
@@ -63,7 +60,6 @@
         .msg-row.mine .msg-author{display:none}
         .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover}
         
-        /* Поле ввода */
         .chat-input-area{display:flex;gap:10px;align-items:center}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
@@ -75,11 +71,10 @@
         .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8)}
         .modal-card h3{font-size:20px;margin-bottom:16px}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
-        .modal-card textarea{height:100px;resize:none}
+        .modal-card textarea{height:90px;resize:none}
         .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:14px 16px;border-radius:14px;font-size:16px;font-weight:600;margin-bottom:10px;cursor:pointer}
         .notif-item{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:14px;border-radius:16px;margin-bottom:10px;font-size:14px;color:#cbd5e1}
         
-        /* СУПЕР-ВЫРАЗИТЕЛЬНЫЙ ПРЕМИУМ ДОК-БАР СНИЗУ */
         .nav-wrapper{position:fixed;bottom:16px;left:16px;right:16px;z-index:1000}
         nav{background:linear-gradient(180deg,rgba(26,32,54,0.95),rgba(14,18,32,0.99));backdrop-filter:blur(25px);border:1px solid rgba(255,255,255,0.2);border-radius:30px;display:flex;padding:8px;box-shadow:0 20px 45px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.2);gap:8px}
         nav button{flex:1;background:rgba(255,255,255,0.03);border:1px solid transparent;border-radius:24px;padding:14px 8px;color:#94a3b8;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all .25s cubic-bezier(0.34,1.56,0.64,1)}
@@ -144,13 +139,6 @@
                             Привет всем жителям PulseCity! 👋
                         </div>
                     </div>
-                    <div class="msg-row">
-                        <div class="msg-avatar" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">Е</div>
-                        <div class="msg-bubble">
-                            <div class="msg-author">Елена</div>
-                            Интерфейс стал очень удобным и крупным! 🔥
-                        </div>
-                    </div>
                 </div>
                 <div class="chat-input-area">
                     <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this,'public')">
@@ -170,13 +158,6 @@
                     <div class="contact-info">
                         <div class="contact-name">Алексей Смирнов</div>
                         <div class="contact-last" id="last-Алексей Смирнов">Привет! Как продвигается запуск?</div>
-                    </div>
-                </div>
-                <div class="contact-item" onclick="openPrivateChat('Елена Волкова')">
-                    <div class="avatar" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">Е<span class="online-dot"></span></div>
-                    <div class="contact-info">
-                        <div class="contact-name">Елена Волкова</div>
-                        <div class="contact-last" id="last-Елена Волкова">Видела новость про центр города 👍</div>
                     </div>
                 </div>
             </div>
@@ -232,6 +213,7 @@
     </div>
 </div>
 
+<!-- МОДАЛКА ДОБАВЛЕНИЯ НОВОСТИ С ФОТО -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
@@ -240,8 +222,16 @@
             <option value="emergency">🚨 ЧП</option>
             <option value="transport">🚗 Транспорт</option>
         </select>
-        <input type="text" id="newsTitleInput" placeholder="Заголовок...">
+        <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
+        
+        <!-- Кнопка прикрепления фото к новости -->
+        <div style="margin-bottom: 12px;">
+            <input type="file" id="newsImageInput" accept="image/*" style="display:none" onchange="previewNewsImage(this)">
+            <button class="btn-sec" onclick="document.getElementById('newsImageInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📷 Прикрепить фото к посту</button>
+            <div id="newsImagePreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Фото выбрано</div>
+        </div>
+
         <div style="display:flex;gap:10px">
             <button class="btn-sec" onclick="closeModal('newsModal')">Отмена</button>
             <button class="btn-main" style="margin:0" onclick="publishNews()">Опубликовать</button>
@@ -264,12 +254,11 @@
     <div class="modal-card">
         <h3>Уведомления</h3>
         <div class="notif-item">🛡️ Личные чаты защищены. Доступ только у собеседников.</div>
-        <div class="notif-item">📎 В чатах доступна отправка фото и видео!</div>
+        <div class="notif-item">📷 Теперь в ленту можно выкладывать свои фото!</div>
         <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
     </div>
 </div>
 
-<!-- Парящее крупное меню -->
 <div class="nav-wrapper">
     <nav>
         <button class="active" onclick="switchTab('feed',this)"><span class="icon">📰</span><span>Лента</span></button>
@@ -279,10 +268,9 @@
 </div>
 
 <script>
-    let selectedCity='Иркутск', activeDmUser='', myName='Андрей', myAvatarUrl='';
+    let selectedCity='Иркутск', activeDmUser='', myName='Андрей', myAvatarUrl='', tempNewsImageUrl='';
     const dmHistory={
-        'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}],
-        'Елена Волкова':[{text:'Видела новость про центр города 👍',mine:false}]
+        'Алексей Смирнов':[{text:'Привет! Как продвигается запуск?',mine:false}]
     };
 
     function getMyAvatarHtml(){
@@ -300,6 +288,13 @@
         myName = val.trim() || 'Андрей';
         document.getElementById('displayProfileName').textContent = myName;
         if(!myAvatarUrl) document.getElementById('myProfileAvatar').textContent = myName[0].toUpperCase();
+    }
+
+    function previewNewsImage(input){
+        if(input.files && input.files[0]){
+            tempNewsImageUrl = URL.createObjectURL(input.files[0]);
+            document.getElementById('newsImagePreview').style.display = 'block';
+        }
     }
 
     function handleMediaUpload(input, chatType){
@@ -434,11 +429,27 @@
         const text=document.getElementById('newsTextInput').value.trim();
         const cat=document.getElementById('newsCategorySelect').value;
         if(!title||!text)return;
+
+        const imgTag = tempNewsImageUrl ? `<img src="${tempNewsImageUrl}" class="news-img">` : '';
+
         const card=document.createElement('div');
         card.className='card';card.setAttribute('data-category',cat);
-        card.innerHTML=`<span class="card-tag">${selectedCity} • Только что</span><h3>${title}</h3><p>${text}</p><button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>`;
+        card.innerHTML=`
+            <span class="card-tag">${selectedCity} • Только что</span>
+            <h3>${title}</h3>
+            ${imgTag}
+            <p>${text}</p>
+            <button class="btn-action" onclick="likePost(this)">🔥 Поддержать (1)</button>
+        `;
         document.getElementById('newsList').prepend(card);
-        document.getElementById('newsTitleInput').value='';document.getElementById('newsTextInput').value='';
+
+        // Сброс полей
+        document.getElementById('newsTitleInput').value='';
+        document.getElementById('newsTextInput').value='';
+        document.getElementById('newsImageInput').value='';
+        document.getElementById('newsImagePreview').style.display='none';
+        tempNewsImageUrl = '';
+
         closeModal('newsModal');
     }
 
