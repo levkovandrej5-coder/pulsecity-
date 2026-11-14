@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PulseCity</title>
     <link rel="manifest" href="/pulsecity-/manifest.json">
-    <!-- Подключаем библиотеку Supabase SDK с защитным таймаутом -->
+    <!-- Подключаем Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -298,7 +298,7 @@
 </div>
 
 <script>
-    // Защищенная инициализация Supabase (приложению не страшны сбои сети и CDN)
+    // Безопасная инициализация Supabase (интерфейс работает даже при сбоях сети)
     let supabaseClient = null;
     try {
         if (window.supabase) {
@@ -386,16 +386,17 @@
         }
     }
 
-    // Загрузка постов из Supabase
     async function loadPostsFromCloud(){
         if(!supabaseClient) return;
-        const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
-        if(error || !data) return;
-        const list = document.getElementById('newsList');
-        list.innerHTML = '';
-        data.forEach(p => {
-            appendPostToDOM(p.id, p.city, p.category, p.title, p.content, p.media_url);
-        });
+        try {
+            const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
+            if(error || !data) return;
+            const list = document.getElementById('newsList');
+            list.innerHTML = '';
+            data.forEach(p => {
+                appendPostToDOM(p.id, p.city, p.category, p.title, p.content, p.media_url);
+            });
+        } catch(e) { console.log(e); }
     }
 
     async function publishNews(){
@@ -405,17 +406,19 @@
         if(!title||!text)return;
 
         if(supabaseClient) {
-            const { data, error } = await supabaseClient.from('posts').insert([{
-                city: selectedCity,
-                category: cat,
-                title: title,
-                content: text,
-                media_url: tempNewsMediaUrl || null
-            }]).select();
+            try {
+                const { data, error } = await supabaseClient.from('posts').insert([{
+                    city: selectedCity,
+                    category: cat,
+                    title: title,
+                    content: text,
+                    media_url: tempNewsMediaUrl || null
+                }]).select();
 
-            if(!error && data){
-                loadPostsFromCloud();
-            }
+                if(!error && data){
+                    loadPostsFromCloud();
+                }
+            } catch(e) { console.log(e); }
         }
 
         document.getElementById('newsTitleInput').value='';
@@ -451,16 +454,17 @@
         document.getElementById('newsList').appendChild(card);
     }
 
-    // Загрузка сообщений общего чата из Supabase
     async function loadPublicMessages(){
         if(!supabaseClient) return;
-        const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
-        if(error || !data) return;
-        const box = document.getElementById('chatMessages');
-        box.innerHTML = '';
-        data.forEach(m => {
-            appendMsgToDOM('chatMessages', m.text, m.sender === myName, m.media_url, m.sender);
-        });
+        try {
+            const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
+            if(error || !data) return;
+            const box = document.getElementById('chatMessages');
+            box.innerHTML = '';
+            data.forEach(m => {
+                appendMsgToDOM('chatMessages', m.text, m.sender === myName, m.media_url, m.sender);
+            });
+        } catch(e) { console.log(e); }
     }
 
     async function sendPublicMessage(){
@@ -469,12 +473,14 @@
         if(!text) return;
 
         if(supabaseClient) {
-            await supabaseClient.from('messages').insert([{
-                chat_type: 'public',
-                sender: myName,
-                text: text
-            }]);
-            loadPublicMessages();
+            try {
+                await supabaseClient.from('messages').insert([{
+                    chat_type: 'public',
+                    sender: myName,
+                    text: text
+                }]);
+                loadPublicMessages();
+            } catch(e) { console.log(e); }
         }
 
         input.value = '';
@@ -489,13 +495,15 @@
 
         if(chatType === 'public'){
             if(supabaseClient) {
-                await supabaseClient.from('messages').insert([{
-                    chat_type: 'public',
-                    sender: myName,
-                    text: isVideo ? '🎥 Видео' : '🖼️ Фото',
-                    media_url: url
-                }]);
-                loadPublicMessages();
+                try {
+                    await supabaseClient.from('messages').insert([{
+                        chat_type: 'public',
+                        sender: myName,
+                        text: isVideo ? '🎥 Видео' : '🖼️ Фото',
+                        media_url: url
+                    }]);
+                    loadPublicMessages();
+                } catch(e) { console.log(e); }
             }
         } else if(chatType === 'private' && activeDmUser){
             dmHistory[activeDmUser].push({text: isVideo ? '🎥 Видео' : '🖼️ Фото', media: mediaTag, mine: true});
@@ -573,4 +581,88 @@
         document.getElementById('dmPartnerAvatar').textContent=name[0].toUpperCase();
         document.getElementById('private-list-view').style.display='none';
         document.getElementById('private-dialog-view').style.display='block';
-        renderDmMessages
+        renderDmMessages();
+    }
+
+    function backToContacts(){
+        document.getElementById('private-dialog-view').style.display='none';
+        document.getElementById('private-list-view').style.display='block';
+    }
+
+    function startNewChat(){
+        const inp=document.getElementById('newContactName');
+        const name=inp.value.trim();
+        if(!name)return;
+        if(!dmHistory[name]){
+            dmHistory[name]=[];
+            const list=document.getElementById('contactsList');
+            const item=document.createElement('div');
+            item.className='contact-item';
+            item.onclick=()=>openPrivateChat(name);
+            item.innerHTML=`<div class="avatar">${name[0].toUpperCase()}<span class="online-dot"></span></div><div class="contact-info"><div class="contact-name">${name}</div><div class="contact-last" id="last-${name}">Новый чат</div></div>`;
+            list.prepend(item);
+        }
+        inp.value='';closeModal('newDmModal');openPrivateChat(name);
+    }
+
+    function filterNews(cat,btn){
+        document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#newsList .card').forEach(c=>{
+            c.style.display=(cat==='all'||c.getAttribute('data-category')===cat)?'block':'none';
+        });
+    }
+
+    function openModal(id){document.getElementById(id).classList.add('open')}
+    function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+    function selectCity(c){
+        selectedCity=c;
+        document.getElementById('currentCity').textContent=c;
+        document.getElementById('feedCityTag').textContent=c+' • Главное';
+        document.getElementById('chatTitle').textContent='Городской чат • '+c;
+        document.getElementById('profileCity').textContent=c;
+        document.getElementById('modCityName').textContent=c;
+        closeModal('cityModal');
+    }
+
+    async function openModeratorPanel(){
+        const listDiv = document.getElementById('modNewsList');
+        listDiv.innerHTML = 'Загрузка...';
+        openModal('modModal');
+
+        if(!supabaseClient) {
+            listDiv.innerHTML = '<div style="color:#94a3b8;font-size:13px">База данных не подключена.</div>';
+            return;
+        }
+
+        try {
+            const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
+            listDiv.innerHTML = '';
+            if(!data || data.length === 0){
+                listDiv.innerHTML = '<div style="color:#94a3b8;font-size:13px">Нет постов в базе.</div>';
+                return;
+            }
+            data.forEach(p => {
+                const item = document.createElement('div');
+                item.style.cssText = 'background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px';
+                item.innerHTML = `<span><b>${p.title}</b></span><button style="background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700">Удалить</button>`;
+                item.querySelector('button').onclick = async () => {
+                    await supabaseClient.from('posts').delete().eq('id', p.id);
+                    item.remove();
+                    loadPostsFromCloud();
+                };
+                listDiv.appendChild(item);
+            });
+        } catch(e) {
+            listDiv.innerHTML = '<div style="color:#ef4444;font-size:13px">Ошибка загрузки.</div>';
+        }
+    }
+
+    function likePost(btn){
+        btn.innerHTML='❤️ Вы поддержали';
+        btn.style.background='linear-gradient(135deg,#10b981,#059669)';
+    }
+</script>
+</body>
+</html>
