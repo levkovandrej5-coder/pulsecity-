@@ -227,6 +227,16 @@
     </div>
 </div>
 
+<!-- Фирменное модальное окно уведомлений/ошибок (вместо браузерных alert) -->
+<div id="alertModal" class="modal" onclick="if(event.target===this)closeModal('alertModal')">
+    <div class="modal-card" style="max-width:320px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:10px">⚡</div>
+        <h3 id="alertTitle" style="font-size:18px;margin-bottom:8px;">PulseCity</h3>
+        <p id="alertText" style="color:#cbd5e1;font-size:14px;margin-bottom:20px;"></p>
+        <button class="btn-main" onclick="closeModal('alertModal')" style="margin:0;">ОК</button>
+    </div>
+</div>
+
 <!-- Окно подтверждения удаления -->
 <div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirmModal(false)">
     <div class="modal-card" style="max-width:320px;text-align:center;">
@@ -324,6 +334,11 @@
 </div>
 
 <script>
+    function showPulseAlert(text) {
+        document.getElementById('alertText').textContent = text;
+        document.getElementById('alertModal').classList.add('open');
+    }
+
     let isAdmin = localStorage.getItem('pulseCity_is_admin') === 'true';
     let adminTapCount = 0;
 
@@ -333,7 +348,7 @@
             isAdmin = true;
             localStorage.setItem('pulseCity_is_admin', 'true');
             checkAdminAccess();
-            alert('👑 Режим разработчика активирован!');
+            showPulseAlert('👑 Режим разработчика активирован!');
             adminTapCount = 0;
         }
     }
@@ -395,7 +410,7 @@
         if ("Notification" in window) {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
-                    alert("✓ Уведомления включены!");
+                    showPulseAlert("✓ Уведомления включены!");
                 }
             });
         }
@@ -423,7 +438,7 @@
 
     let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
     if (bannedList.includes(myUsername)) {
-        alert('Ваш аккаунт заблокирован администратором.');
+        showPulseAlert('Ваш аккаунт заблокирован администратором.');
         localStorage.clear();
         location.reload();
     }
@@ -499,8 +514,9 @@
         if (file.type.startsWith('image/')) { 
             fileToUpload = await compressImage(file); 
         } else if (file.type.startsWith('video/')) {
-            if (file.size > 50 * 1024 * 1024) {
-                alert('Видео слишком большое! Выберите файл размером до 50 МБ.');
+            // Увеличили лимит до 100 МБ с проверкой
+            if (file.size > 100 * 1024 * 1024) {
+                showPulseAlert('Видео слишком большое! Выберите файл размером до 100 МБ.');
                 return null;
             }
         }
@@ -510,7 +526,7 @@
         
         const { error } = await supabaseClient.storage.from('media').upload(fileName, fileToUpload, { cacheControl: '3600', upsert: false });
         if (error) { 
-            alert('Не удалось загрузить файл. Попробуйте видео меньшего размера.'); 
+            showPulseAlert('Не удалось загрузить файл: ' + error.message); 
             return null; 
         }
         const { data: { publicUrl } } = supabaseClient.storage.from('media').getPublicUrl(fileName);
@@ -522,7 +538,7 @@
         let uname = document.getElementById('regUsernameInput').value.trim();
         
         if (!name || !uname) {
-            alert('Введите имя и уникальный никнейм!');
+            showPulseAlert('Введите имя и уникальный никнейм!');
             return;
         }
         if (!uname.startsWith('@')) { uname = '@' + uname; }
@@ -572,12 +588,21 @@
 
     function clearLocalCache() {
         localStorage.clear();
-        alert('Кэш очищен! Перезагрузка...');
-        location.reload();
+        showPulseAlert('Кэш очищен! Перезагрузка...');
+        setTimeout(() => location.reload(), 1000);
     }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    
+    function closeModal(id) { 
+        if (id === 'fullscreenModal') {
+            const content = document.getElementById('fullscreenContent');
+            content.querySelectorAll('video').forEach(v => { v.pause(); v.currentTime = 0; });
+            content.innerHTML = '';
+        }
+        document.getElementById(id).classList.remove('open'); 
+    }
+
     function openAdminModal() { openModal('adminModal'); }
 
     let confirmCallback = null;
@@ -616,7 +641,7 @@
     async function publishAdminFeedPost() {
         const title = document.getElementById('adminFeedTitleInput').value.trim();
         const text = document.getElementById('adminFeedTextInput').value.trim();
-        if (!text) { alert('Введите текст объявления!'); return; }
+        if (!text) { showPulseAlert('Введите текст объявления!'); return; }
 
         document.getElementById('loadingTitle').textContent = 'Публикация от ⚡ PulseCity...';
         document.getElementById('loadingModal').classList.add('open');
@@ -638,6 +663,7 @@
             document.getElementById('adminFeedTextInput').value = '';
             closeModal('adminModal');
             lastLoadedMaxPostId = null;
+            cachedPostsSignature = '';
             loadPostsFromCloud();
         }
     }
@@ -675,7 +701,7 @@
                 list.push(target);
                 localStorage.setItem('pulseCity_banned', JSON.stringify(list));
             }
-            alert(`Пользователь ${target} заблокирован.`);
+            showPulseAlert(`Пользователь ${target} заблокирован.`);
             input.value = '';
             closeModal('adminModal');
         });
@@ -683,20 +709,21 @@
 
     async function deletePost(postId, authorUsername) {
         if (myUsername !== authorUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
-            alert('Вы можете удалять только свои новости!');
+            showPulseAlert('Вы можете удалять только свои новости!');
             return;
         }
         showConfirm('Удаление новости', 'Вы уверены, что хотите удалить эту новость?', async (res) => {
             if (!res) return;
             await supabaseClient.from('posts').delete().eq('id', postId);
             lastLoadedMaxPostId = null;
+            cachedPostsSignature = '';
             loadPostsFromCloud();
         });
     }
 
     async function deleteMessage(msgId, senderUsername) {
         if (myUsername !== senderUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
-            alert('Вы можете удалять только свои сообщения!');
+            showPulseAlert('Вы можете удалять только свои сообщения!');
             return;
         }
         showConfirm('Удаление сообщения', 'Вы уверены, что хотите удалить это сообщение?', async (res) => {
@@ -709,13 +736,14 @@
 
     async function deleteComment(commentId, senderUsername) {
         if (myUsername !== senderUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
-            alert('Вы можете удалять только свои комментарии!');
+            showPulseAlert('Вы можете удалять только свои комментарии!');
             return;
         }
         showConfirm('Удаление комментария', 'Вы уверены, что хотите удалить этот комментарий?', async (res) => {
             if (!res) return;
             await supabaseClient.from('comments').delete().eq('id', commentId);
             loadComments(activePostIdForComments);
+            cachedPostsSignature = '';
             loadPostsFromCloud();
         });
     }
@@ -773,6 +801,7 @@
         closeModal('cityModal');
         lastLoadedMaxPostId = null;
         lastLoadedMaxMsgId = null;
+        cachedPostsSignature = '';
         loadPostsFromCloud();
         loadPublicMessages();
     }
@@ -804,6 +833,26 @@
 
     let lastLoadedMaxPostId = null;
     let cachedPostsSignature = '';
+    let feedVideoObserver = null;
+
+    function initVideoObserver() {
+        if (feedVideoObserver) feedVideoObserver.disconnect();
+        
+        feedVideoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            });
+        }, { threshold: 0.65 });
+
+        document.querySelectorAll('#newsList video').forEach(v => {
+            feedVideoObserver.observe(v);
+        });
+    }
 
     async function loadPostsFromCloud() {
         if (!supabaseClient || !myUsername) return;
@@ -818,7 +867,6 @@
             });
         }
         
-        // Создаем уникальную подпись для проверки изменений, чтобы лента не мерцала без надобности
         let newSignature = data.map(p => `${p.id}-${p.likes}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
@@ -830,7 +878,7 @@
         }
 
         if (newSignature === cachedPostsSignature && document.getElementById('newsList').children.length > 0) {
-            return; // Ничего не изменилось — не перерисовываем ленту, избавились от мерцания!
+            return;
         }
         cachedPostsSignature = newSignature;
         lastLoadedMaxPostId = currentMaxId;
@@ -849,7 +897,7 @@
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
                 mediaTag = isVid
-                    ? `<video src="${p.media_url}" class="news-media" autoplay muted loop playsinline preload="metadata" onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
+                    ? `<video src="${p.media_url}" class="news-media" muted loop playsinline preload="metadata" onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
 
@@ -892,6 +940,9 @@
             `;
             list.appendChild(card);
         });
+
+        // Запускаем наблюдатель скролла для автовоспроизведения только центрального видео
+        initVideoObserver();
     }
 
     async function likePost(postId, currentLikes) {
@@ -970,7 +1021,7 @@
         }]);
         input.value = '';
         loadComments(activePostIdForComments);
-        cachedPostsSignature = ''; // Сбрасываем кэш чтобы обновился счетчик
+        cachedPostsSignature = '';
         loadPostsFromCloud();
     }
 
@@ -979,7 +1030,7 @@
         const text = document.getElementById('newsTextInput').value.trim();
         const cat = document.getElementById('newsCategorySelect').value;
         
-        if (!text) { alert('Введите текст новости!'); return; }
+        if (!text) { showPulseAlert('Введите текст новости!'); return; }
         if (!title) { title = 'Новость от ' + myUsername; }
 
         document.getElementById('loadingTitle').textContent = selectedNewsFile ? '⚡ Обработка и загрузка медиа...' : '⚡ Публикация...';
@@ -1067,7 +1118,7 @@
             if (m.media_url) {
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
-                    ? `<video src="${m.media_url}" class="msg-media" autoplay muted loop playsinline preload="metadata" onclick="openFullscreenMedia('${m.media_url}', true)"></video>`
+                    ? `<video src="${m.media_url}" class="msg-media" muted loop playsinline preload="metadata" onclick="openFullscreenMedia('${m.media_url}', true)"></video>`
                     : `<img src="${m.media_url}" class="msg-media" loading="lazy" onclick="openFullscreenMedia('${m.media_url}', false)">`;
             }
 
@@ -1110,7 +1161,7 @@
         if (!text) return;
 
         if (chatMode === 'private' && !privateRecipient) {
-            alert('Сначала выберите пользователя для личного сообщения!');
+            showPulseAlert('Сначала выберите пользователя для личного сообщения!');
             return;
         }
 
@@ -1136,7 +1187,7 @@
     async function handleMediaUpload(input) {
         if (!input.files || !input.files[0]) return;
         if (chatMode === 'private' && !privateRecipient) {
-            alert('Сначала выберите пользователя!');
+            showPulseAlert('Сначала выберите пользователя!');
             return;
         }
 
