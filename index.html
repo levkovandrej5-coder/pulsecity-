@@ -19,10 +19,13 @@
         .content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         
-        /* Закрепленная шапка ленты (кнопка добавления всегда наверху) */
-        .feed-sticky-header{position:sticky;top:0;background:radial-gradient(circle at top right,#161d36,#06070a 65%);padding-top:4px;padding-bottom:12px;z-index:10}
+        /* Закрепленная шапка ленты */
+        .feed-sticky-header{position:sticky;top:0;background:radial-gradient(circle at top right,#161d36,#06070a 65%);padding-top:4px;padding-bottom:12px;z-index:10;display:flex;flex-direction:column;gap:10px}
         
-        .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px}
+        .search-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:12px 16px;color:#fff;font-size:14px;outline:none}
+        .search-input:focus{border-color:#00f3ff}
+
+        .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px}
         
         .card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border-radius:24px;padding:20px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 15px 35px rgba(0,0,0,0.6);position:relative}
         .card.admin-card{border:1px solid rgba(0,243,255,0.4);background:linear-gradient(135deg,rgba(0,243,255,0.08),rgba(37,99,235,0.04));}
@@ -39,11 +42,13 @@
         .card p{font-size:15px;color:#cbd5e1;line-height:1.5;margin-bottom:16px}
         .news-media{width:100%;max-height:320px;border-radius:18px;object-fit:cover;margin-bottom:14px;display:block;background:#000;cursor:pointer}
         
-        .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px}
-        .card-actions-left{display:flex;gap:10px}
-        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:8px 16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+        .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;flex-wrap:wrap;gap:10px}
+        .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:8px 12px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px}
         .action-btn:active{transform:scale(0.95)}
         
+        .views-badge{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:4px}
+
         .delete-btn{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
         
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px}
@@ -52,7 +57,10 @@
         .chat-tab-btn{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:10px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
         .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent}
 
-        .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:42vh;overflow-y:auto;padding-right:4px}
+        /* Закрепленное сообщение в чате */
+        .pinned-msg-box{background:rgba(0,243,255,0.08);border:1px solid rgba(0,243,255,0.25);border-radius:16px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+        
+        .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:38vh;overflow-y:auto;padding-right:4px}
         .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:92%;position:relative}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
         
@@ -68,6 +76,8 @@
         .msg-row.mine .msg-author{display:none}
         .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000;cursor:pointer}
         
+        .typing-indicator{font-size:12px;color:#00f3ff;height:18px;margin-bottom:6px;font-style:italic}
+
         .chat-input-area{display:flex;gap:10px;align-items:center;margin-bottom:10px}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
@@ -108,9 +118,9 @@
 
 <div class="container">
     <div id="tab-feed" class="content active">
-        <!-- Закрепленная кнопка добавления новости, которая всегда видна сверху при прокрутке -->
         <div class="feed-sticky-header">
             <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
+            <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Поиск по новостям..." oninput="filterFeedSearch()">
         </div>
         <div id="newsList"></div>
     </div>
@@ -121,17 +131,29 @@
                 <button class="chat-tab-btn active" id="tabBtnPublic" onclick="switchChatMode('public')">🌍 Общий чат</button>
                 <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные сообщения</button>
             </div>
-            <h3 id="chatTitle">Городской чат • Иркутск</h3>
+            <h3 id="chatTitle" style="margin-bottom:8px;">Городской чат • Иркутск</h3>
+            
+            <input type="text" id="chatSearchInput" class="search-input" placeholder="🔍 Поиск по сообщениям..." oninput="filterChatSearch()" style="margin-bottom:10px;">
+
+            <!-- Закрепленное сообщение -->
+            <div id="pinnedMsgContainer" class="pinned-msg-box" style="display:none;">
+                <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;padding-right:8px;">
+                    📌 <strong style="color:#00f3ff">Закреплено:</strong> <span id="pinnedMsgText" style="color:#cbd5e1">...</span>
+                </div>
+                <button onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;display:none;">✕ Снять</button>
+            </div>
             
             <div id="privateRecipientBar" style="display:none;margin-bottom:10px;background:rgba(0,243,255,0.1);padding:8px 12px;border-radius:12px;font-size:13px;justify-content:space-between;align-items:center;">
                 <span>Диалог с: <strong id="activeDmUser" style="color:#00f3ff">выберите пользователя</strong></span>
                 <button onclick="switchChatMode('public')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
             </div>
 
+            <div class="typing-indicator" id="typingIndicator"></div>
+
             <div class="chat-input-area">
                 <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
                 <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
-                <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." onkeydown="if(event.key==='Enter')sendPublicMessage()">
+                <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." oninput="notifyTyping()" onkeydown="if(event.key==='Enter')sendPublicMessage()">
                 <button class="send-btn" onclick="sendPublicMessage()">➤</button>
             </div>
 
@@ -554,7 +576,7 @@
         
         loadPostsFromCloud();
         loadPublicMessages();
-        setupRealtimeSubscription();
+        setupRealtimeSubscriptions();
     }
 
     async function updateUserAvatar(input) {
@@ -644,7 +666,8 @@
             media_url: null,
             author_username: '⚡ PulseCity',
             author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
-            likes: 0
+            likes: 0,
+            views: 0
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
@@ -772,6 +795,7 @@
         }
         lastLoadedMaxMsgId = null;
         loadPublicMessages();
+        loadPinnedMessage();
     }
 
     function startPrivateChatWith(username) {
@@ -794,6 +818,7 @@
         cachedPostsSignature = '';
         loadPostsFromCloud();
         loadPublicMessages();
+        loadPinnedMessage();
     }
 
     function previewNewsMedia(input) {
@@ -813,10 +838,7 @@
         openModal('fullscreenModal');
     }
 
-    let lastLoadedMaxPostId = null;
-    let cachedPostsSignature = '';
     let feedVideoObserver = null;
-
     function initVideoObserver() {
         if (feedVideoObserver) feedVideoObserver.disconnect();
         
@@ -836,10 +858,16 @@
         });
     }
 
+    let lastLoadedMaxPostId = null;
+    let cachedPostsSignature = '';
+    let globalPostsData = [];
+
     async function loadPostsFromCloud() {
         if (!supabaseClient || !myUsername) return;
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
+
+        globalPostsData = data;
 
         const { data: allComments } = await supabaseClient.from('comments').select('post_id');
         const commentCounts = {};
@@ -849,7 +877,7 @@
             });
         }
         
-        let newSignature = data.map(p => `${p.id}-${p.likes}-${commentCounts[p.id] || 0}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${p.likes}-${p.reactions ? JSON.stringify(p.reactions) : ''}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -859,37 +887,50 @@
             }
         }
 
-        if (newSignature === cachedPostsSignature && document.getElementById('newsList').children.length > 0) {
+        if (newSignature === cachedPostsSignature && document.querySelectorAll('#newsList .card').length > 0) {
             return;
         }
         cachedPostsSignature = newSignature;
         lastLoadedMaxPostId = currentMaxId;
 
-        const list = document.getElementById('newsList');
-        // Очищаем старые карточки, но сохраняем закрепленную кнопку сверху
-        const stickyHeader = list.querySelector('.feed-sticky-header');
-        list.innerHTML = '';
-        
-        const stickyWrapper = document.createElement('div');
-        stickyWrapper.className = 'feed-sticky-header';
-        stickyWrapper.innerHTML = `<button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>`;
-        list.appendChild(stickyWrapper);
+        renderPostsList(globalPostsData, commentCounts);
+    }
 
-        if (data.length === 0) {
+    function renderPostsList(postsToRender, commentCounts = {}) {
+        const list = document.getElementById('newsList');
+        
+        // Сохраняем поле ввода поиска и кнопку вверху
+        const searchVal = document.getElementById('feedSearchInput').value;
+
+        list.innerHTML = `
+            <div class="feed-sticky-header">
+                <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
+                <input type="text" id="feedSearchInput" class="search-input" value="${searchVal}" placeholder="🔍 Поиск по новостям..." oninput="filterFeedSearch()">
+            </div>
+        `;
+
+        if (postsToRender.length === 0) {
             const emptyCard = document.createElement('div');
             emptyCard.className = 'card';
-            emptyCard.innerHTML = `<p style="margin:0;text-align:center;color:#94a3b8">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p>`;
+            emptyCard.innerHTML = `<p style="margin:0;text-align:center;color:#94a3b8">Новости не найдены.</p>`;
             list.appendChild(emptyCard);
             return;
         }
 
-        let myLikes = JSON.parse(localStorage.getItem('pulseCity_likes') || '{}');
+        let viewedPosts = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
 
-        data.forEach(p => {
+        postsToRender.forEach(p => {
+            // Учет просмотров один раз для пользователя
+            if (!viewedPosts[p.id] && p.author_username !== myUsername) {
+                viewedPosts[p.id] = true;
+                localStorage.setItem('pulseCity_views', JSON.stringify(viewedPosts));
+                supabaseClient.from('posts').update({ views: (p.views || 0) + 1 }).eq('id', p.id).then(()=>{});
+                p.views = (p.views || 0) + 1;
+            }
+
             let mediaTag = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
-                // Убрали атрибут loop, теперь видео проигрывается ровно один раз и останавливается
                 mediaTag = isVid
                     ? `<video src="${p.media_url}" class="news-media" muted playsinline preload="metadata" onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
@@ -904,7 +945,17 @@
             const cCount = commentCounts[p.id] || 0;
             const isAdminPost = authorName === '⚡ PulseCity';
 
-            const isLiked = myLikes[p.id] === true;
+            // Реакции
+            let reactions = p.reactions || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
+            let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
+            let userReacted = myReactions[p.id] || null;
+
+            let reactionsHtml = '';
+            ['🔥', '👍', '😂', '🚀'].forEach(emo => {
+                let count = reactions[emo] || 0;
+                let activeStyle = userReacted === emo ? 'background:rgba(0,243,255,0.25);border-color:#00f3ff;' : '';
+                reactionsHtml += `<button class="action-btn" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
+            });
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -924,11 +975,10 @@
                 <p>${p.content}</p>
                 <div class="card-actions">
                     <div class="card-actions-left">
-                        <button class="action-btn" onclick="likePost(${p.id}, ${p.likes || 0})" style="color:${isLiked ? '#ef4444' : '#fff'}">
-                            <span id="like-icon-${p.id}">${isLiked ? '❤️' : '🤍'}</span> <span id="likes-count-${p.id}">${p.likes || 0}</span>
-                        </button>
-                        <button class="action-btn" onclick="openComments(${p.id})">💬 Комментарии (${cCount})</button>
+                        ${reactionsHtml}
+                        <button class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
                     </div>
+                    <div class="views-badge">👁️ ${p.views || 0}</div>
                 </div>
             `;
             list.appendChild(card);
@@ -937,30 +987,44 @@
         initVideoObserver();
     }
 
-    async function likePost(postId, currentLikes) {
-        let myLikes = JSON.parse(localStorage.getItem('pulseCity_likes') || '{}');
-        const isLiked = myLikes[postId] === true;
-        const elCount = document.getElementById(`likes-count-${postId}`);
-        const elIcon = document.getElementById(`like-icon-${postId}`);
-        
-        let actualCurrent = parseInt(elCount.textContent) || currentLikes;
-        let newLikes;
+    function filterFeedSearch() {
+        const query = document.getElementById('feedSearchInput').value.toLowerCase().trim();
+        if (!query) {
+            renderPostsList(globalPostsData);
+            return;
+        }
+        const filtered = globalPostsData.filter(p => 
+            (p.title && p.title.toLowerCase().includes(query)) || 
+            (p.content && p.content.toLowerCase().includes(query)) ||
+            (p.author_username && p.author_username.toLowerCase().includes(query))
+        );
+        renderPostsList(filtered);
+    }
 
-        if (isLiked) {
-            newLikes = Math.max(0, actualCurrent - 1);
-            myLikes[postId] = false;
-            elIcon.textContent = '🤍';
-            elCount.parentElement.style.color = '#fff';
+    async function reactPost(postId, emoji) {
+        let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
+        let currentReact = myReactions[postId] || null;
+
+        let post = globalPostsData.find(x => x.id === postId);
+        if (!post) return;
+        let reactions = post.reactions || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
+
+        if (currentReact === emoji) {
+            reactions[emoji] = Math.max(0, (reactions[emoji] || 1) - 1);
+            myReactions[postId] = null;
         } else {
-            newLikes = actualCurrent + 1;
-            myLikes[postId] = true;
-            elIcon.textContent = '❤️';
-            elCount.parentElement.style.color = '#ef4444';
+            if (currentReact) {
+                reactions[currentReact] = Math.max(0, (reactions[currentReact] || 1) - 1);
+            }
+            reactions[emoji] = (reactions[emoji] || 0) + 1;
+            myReactions[postId] = emoji;
         }
 
-        localStorage.setItem('pulseCity_likes', JSON.stringify(myLikes));
-        elCount.textContent = newLikes;
-        await supabaseClient.from('posts').update({ likes: newLikes }).eq('id', postId);
+        localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
+        post.reactions = reactions;
+        
+        renderPostsList(globalPostsData);
+        await supabaseClient.from('posts').update({ reactions: reactions }).eq('id', postId);
     }
 
     function openComments(postId) {
@@ -1040,7 +1104,9 @@
             media_url: publicMediaUrl,
             author_username: myUsername,
             author_avatar: myAvatar,
-            likes: 0
+            likes: 0,
+            views: 0,
+            reactions: { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 }
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
@@ -1059,6 +1125,8 @@
     }
 
     let lastLoadedMaxMsgId = null;
+    let globalMessagesData = [];
+
     async function loadPublicMessages() {
         if (!supabaseClient || !myUsername) return;
         
@@ -1068,7 +1136,7 @@
             query = query.eq('city', selectedCity).eq('chat_type', 'public');
         } else {
             if (!privateRecipient) {
-                document.getElementById('chatMessages').innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате (нажав на его аватар или ник), чтобы написать ему лично.</p>';
+                document.getElementById('chatMessages').innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате, чтобы написать ему лично.</p>';
                 return;
             }
             query = query.eq('chat_type', 'private');
@@ -1085,6 +1153,7 @@
             );
         }
         
+        globalMessagesData = filteredData;
         const currentMaxId = filteredData.length > 0 ? filteredData[0].id : 0;
         
         if (lastLoadedMaxMsgId !== null && currentMaxId > lastLoadedMaxMsgId) {
@@ -1094,17 +1163,19 @@
             }
         }
         
-        if (currentMaxId === lastLoadedMaxMsgId) return;
         lastLoadedMaxMsgId = currentMaxId;
+        renderMessagesList(globalMessagesData);
+    }
 
+    function renderMessagesList(msgs) {
         const box = document.getElementById('chatMessages');
         box.innerHTML = '';
-        if (filteredData.length === 0) {
-            box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Здесь пока нет сообщений. Напишите первое!</p>`;
+        if (msgs.length === 0) {
+            box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Сообщений пока нет.</p>`;
             return;
         }
 
-        filteredData.forEach(m => {
+        msgs.forEach(m => {
             let mediaTag = '';
             if (m.media_url) {
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
@@ -1119,6 +1190,7 @@
 
             const isMine = m.sender === myUsername;
             const canDeleteMsg = (m.sender === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
+            const canPin = isAdmin || (myUsername.toLowerCase() === '@andrey');
 
             const row = document.createElement('div');
             row.className = 'msg-row' + (isMine ? ' mine' : '');
@@ -1128,7 +1200,10 @@
                 <div class="msg-bubble">
                     <div class="msg-user-info" style="justify-content:space-between;">
                         <span class="msg-author" onclick="startPrivateChatWith('${m.sender}')">${m.sender}</span>
-                        ${canDeleteMsg ? `<button class="delete-btn" style="padding:1px 6px;font-size:10px;margin-left:8px;" onclick="deleteMessage(${m.id}, '${m.sender}')">Удалить</button>` : ''}
+                        <div style="display:flex;gap:4px;">
+                            ${canPin ? `<button class="delete-btn" style="padding:1px 5px;font-size:9px;background:rgba(0,243,255,0.2);color:#00f3ff;" onclick="pinMessage(${m.id}, '${m.text.replace(/'/g, "")}')">📌</button>` : ''}
+                            ${canDeleteMsg ? `<button class="delete-btn" style="padding:1px 5px;font-size:9px;" onclick="deleteMessage(${m.id}, '${m.sender}')">✕</button>` : ''}
+                        </div>
                     </div>
                     ${m.text}${mediaTag}
                 </div>`;
@@ -1136,14 +1211,81 @@
         });
     }
 
-    function setupRealtimeSubscription() {
+    function filterChatSearch() {
+        const q = document.getElementById('chatSearchInput').value.toLowerCase().trim();
+        if (!q) {
+            renderMessagesList(globalMessagesData);
+            return;
+        }
+        const filtered = globalMessagesData.filter(m => m.text && m.text.toLowerCase().includes(q));
+        renderMessagesList(filtered);
+    }
+
+    // Закрепленные сообщения
+    async function pinMessage(msgId, text) {
+        await supabaseClient.from('pins').upsert([{ city: selectedCity, message_id: msgId, text: text }]);
+        loadPinnedMessage();
+        showPulseAlert('📌 Сообщение закреплено!');
+    }
+
+    async function unpinMessage() {
+        await supabaseClient.from('pins').delete().eq('city', selectedCity);
+        document.getElementById('pinnedMsgContainer').style.display = 'none';
+    }
+
+    async function loadPinnedMessage() {
+        const { data } = await supabaseClient.from('pins').select('*').eq('city', selectedCity).maybeSingle();
+        const box = document.getElementById('pinnedMsgContainer');
+        const txt = document.getElementById('pinnedMsgText');
+        const btn = document.getElementById('unpinBtn');
+
+        if (data) {
+            txt.textContent = data.text;
+            box.style.display = 'flex';
+            if (isAdmin || myUsername.toLowerCase() === '@andrey') {
+                btn.style.display = 'block';
+            }
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    // Индикатор печати
+    let typingTimer = null;
+    function notifyTyping() {
+        if (!supabaseClient || !myUsername) return;
+        supabaseClient.from('typing').upsert([{ username: myUsername, city: selectedCity, updated_at: new Date() }]).then(()=>{});
+    }
+
+    function setupRealtimeSubscriptions() {
         if (!supabaseClient) return;
+        
         supabaseClient
             .channel('public:messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
                 loadPublicMessages();
             })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, payload => {
+                loadPinnedMessage();
+            })
             .subscribe();
+
+        // Проверка кто печатает каждые 2 секунды
+        setInterval(async () => {
+            if (!selectedCity) return;
+            const { data } = await supabaseClient.from('typing').select('*').eq('city', selectedCity);
+            if (!data) return;
+            const now = new Date();
+            let activeTypers = data.filter(t => t.username !== myUsername && (now - new Date(t.updated_at)) < 3000);
+            
+            const indicator = document.getElementById('typingIndicator');
+            if (activeTypers.length > 0) {
+                let names = activeTypers.map(t => t.username).join(', ');
+                indicator.textContent = `${names} печатает...`;
+            } else {
+                indicator.textContent = '';
+            }
+        }, 2000);
     }
 
     async function sendPublicMessage() {
@@ -1218,7 +1360,8 @@
     if (myUsername) {
         loadPostsFromCloud();
         loadPublicMessages();
-        setupRealtimeSubscription();
+        loadPinnedMessage();
+        setupRealtimeSubscriptions();
     }
 
     setInterval(() => {
