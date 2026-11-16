@@ -9,21 +9,11 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
         
-        #debugBar{background:#0f172a;color:#00f3ff;font-size:11px;padding:4px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);z-index:5000}
+        #debugBar{background:#0f172a;color:#00f3ff;font-size:11px;padding:6px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);z-index:5000;font-weight:600}
 
-        .welcome-screen{position:fixed;inset:0;background:radial-gradient(circle at top,#1b2547,#06070a 75%);z-index:3000;display:none;pointer-events:none;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 24px 36px;text-align:center}
-        .welcome-screen.active{display:flex;pointer-events:auto;animation:fadeIn .35s ease}
-        .welcome-badge{background:rgba(0,243,255,0.12);border:1px solid rgba(0,243,255,0.3);color:#00f3ff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.5px}
-        .welcome-hero{margin:auto 0;max-width:340px}
-        .welcome-icon{width:92px;height:92px;margin:0 auto 24px;border-radius:28px;background:linear-gradient(135deg,#00f3ff,#2563eb);display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 16px 40px rgba(0,243,255,0.4)}
-        .welcome-title{font-size:32px;font-weight:800;margin-bottom:14px;background:linear-gradient(90deg,#ffffff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .welcome-desc{font-size:16px;color:#cbd5e1;line-height:1.5}
-        
         header{background:rgba(18,23,38,0.85);backdrop-filter:blur(20px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);z-index:20}
         .logo{font-size:22px;font-weight:800;background:linear-gradient(90deg,#00f3ff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .header-actions{display:flex;gap:10px;align-items:center}
-        .icon-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;position:relative}
-        .badge{position:absolute;top:-2px;right:-2px;width:12px;height:12px;background:#ef4444;border-radius:50%;border:2px solid #141829}
         .city-btn{background:rgba(0,243,255,0.15);color:#00f3ff;font-size:14px;font-weight:700;padding:10px 16px;border-radius:18px;border:1px solid rgba(0,243,255,0.35);cursor:pointer;display:flex;align-items:center;gap:6px}
         
         .container{flex:1;overflow-y:auto;padding:20px;padding-bottom:130px}
@@ -40,13 +30,15 @@
         .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:24px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 35px rgba(0,0,0,0.5);position:relative}
         .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
         .card-tag{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;color:#00f3ff;background:rgba(0,243,255,0.12);padding:6px 12px;border-radius:10px}
-        .btn-discuss-top{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;padding:6px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
         
         .card h3{font-size:20px;font-weight:700;margin-bottom:8px;color:#f8fafc}
         .card p{font-size:15px;color:#cbd5e1;line-height:1.5;margin-bottom:16px}
-        .news-media{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block;background:#000}
+        .news-media{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block;background:#000;cursor:pointer}
         
-        .btn-action{width:100%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+        .card-actions{display:flex;gap:10px;margin-top:14px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px}
+        .action-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+        .action-btn:active{transform:scale(0.95)}
+        
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
         
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:45vh;overflow-y:auto;padding-right:4px}
@@ -57,7 +49,7 @@
         .msg-row.mine .msg-bubble{border-radius:18px 18px 6px 18px;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;font-weight:500}
         .msg-author{font-size:12px;font-weight:700;color:#00f3ff;margin-bottom:4px}
         .msg-row.mine .msg-author{display:none}
-        .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000}
+        .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000;cursor:pointer}
         
         .chat-input-area{display:flex;gap:10px;align-items:center}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -66,7 +58,7 @@
         
         .modal{display:none;pointer-events:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
         .modal.open{display:flex;pointer-events:auto}
-        .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8)}
+        .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8);max-height:85vh;display:flex;flex-direction:column}
         .modal-card h3{font-size:20px;margin-bottom:16px}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
         .modal-card textarea{height:90px;resize:none}
@@ -81,12 +73,11 @@
 </head>
 <body>
 
-<div id="debugBar">Статус: Загрузка...</div>
+<div id="debugBar">Статус: Подключение к городу...</div>
 
 <header>
     <div class="logo">PulseCity</div>
     <div class="header-actions">
-        <button class="icon-btn" onclick="openModal('notifModal')">🔔<span class="badge"></span></button>
         <button class="city-btn" onclick="openModal('cityModal')">📍 <span id="currentCity">Иркутск</span> ▾</button>
     </div>
 </header>
@@ -111,7 +102,7 @@
                 <div class="chat-input-area">
                     <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
                     <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
-                    <input type="text" id="messageInput" placeholder="Сообщение или фото/видео...">
+                    <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." onkeydown="if(event.key==='Enter')sendPublicMessage()">
                     <button class="send-btn" onclick="sendPublicMessage()">➤</button>
                 </div>
             </div>
@@ -123,15 +114,27 @@
             <h3 id="displayProfileName" style="margin-bottom:8px;font-size:20px">Андрей</h3>
             <label style="font-size:13px;color:#94a3b8">Ваш никнейм:</label>
             <input type="text" id="profileNameInput" value="Андрей" oninput="updateProfileName(this.value)" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px;color:#fff;font-size:15px;margin:6px 0 14px">
-            <p style="margin-bottom:12px;font-size:15px">Город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
-            <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
+            <p style="margin-bottom:12px;font-size:15px">Текущий город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
+            <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
         </div>
     </div>
 </div>
 
+<!-- Модальное окно регистрации для новых пользователей -->
+<div id="authModal" class="modal" style="display:flex;pointer-events:auto;">
+    <div class="modal-card" style="max-width:340px;text-align:center;margin:auto;">
+        <div style="font-size:40px;margin-bottom:12px">⚡</div>
+        <h3>Добро пожаловать в PulseCity!</h3>
+        <p style="color:#cbd5e1;font-size:14px;margin-bottom:16px">Введите ваше имя или ник, чтобы начать общение:</p>
+        <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:700;">
+        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Войти в город</button>
+    </div>
+</div>
+
+<!-- Модальное окно выбора города -->
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
-        <h3>Выберите город</h3>
+        <h3>Выберите ваш город</h3>
         <button class="city-option" onclick="selectCity('Иркутск')">📍 Иркутск</button>
         <button class="city-option" onclick="selectCity('Новосибирск')">📍 Новосибирск</button>
         <button class="city-option" onclick="selectCity('Москва')">📍 Москва</button>
@@ -139,6 +142,7 @@
     </div>
 </div>
 
+<!-- Модальное окно создания новости -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
@@ -152,7 +156,7 @@
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
             <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
-            <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Файл выбран для загрузки</div>
+            <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Файл выбран</div>
         </div>
         <div style="display:flex;gap:10px">
             <button class="btn-sec" onclick="closeModal('newsModal')">Отмена</button>
@@ -161,11 +165,22 @@
     </div>
 </div>
 
-<div id="notifModal" class="modal" onclick="if(event.target===this)closeModal('notifModal')">
+<!-- Модальное окно полноэкранного просмотра и скачивания медиа -->
+<div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;">
+    <button class="btn-sec" style="position:absolute;top:20px;right:20px;width:auto;padding:8px 16px;z-index:3000;" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
+    <div id="fullscreenContent" style="max-width:95%;max-height:75vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
+    <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:20px auto 10px;text-decoration:none;text-align:center;">📥 Скачать файл</a>
+</div>
+
+<!-- Модальное окно комментариев -->
+<div id="commentsModal" class="modal" onclick="if(event.target===this)closeModal('commentsModal')">
     <div class="modal-card">
-        <h3>Уведомления</h3>
-        <p style="color:#cbd5e1;margin-bottom:14px">Система готова к работе.</p>
-        <button class="btn-sec" onclick="closeModal('notifModal')">Закрыть</button>
+        <h3>Комментарии</h3>
+        <div class="chat-box" id="commentsList" style="max-height:35vh;"></div>
+        <div class="chat-input-area" style="margin-top:10px;">
+            <input type="text" id="commentInput" placeholder="Написать комментарий..." onkeydown="if(event.key==='Enter')sendComment()">
+            <button class="send-btn" onclick="sendComment()">➤</button>
+        </div>
     </div>
 </div>
 
@@ -191,7 +206,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Интерфейс стабилен');
+            logStatus('База подключена • Готово к работе');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -199,12 +214,38 @@
         logStatus('Ошибка инициализации: ' + e.message, true);
     }
 
-    let selectedCity = 'Иркутск';
-    let myName = localStorage.getItem('pulseCity_v4_name') || 'Андрей';
+    let selectedCity = localStorage.getItem('pulseCity_v4_city') || 'Иркутск';
+    let myName = localStorage.getItem('pulseCity_v4_name') || '';
     let selectedNewsFile = null;
+    let activePostIdForComments = null;
 
-    document.getElementById('displayProfileName').textContent = myName;
-    document.getElementById('profileNameInput').value = myName;
+    document.getElementById('currentCity').textContent = selectedCity;
+    document.getElementById('profileCity').textContent = selectedCity;
+    document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
+
+    if (!myName) {
+        document.getElementById('authModal').classList.add('open');
+    } else {
+        document.getElementById('authModal').classList.remove('open');
+        document.getElementById('displayProfileName').textContent = myName;
+        document.getElementById('profileNameInput').value = myName;
+    }
+
+    function completeRegistration() {
+        const nameInput = document.getElementById('regNameInput').value.trim();
+        if (!nameInput) {
+            alert('Пожалуйста, введите ваше имя!');
+            return;
+        }
+        myName = nameInput;
+        localStorage.setItem('pulseCity_v4_name', myName);
+        document.getElementById('displayProfileName').textContent = myName;
+        document.getElementById('profileNameInput').value = myName;
+        document.getElementById('authModal').classList.remove('open');
+        logStatus('Добро пожаловать, ' + myName + '!');
+        loadPostsFromCloud();
+        loadPublicMessages();
+    }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -218,10 +259,16 @@
 
     function selectCity(c) {
         selectedCity = c;
+        localStorage.setItem('pulseCity_v4_city', c);
         document.getElementById('currentCity').textContent = c;
         document.getElementById('chatTitle').textContent = 'Городской чат • ' + c;
         document.getElementById('profileCity').textContent = c;
         closeModal('cityModal');
+        logStatus('Город изменен на: ' + c);
+        lastLoadedMaxPostId = null;
+        lastLoadedMaxMsgId = null;
+        loadPostsFromCloud();
+        loadPublicMessages();
     }
 
     function updateProfileName(val) {
@@ -245,13 +292,19 @@
         }
     }
 
-    // Автоматическое сжатие фото перед отправкой для мгновенной загрузки
+    function openFullscreenMedia(url, isVideo) {
+        const content = document.getElementById('fullscreenContent');
+        content.innerHTML = isVideo 
+            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:75vh;border-radius:12px;"></video>`
+            : `<img src="${url}" style="max-width:100%;max-height:75vh;border-radius:12px;object-fit:contain;">`;
+        
+        document.getElementById('downloadMediaBtn').href = url;
+        openModal('fullscreenModal');
+    }
+
     async function compressImage(file) {
         return new Promise((resolve) => {
-            if (!file.type.startsWith('image/')) {
-                resolve(file); // Видео не сжимаем
-                return;
-            }
+            if (!file.type.startsWith('image/')) { resolve(file); return; }
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (event) => {
@@ -259,25 +312,16 @@
                 img.src = event.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
+                    let width = img.width, height = img.height;
                     const MAX_SIZE = 1024;
-                    if (width > height) {
-                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                    } else {
-                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     canvas.toBlob((blob) => {
-                        const compressedFile = new File([blob], file.name, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-                        resolve(compressedFile);
-                    }, 'image/jpeg', 0.75);
+                        resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+                    }, 'image/jpeg', 0.8);
                 };
             };
         });
@@ -285,20 +329,11 @@
 
     async function uploadFileToSupabase(file) {
         let fileToUpload = file;
-        if (file.type.startsWith('image/')) {
-            fileToUpload = await compressImage(file);
-        }
-
+        if (file.type.startsWith('image/')) { fileToUpload = await compressImage(file); }
         const fileExt = file.name.split('.').pop() || 'mp4';
         const fileName = `${Date.now()}_file.${fileExt}`;
-        const { data, error } = await supabaseClient.storage.from('media').upload(fileName, fileToUpload, {
-            cacheControl: '3600',
-            upsert: false
-        });
-        if (error) {
-            alert('Ошибка загрузки файла: ' + error.message);
-            return null;
-        }
+        const { error } = await supabaseClient.storage.from('media').upload(fileName, fileToUpload, { cacheControl: '3600', upsert: false });
+        if (error) { alert('Ошибка загрузки: ' + error.message); return null; }
         const { data: { publicUrl } } = supabaseClient.storage.from('media').getPublicUrl(fileName);
         return publicUrl;
     }
@@ -306,17 +341,17 @@
     let lastLoadedMaxPostId = null;
     async function loadPostsFromCloud() {
         if (!supabaseClient) return;
-        const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
+        const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
         
         const currentMaxId = data.length > 0 ? data[0].id : 0;
-        if (currentMaxId === lastLoadedMaxPostId) return; // Если ничего не изменилось — не трогаем экран (нет мерцания)
+        if (currentMaxId === lastLoadedMaxPostId) return;
         lastLoadedMaxPostId = currentMaxId;
 
         const list = document.getElementById('newsList');
         list.innerHTML = '';
         if (data.length === 0) {
-            list.innerHTML = '<div class="card"><p style="margin:0;text-align:center;color:#94a3b8">Пока нет новостей. Нажмите «Добавить новость» сверху!</p></div>';
+            list.innerHTML = `<div class="card"><p style="margin:0;text-align:center;color:#94a3b8">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p></div>`;
             return;
         }
         data.forEach(p => {
@@ -324,8 +359,8 @@
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
                 mediaTag = isVid
-                    ? `<video src="${p.media_url}" class="news-media" controls preload="metadata" playsinline></video>`
-                    : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
+                    ? `<video src="${p.media_url}" class="news-media" preload="metadata" playsinline onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
+                    : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
             const card = document.createElement('div');
             card.className = 'card';
@@ -333,23 +368,71 @@
             card.innerHTML = `
                 <div class="card-top">
                     <span class="card-tag">${p.city}</span>
-                    <button class="btn-discuss-top" onclick="switchTab('chat',document.getElementById('nav-chat'))">💬 Чат</button>
                 </div>
                 <h3>${p.title}</h3>
                 ${mediaTag}
                 <p>${p.content}</p>
+                <div class="card-actions">
+                    <button class="action-btn" onclick="likePost(${p.id}, ${p.likes || 0})">❤️ <span id="likes-count-${p.id}">${p.likes || 0}</span></button>
+                    <button class="action-btn" onclick="openComments(${p.id})">💬 Комментарии</button>
+                </div>
             `;
             list.appendChild(card);
         });
     }
 
+    async function likePost(postId, currentLikes) {
+        const newLikes = currentLikes + 1;
+        document.getElementById(`likes-count-${postId}`).textContent = newLikes;
+        await supabaseClient.from('posts').update({ likes: newLikes }).eq('id', postId);
+    }
+
+    function openComments(postId) {
+        activePostIdForComments = postId;
+        openModal('commentsModal');
+        loadComments(postId);
+    }
+
+    async function loadComments(postId) {
+        const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: true });
+        const list = document.getElementById('commentsList');
+        list.innerHTML = '';
+        if (!data || data.length === 0) {
+            list.innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:10px 0;">Пока нет комментариев. Напишите первый!</p>';
+            return;
+        }
+        data.forEach(c => {
+            const row = document.createElement('div');
+            row.className = 'msg-row';
+            row.innerHTML = `<div class="msg-avatar">${c.sender[0].toUpperCase()}</div><div class="msg-bubble"><div class="msg-author">${c.sender}</div>${c.text}</div>`;
+            list.appendChild(row);
+        });
+        list.scrollTop = list.scrollHeight;
+    }
+
+    async function sendComment() {
+        const input = document.getElementById('commentInput');
+        const text = input.value.trim();
+        if (!text || !activePostIdForComments) return;
+
+        await supabaseClient.from('comments').insert([{
+            post_id: activePostIdForComments,
+            sender: myName || 'Гость',
+            text: text
+        }]);
+        input.value = '';
+        loadComments(activePostIdForComments);
+    }
+
     async function publishNews() {
-        const title = document.getElementById('newsTitleInput').value.trim();
+        let title = document.getElementById('newsTitleInput').value.trim();
         const text = document.getElementById('newsTextInput').value.trim();
         const cat = document.getElementById('newsCategorySelect').value;
-        if (!title || !text) { alert('Введите заголовок и текст!'); return; }
+        
+        if (!text) { alert('Введите текст новости!'); return; }
+        if (!title) { title = 'Новость от ' + (myName || 'Гость'); }
 
-        logStatus('Сжатие и загрузка медиа...');
+        logStatus('Сжатие и публикация...');
         let publicMediaUrl = null;
         if (selectedNewsFile) {
             publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
@@ -364,11 +447,11 @@
         }]);
 
         if (error) {
-            alert('Ошибка публикации: ' + error.message);
+            logStatus('Ошибка публикации', true);
             return;
         }
 
-        logStatus('Новость опубликована!');
+        logStatus('✓ Новость успешно опубликована!');
         document.getElementById('newsTitleInput').value = '';
         document.getElementById('newsTextInput').value = '';
         document.getElementById('newsMediaInput').value = '';
@@ -382,24 +465,28 @@
     let lastLoadedMaxMsgId = null;
     async function loadPublicMessages() {
         if (!supabaseClient) return;
-        const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
+        const { data, error } = await supabaseClient.from('messages').select('*').eq('city', selectedCity).order('id', { ascending: true });
         if (error || !data) return;
         
         const currentMaxId = data.length > 0 ? data[data.length - 1].id : 0;
-        if (currentMaxId === lastLoadedMaxMsgId) return; // Если новых сообщений нет — не перерисовываем чат
+        if (currentMaxId === lastLoadedMaxMsgId) return;
         lastLoadedMaxMsgId = currentMaxId;
 
         const box = document.getElementById('chatMessages');
         const isScrolledToBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 50;
 
         box.innerHTML = '';
+        if (data.length === 0) {
+            box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">В чате ${selectedCity} пока тихо. Напишите первое сообщение!</p>`;
+            return;
+        }
         data.forEach(m => {
             let mediaTag = '';
             if (m.media_url) {
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
-                    ? `<video src="${m.media_url}" class="msg-media" controls preload="metadata" playsinline></video>`
-                    : `<img src="${m.media_url}" class="msg-media" loading="lazy">`;
+                    ? `<video src="${m.media_url}" class="msg-media" preload="metadata" playsinline onclick="openFullscreenMedia('${m.media_url}', true)"></video>`
+                    : `<img src="${m.media_url}" class="msg-media" loading="lazy" onclick="openFullscreenMedia('${m.media_url}', false)">`;
             }
             const row = document.createElement('div');
             row.className = 'msg-row' + (m.sender === myName ? ' mine' : '');
@@ -416,17 +503,20 @@
         const text = input.value.trim();
         if (!text) return;
 
+        logStatus('Отправка сообщения...');
         const { error } = await supabaseClient.from('messages').insert([{
             chat_type: 'public',
-            sender: myName,
+            city: selectedCity,
+            sender: myName || 'Гость',
             text: text
         }]);
 
         if (error) {
-            logStatus('Ошибка чата: ' + error.message, true);
+            logStatus('Ошибка отправки', true);
             return;
         }
         input.value = '';
+        logStatus('✓ Отправлено');
         lastLoadedMaxMsgId = null;
         loadPublicMessages();
     }
@@ -434,7 +524,7 @@
     async function handleMediaUpload(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
-        logStatus('Сжатие и отправка файла...');
+        logStatus('Сжатие и отправка файла в чат...');
         
         const publicUrl = await uploadFileToSupabase(file);
         if (!publicUrl) return;
@@ -442,26 +532,30 @@
         const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|3gp|mkv|avi)$/i);
         const { error } = await supabaseClient.from('messages').insert([{
             chat_type: 'public',
-            sender: myName,
+            city: selectedCity,
+            sender: myName || 'Гость',
             text: isVideo ? '🎥 Видео' : '🖼️ Фото',
             media_url: publicUrl
         }]);
 
         if (!error) {
-            logStatus('Файл отправлен в чат');
+            logStatus('✓ Файл отправлен в чат');
             lastLoadedMaxMsgId = null;
             loadPublicMessages();
         }
         input.value = '';
     }
 
-    loadPostsFromCloud();
-    loadPublicMessages();
-
-    // Фоновая проверка новых данных каждые 4 секунды (работает плавно, без мерцания)
-    setInterval(() => {
+    if (myName) {
         loadPostsFromCloud();
         loadPublicMessages();
+    }
+
+    setInterval(() => {
+        if (myName) {
+            loadPostsFromCloud();
+            loadPublicMessages();
+        }
     }, 4000);
 </script>
 </body>
