@@ -57,7 +57,6 @@
         .chat-tab-btn{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:10px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
         .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent}
 
-        /* Закрепленное сообщение в чате */
         .pinned-msg-box{background:rgba(0,243,255,0.08);border:1px solid rgba(0,243,255,0.25);border-radius:16px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
         
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:38vh;overflow-y:auto;padding-right:4px}
@@ -135,7 +134,6 @@
             
             <input type="text" id="chatSearchInput" class="search-input" placeholder="🔍 Поиск по сообщениям..." oninput="filterChatSearch()" style="margin-bottom:10px;">
 
-            <!-- Закрепленное сообщение -->
             <div id="pinnedMsgContainer" class="pinned-msg-box" style="display:none;">
                 <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;padding-right:8px;">
                     📌 <strong style="color:#00f3ff">Закреплено:</strong> <span id="pinnedMsgText" style="color:#cbd5e1">...</span>
@@ -666,7 +664,6 @@
             media_url: null,
             author_username: '⚡ PulseCity',
             author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
-            likes: 0,
             views: 0
         }]);
 
@@ -877,7 +874,7 @@
             });
         }
         
-        let newSignature = data.map(p => `${p.id}-${p.likes}-${p.reactions ? JSON.stringify(p.reactions) : ''}-${commentCounts[p.id] || 0}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${p.reactions ? JSON.stringify(p.reactions) : ''}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -898,10 +895,10 @@
 
     function renderPostsList(postsToRender, commentCounts = {}) {
         const list = document.getElementById('newsList');
-        
-        // Сохраняем поле ввода поиска и кнопку вверху
-        const searchVal = document.getElementById('feedSearchInput').value;
+        const searchInputEl = document.getElementById('feedSearchInput');
+        const searchVal = searchInputEl ? searchInputEl.value : '';
 
+        // Чистим список перед перерисовкой, чтобы не было никаких дубликатов кнопки
         list.innerHTML = `
             <div class="feed-sticky-header">
                 <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
@@ -920,12 +917,12 @@
         let viewedPosts = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
 
         postsToRender.forEach(p => {
-            // Учет просмотров один раз для пользователя
             if (!viewedPosts[p.id] && p.author_username !== myUsername) {
                 viewedPosts[p.id] = true;
                 localStorage.setItem('pulseCity_views', JSON.stringify(viewedPosts));
-                supabaseClient.from('posts').update({ views: (p.views || 0) + 1 }).eq('id', p.id).then(()=>{});
-                p.views = (p.views || 0) + 1;
+                let newViews = (p.views || 0) + 1;
+                p.views = newViews;
+                supabaseClient.from('posts').update({ views: newViews }).eq('id', p.id).then(()=>{});
             }
 
             let mediaTag = '';
@@ -945,7 +942,7 @@
             const cCount = commentCounts[p.id] || 0;
             const isAdminPost = authorName === '⚡ PulseCity';
 
-            // Реакции
+            // Реакции (эмодзи)
             let reactions = p.reactions || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
             let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
             let userReacted = myReactions[p.id] || null;
@@ -1104,13 +1101,15 @@
             media_url: publicMediaUrl,
             author_username: myUsername,
             author_avatar: myAvatar,
-            likes: 0,
             views: 0,
             reactions: { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 }
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
-        if (error) return;
+        if (error) {
+            showPulseAlert('Ошибка публикации: ' + error.message);
+            return;
+        }
 
         playSystemSound('send');
         document.getElementById('newsTitleInput').value = '';
@@ -1221,7 +1220,6 @@
         renderMessagesList(filtered);
     }
 
-    // Закрепленные сообщения
     async function pinMessage(msgId, text) {
         await supabaseClient.from('pins').upsert([{ city: selectedCity, message_id: msgId, text: text }]);
         loadPinnedMessage();
@@ -1250,7 +1248,6 @@
         }
     }
 
-    // Индикатор печати
     let typingTimer = null;
     function notifyTyping() {
         if (!supabaseClient || !myUsername) return;
@@ -1270,7 +1267,6 @@
             })
             .subscribe();
 
-        // Проверка кто печатает каждые 2 секунды
         setInterval(async () => {
             if (!selectedCity) return;
             const { data } = await supabaseClient.from('typing').select('*').eq('city', selectedCity);
