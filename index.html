@@ -184,6 +184,10 @@
         bar.style.color = isErr ? '#ef4444' : '#10b981';
     }
 
+    window.onerror = function(msg, url, line) {
+        logStatus('Ошибка JS [стр.' + line + ']: ' + msg, true);
+    };
+
     let supabaseClient = null;
     try {
         if (window.supabase) {
@@ -191,7 +195,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Плавное обновление активно');
+            logStatus('База подключена • Всё работает');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -266,7 +270,6 @@
         const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
         if (error) return;
         
-        // Устраняем моргание: перерисовываем ленту только если количество постов изменилось
         if (data && data.length === cachedPostsCount) return;
         cachedPostsCount = data ? data.length : 0;
 
@@ -279,7 +282,6 @@
         data.forEach(p => {
             let mediaTag = '';
             if (p.media_url) {
-                // Расширенная проверка на все мобильные видеоформаты (включая 3gp, mkv, avi)
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
                 mediaTag = isVid
                     ? `<video src="${p.media_url}" class="news-media" controls preload="metadata" playsinline></video>`
@@ -333,7 +335,7 @@
         document.getElementById('newsMediaPreview').style.display = 'none';
         selectedNewsFile = null;
         closeModal('newsModal');
-        cachedPostsCount = -1; // сбрасываем кэш для мгновенного отображения
+        cachedPostsCount = -1;
         loadPostsFromCloud();
     }
 
@@ -398,7 +400,7 @@
             sender: myName,
             text: isVideo ? '🎥 Видео' : '🖼️ Фото',
             media_url: publicUrl
-        }]),
+        }]);
 
         if (!error) {
             logStatus('Файл отправлен в чат');
@@ -411,7 +413,6 @@
     loadPostsFromCloud();
     loadPublicMessages();
 
-    // Плавная фоновая проверка новых записей каждые 4 секунды без мерцания экрана
     setInterval(() => {
         loadPostsFromCloud();
         loadPublicMessages();
