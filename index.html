@@ -19,11 +19,10 @@
         .content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         
-        .filter-scroll{display:flex;gap:10px;overflow-x:auto;margin-bottom:16px;padding-bottom:6px;scrollbar-width:none}
-        .chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:10px 18px;border-radius:16px;font-size:14px;font-weight:700;white-space:nowrap;cursor:pointer}
-        .chip.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(0,243,255,0.35)}
+        /* Закрепленная шапка ленты (кнопка добавления всегда наверху) */
+        .feed-sticky-header{position:sticky;top:0;background:radial-gradient(circle at top right,#161d36,#06070a 65%);padding-top:4px;padding-bottom:12px;z-index:10}
         
-        .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
+        .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px}
         
         .card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border-radius:24px;padding:20px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 15px 35px rgba(0,0,0,0.6);position:relative}
         .card.admin-card{border:1px solid rgba(0,243,255,0.4);background:linear-gradient(135deg,rgba(0,243,255,0.08),rgba(37,99,235,0.04));}
@@ -109,12 +108,9 @@
 
 <div class="container">
     <div id="tab-feed" class="content active">
-        <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
-        <div class="filter-scroll">
-            <button class="chip active" onclick="filterNews('all',this)">Все</button>
-            <button class="chip" onclick="filterNews('emergency',this)">🚨 ЧП</button>
-            <button class="chip" onclick="filterNews('events',this)">🎉 События</button>
-            <button class="chip" onclick="filterNews('transport',this)">🚗 Транспорт</button>
+        <!-- Закрепленная кнопка добавления новости, которая всегда видна сверху при прокрутке -->
+        <div class="feed-sticky-header">
+            <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
         </div>
         <div id="newsList"></div>
     </div>
@@ -227,7 +223,7 @@
     </div>
 </div>
 
-<!-- Фирменное модальное окно уведомлений/ошибок (вместо браузерных alert) -->
+<!-- Фирменное модальное окно уведомлений -->
 <div id="alertModal" class="modal" onclick="if(event.target===this)closeModal('alertModal')">
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚡</div>
@@ -284,11 +280,6 @@
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
-        <select id="newsCategorySelect">
-            <option value="events">🎉 События</option>
-            <option value="emergency">🚨 ЧП</option>
-            <option value="transport">🚗 Транспорт</option>
-        </select>
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
         <div style="margin-bottom: 12px;">
@@ -514,7 +505,6 @@
         if (file.type.startsWith('image/')) { 
             fileToUpload = await compressImage(file); 
         } else if (file.type.startsWith('video/')) {
-            // Увеличили лимит до 100 МБ с проверкой
             if (file.size > 100 * 1024 * 1024) {
                 showPulseAlert('Видео слишком большое! Выберите файл размером до 100 МБ.');
                 return null;
@@ -648,7 +638,7 @@
 
         const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
-            category: 'events',
+            category: 'general',
             title: title || '⚡ PulseCity • Официально',
             content: text,
             media_url: null,
@@ -806,14 +796,6 @@
         loadPublicMessages();
     }
 
-    function filterNews(cat, btn) {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('#newsList .card').forEach(c => {
-            c.style.display = (cat === 'all' || c.getAttribute('data-category') === cat) ? 'block' : 'none';
-        });
-    }
-
     function previewNewsMedia(input) {
         if (input.files && input.files[0]) {
             selectedNewsFile = input.files[0];
@@ -884,9 +866,20 @@
         lastLoadedMaxPostId = currentMaxId;
 
         const list = document.getElementById('newsList');
+        // Очищаем старые карточки, но сохраняем закрепленную кнопку сверху
+        const stickyHeader = list.querySelector('.feed-sticky-header');
         list.innerHTML = '';
+        
+        const stickyWrapper = document.createElement('div');
+        stickyWrapper.className = 'feed-sticky-header';
+        stickyWrapper.innerHTML = `<button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>`;
+        list.appendChild(stickyWrapper);
+
         if (data.length === 0) {
-            list.innerHTML = `<div class="card"><p style="margin:0;text-align:center;color:#94a3b8">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p></div>`;
+            const emptyCard = document.createElement('div');
+            emptyCard.className = 'card';
+            emptyCard.innerHTML = `<p style="margin:0;text-align:center;color:#94a3b8">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p>`;
+            list.appendChild(emptyCard);
             return;
         }
 
@@ -896,8 +889,9 @@
             let mediaTag = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
+                // Убрали атрибут loop, теперь видео проигрывается ровно один раз и останавливается
                 mediaTag = isVid
-                    ? `<video src="${p.media_url}" class="news-media" muted loop playsinline preload="metadata" onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
+                    ? `<video src="${p.media_url}" class="news-media" muted playsinline preload="metadata" onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
 
@@ -914,7 +908,6 @@
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
-            card.setAttribute('data-category', p.category);
             card.innerHTML = `
                 <div class="news-header">
                     <div class="news-author-info">
@@ -941,7 +934,6 @@
             list.appendChild(card);
         });
 
-        // Запускаем наблюдатель скролла для автовоспроизведения только центрального видео
         initVideoObserver();
     }
 
@@ -1028,7 +1020,6 @@
     async function publishNews() {
         let title = document.getElementById('newsTitleInput').value.trim();
         const text = document.getElementById('newsTextInput').value.trim();
-        const cat = document.getElementById('newsCategorySelect').value;
         
         if (!text) { showPulseAlert('Введите текст новости!'); return; }
         if (!title) { title = 'Новость от ' + myUsername; }
@@ -1043,7 +1034,7 @@
 
         const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
-            category: cat,
+            category: 'general',
             title: title,
             content: text,
             media_url: publicMediaUrl,
@@ -1118,7 +1109,7 @@
             if (m.media_url) {
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
-                    ? `<video src="${m.media_url}" class="msg-media" muted loop playsinline preload="metadata" onclick="openFullscreenMedia('${m.media_url}', true)"></video>`
+                    ? `<video src="${m.media_url}" class="msg-media" muted playsinline preload="metadata" onclick="openFullscreenMedia('${m.media_url}', true)"></video>`
                     : `<img src="${m.media_url}" class="msg-media" loading="lazy" onclick="openFullscreenMedia('${m.media_url}', false)">`;
             }
 
