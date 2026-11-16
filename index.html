@@ -73,7 +73,7 @@
 </head>
 <body>
 
-<div id="debugBar">Статус: Подключение к городу...</div>
+<div id="debugBar">Статус: Проверка сессии...</div>
 
 <header>
     <div class="logo">PulseCity</div>
@@ -111,23 +111,32 @@
 
     <div id="tab-profile" class="content">
         <div class="card">
-            <h3 id="displayProfileName" style="margin-bottom:8px;font-size:20px">Андрей</h3>
-            <label style="font-size:13px;color:#94a3b8">Ваш никнейм:</label>
-            <input type="text" id="profileNameInput" value="Андрей" oninput="updateProfileName(this.value)" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px;color:#fff;font-size:15px;margin:6px 0 14px">
+            <h3 id="displayProfileName" style="margin-bottom:8px;font-size:20px">Пользователь</h3>
+            <p style="margin-bottom:12px;font-size:14px;color:#94a3b8">Email: <strong id="profileEmail" style="color:#00f3ff">не указан</strong></p>
             <p style="margin-bottom:12px;font-size:15px">Текущий город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
-            <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
+            <button class="btn-sec" style="margin-bottom:12px" onclick="openModal('cityModal')">📍 Сменить город</button>
+            <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти из аккаунта</button>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно регистрации для новых пользователей -->
+<!-- Модальное окно авторизации по Email (с реальным кодом активации) -->
 <div id="authModal" class="modal" style="display:flex;pointer-events:auto;">
     <div class="modal-card" style="max-width:340px;text-align:center;margin:auto;">
-        <div style="font-size:40px;margin-bottom:12px">⚡</div>
-        <h3>Добро пожаловать в PulseCity!</h3>
-        <p style="color:#cbd5e1;font-size:14px;margin-bottom:16px">Введите ваше имя или ник, чтобы начать общение:</p>
-        <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:700;">
-        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Войти в город</button>
+        <div style="font-size:40px;margin-bottom:12px">✉️</div>
+        <h3>Регистрация / Вход</h3>
+        <p style="color:#cbd5e1;font-size:14px;margin-bottom:16px">Введите ваш реальный email для получения кода подтверждения:</p>
+        
+        <div id="stepEmail">
+            <input type="email" id="authEmailInput" placeholder="name@example.com" style="text-align:center;font-weight:700;">
+            <button class="btn-main" style="margin:0" onclick="sendAuthCode()">Получить код на почту</button>
+        </div>
+
+        <div id="stepCode" style="display:none;">
+            <p style="color:#10b981;font-size:13px;margin-bottom:10px;">Код отправлен на вашу почту!</p>
+            <input type="text" id="authCodeInput" placeholder="Введите код из письма" style="text-align:center;font-weight:700;letter-spacing:2px;">
+            <button class="btn-main" style="margin:0" onclick="verifyAuthCode()">Подтвердить и войти</button>
+        </div>
     </div>
 </div>
 
@@ -206,7 +215,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Готово к работе');
+            logStatus('База подключена • Ожидание авторизации');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -215,7 +224,8 @@
     }
 
     let selectedCity = localStorage.getItem('pulseCity_v4_city') || 'Иркутск';
-    let myName = localStorage.getItem('pulseCity_v4_name') || '';
+    let myEmail = '';
+    let pendingEmail = '';
     let selectedNewsFile = null;
     let activePostIdForComments = null;
 
@@ -223,28 +233,76 @@
     document.getElementById('profileCity').textContent = selectedCity;
     document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
 
-    if (!myName) {
-        document.getElementById('authModal').classList.add('open');
-    } else {
-        document.getElementById('authModal').classList.remove('open');
-        document.getElementById('displayProfileName').textContent = myName;
-        document.getElementById('profileNameInput').value = myName;
+    // Проверяем текущую активную сессию Supabase Auth
+    async function checkUserSession() {
+        if (!supabaseClient) return;
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && session.user) {
+            myEmail = session.user.email;
+            document.getElementById('authModal').classList.remove('open');
+            document.getElementById('displayProfileName').textContent = myEmail.split('@')[0];
+            document.getElementById('profileEmail').textContent = myEmail;
+            logStatus('Авторизован: ' + myEmail);
+            loadPostsFromCloud();
+            loadPublicMessages();
+        } else {
+            document.getElementById('authModal').classList.add('open');
+            logStatus('Требуется вход по Email');
+        }
     }
 
-    function completeRegistration() {
-        const nameInput = document.getElementById('regNameInput').value.trim();
-        if (!nameInput) {
-            alert('Пожалуйста, введите ваше имя!');
+    // Отправка кода подтверждения на почту
+    async function sendAuthCode() {
+        const email = document.getElementById('authEmailInput').value.trim();
+        if (!email || !email.includes('@')) {
+            alert('Введите корректный email адрес!');
             return;
         }
-        myName = nameInput;
-        localStorage.setItem('pulseCity_v4_name', myName);
-        document.getElementById('displayProfileName').textContent = myName;
-        document.getElementById('profileNameInput').value = myName;
+        logStatus('Отправка кода на почту...');
+        const { error } = await supabaseClient.auth.signInWithOtp({ email });
+        if (error) {
+            alert('Ошибка отправки: ' + error.message);
+            logStatus('Ошибка отправки кода', true);
+            return;
+        }
+        pendingEmail = email;
+        document.getElementById('stepEmail').style.display = 'none';
+        document.getElementById('stepCode').style.display = 'block';
+        logStatus('Код отправлен! Проверьте почту.');
+    }
+
+    // Проверка введенного кода из письма
+    async function verifyAuthCode() {
+        const token = document.getElementById('authCodeInput').value.trim();
+        if (!token) {
+            alert('Введите код из письма!');
+            return;
+        }
+        logStatus('Проверка кода...');
+        const { data, error } = await supabaseClient.auth.verifyOtp({
+            email: pendingEmail,
+            token: token,
+            type: 'email'
+        });
+
+        if (error) {
+            alert('Неверный код или ошибка: ' + error.message);
+            logStatus('Ошибка проверки кода', true);
+            return;
+        }
+
+        logStatus('✓ Успешный вход!');
         document.getElementById('authModal').classList.remove('open');
-        logStatus('Добро пожаловать, ' + myName + '!');
+        myEmail = data.user.email;
+        document.getElementById('displayProfileName').textContent = myEmail.split('@')[0];
+        document.getElementById('profileEmail').textContent = myEmail;
         loadPostsFromCloud();
         loadPublicMessages();
+    }
+
+    async function logoutUser() {
+        await supabaseClient.auth.signOut();
+        location.reload();
     }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -269,12 +327,6 @@
         lastLoadedMaxMsgId = null;
         loadPostsFromCloud();
         loadPublicMessages();
-    }
-
-    function updateProfileName(val) {
-        myName = val.trim() || 'Гость';
-        localStorage.setItem('pulseCity_v4_name', myName);
-        document.getElementById('displayProfileName').textContent = myName;
     }
 
     function filterNews(cat, btn) {
@@ -340,7 +392,7 @@
 
     let lastLoadedMaxPostId = null;
     async function loadPostsFromCloud() {
-        if (!supabaseClient) return;
+        if (!supabaseClient || !myEmail) return;
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
         
@@ -417,7 +469,7 @@
 
         await supabaseClient.from('comments').insert([{
             post_id: activePostIdForComments,
-            sender: myName || 'Гость',
+            sender: myEmail ? myEmail.split('@')[0] : 'Гость',
             text: text
         }]);
         input.value = '';
@@ -430,7 +482,7 @@
         const cat = document.getElementById('newsCategorySelect').value;
         
         if (!text) { alert('Введите текст новости!'); return; }
-        if (!title) { title = 'Новость от ' + (myName || 'Гость'); }
+        if (!title) { title = 'Новость от ' + (myEmail ? myEmail.split('@')[0] : 'Гость'); }
 
         logStatus('Сжатие и публикация...');
         let publicMediaUrl = null;
@@ -464,7 +516,7 @@
 
     let lastLoadedMaxMsgId = null;
     async function loadPublicMessages() {
-        if (!supabaseClient) return;
+        if (!supabaseClient || !myEmail) return;
         const { data, error } = await supabaseClient.from('messages').select('*').eq('city', selectedCity).order('id', { ascending: true });
         if (error || !data) return;
         
@@ -489,7 +541,7 @@
                     : `<img src="${m.media_url}" class="msg-media" loading="lazy" onclick="openFullscreenMedia('${m.media_url}', false)">`;
             }
             const row = document.createElement('div');
-            row.className = 'msg-row' + (m.sender === myName ? ' mine' : '');
+            row.className = 'msg-row' + (m.sender === (myEmail ? myEmail.split('@')[0] : '') ? ' mine' : '');
             row.innerHTML = `<div class="msg-avatar">${m.sender[0].toUpperCase()}</div><div class="msg-bubble"><div class="msg-author">${m.sender}</div>${m.text}${mediaTag}</div>`;
             box.appendChild(row);
         });
@@ -507,7 +559,7 @@
         const { error } = await supabaseClient.from('messages').insert([{
             chat_type: 'public',
             city: selectedCity,
-            sender: myName || 'Гость',
+            sender: myEmail ? myEmail.split('@')[0] : 'Гость',
             text: text
         }]);
 
@@ -522,7 +574,7 @@
     }
 
     async function handleMediaUpload(input) {
-        if (!input.files || !input.files[0]) return;
+        if (!input.files || !input.files[0]) none;
         const file = input.files[0];
         logStatus('Сжатие и отправка файла в чат...');
         
@@ -533,7 +585,7 @@
         const { error } = await supabaseClient.from('messages').insert([{
             chat_type: 'public',
             city: selectedCity,
-            sender: myName || 'Гость',
+            sender: myEmail ? myEmail.split('@')[0] : 'Гость',
             text: isVideo ? '🎥 Видео' : '🖼️ Фото',
             media_url: publicUrl
         }]);
@@ -546,13 +598,12 @@
         input.value = '';
     }
 
-    if (myName) {
-        loadPostsFromCloud();
-        loadPublicMessages();
-    }
+    // Запускаем проверку сессии при старте
+    checkUserSession();
 
+    // Фоновая синхронизация
     setInterval(() => {
-        if (myName) {
+        if (myEmail) {
             loadPostsFromCloud();
             loadPublicMessages();
         }
