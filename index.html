@@ -8,8 +8,6 @@
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-        
-        #debugBar{background:#0f172a;color:#00f3ff;font-size:11px;padding:6px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);z-index:5000;font-weight:600}
 
         header{background:rgba(18,23,38,0.85);backdrop-filter:blur(20px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);z-index:20}
         .logo{font-size:22px;font-weight:800;background:linear-gradient(90deg,#00f3ff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -52,7 +50,7 @@
         .msg-user-info{display:flex;align-items:center;gap:8px;margin-bottom:4px}
         .msg-row.mine .msg-user-info{justify-content:flex-end}
         
-        .msg-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(0,243,255,0.4);cursor:pointer}
+        .msg-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(0,243,255,0.4);cursor:pointer}
         .msg-avatar img{width:100%;height:100%;object-fit:cover}
         
         .msg-bubble{background:rgba(255,255,255,0.09);padding:12px 16px;border-radius:18px 18px 18px 6px;font-size:15px;line-height:1.4;word-break:break-word}
@@ -89,10 +87,8 @@
 </head>
 <body>
 
-<div id="debugBar">Статус: Система готова</div>
-
 <header>
-    <div class="logo">PulseCity</div>
+    <div class="logo">⚡ PulseCity</div>
     <div class="header-actions">
         <button class="city-btn" onclick="openModal('cityModal')">📍 <span id="currentCity">Иркутск</span> ▾</button>
     </div>
@@ -148,6 +144,10 @@
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
             <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
+            
+            <!-- Кнопка Кабинета разработчика видна только вам (первому администратору) -->
+            <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
+            
             <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти</button>
         </div>
     </div>
@@ -174,6 +174,25 @@
     </div>
 </div>
 
+<!-- Модальное окно: Кабинет разработчика (модерация) -->
+<div id="adminModal" class="modal" onclick="if(event.target===this)closeModal('adminModal')">
+    <div class="modal-card" style="max-width:440px;">
+        <h3>👑 Кабинет разработчика</h3>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель модерации и управления платформой:</p>
+        
+        <button class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">🗑️ Очистить текущий городской чат</button>
+        <button class="btn-sec" onclick="adminClearPosts()" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">🗑️ Удалить все новости города</button>
+        
+        <div style="background:rgba(0,243,255,0.06);padding:12px;border-radius:12px;margin:10px 0;font-size:13px;">
+            <p><strong>Статус системы:</strong> Онлайн 🟢</p>
+            <p><strong>База данных:</strong> Supabase (Подключена)</p>
+            <p><strong>Режим разработчика:</strong> Активен</p>
+        </div>
+        
+        <button class="btn-sec" onclick="closeModal('adminModal')">Закрыть</button>
+    </div>
+</div>
+
 <!-- Модальное окно Настройки и Безопасность -->
 <div id="settingsModal" class="modal" onclick="if(event.target===this)closeModal('settingsModal')">
     <div class="modal-card">
@@ -182,7 +201,7 @@
         <div class="setting-row">
             <div>
                 <p style="font-weight:700;font-size:15px">Системные звуки</p>
-                <p style="font-size:12px;color:#94a3b8">Максимальная громкость отклика</p>
+                <p style="font-size:12px;color:#94a3b8">Максимальная громкость и вибро</p>
             </div>
             <div id="soundToggle" class="toggle-switch active" onclick="toggleSystemSound()"></div>
         </div>
@@ -195,7 +214,8 @@
             <div style="color:#10b981;font-weight:700;font-size:13px">Активно ✓</div>
         </div>
 
-        <button class="btn-sec" onclick="clearLocalCache()" style="margin-top:10px">🧹 Очистить локальный кэш</button>
+        <button class="btn-sec" onclick="requestNotificationPermission()" style="margin-top:10px;background:rgba(0,243,255,0.15);color:#00f3ff;border-color:rgba(0,243,255,0.3)">🔔 Включить push-уведомления</button>
+        <button class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
         <button class="btn-sec" onclick="closeModal('settingsModal')">Закрыть</button>
     </div>
 </div>
@@ -262,17 +282,24 @@
 </div>
 
 <script>
-    const bar = document.getElementById('debugBar');
-    function logStatus(msg, isErr = false) {
-        bar.textContent = msg;
-        bar.style.color = isErr ? '#ef4444' : '#10b981';
-    }
+    // Уникальный создатель / администратор (измените на ваш точный ник при первом входе, например '@andrey')
+    const ADMIN_USERNAME = localStorage.getItem('pulseCity_admin_handle') || '';
 
-    // Сверхгромкий синтезатор звуков для отправки и входящих сообщений
     let soundEnabled = localStorage.getItem('pulseCity_sound') !== 'false';
     let audioCtx = null;
 
     function playSystemSound(type = 'click') {
+        if (!navigator.vibrate) navigator.vibrate = () => {};
+        
+        // Виброотклик
+        if (type === 'send') {
+            navigator.vibrate([60, 40, 60]);
+        } else if (type === 'receive') {
+            navigator.vibrate([100, 50, 100, 50, 100]);
+        } else {
+            navigator.vibrate(35);
+        }
+
         if (!soundEnabled) return;
         try {
             if (!audioCtx) {
@@ -287,23 +314,20 @@
             gain.connect(audioCtx.destination);
             
             if (type === 'send') {
-                // Высокий энергичный сигнал отправки
                 osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(987.77, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.4, audioCtx.currentTime); // максимальная громкость
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.15);
             } else if (type === 'receive') {
-                // Двойной громкий сигнал входящего сообщения
                 osc.frequency.setValueAtTime(440, audioCtx.currentTime);
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.22);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.22);
             } else {
-                // Клик
                 osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.08);
             }
@@ -316,11 +340,24 @@
         const sw = document.getElementById('soundToggle');
         sw.classList.toggle('active', soundEnabled);
         playSystemSound('click');
-        logStatus(soundEnabled ? 'Системные звуки включены' : 'Звуки отключены');
     }
 
     if (!soundEnabled) {
         document.getElementById('soundToggle').classList.remove('active');
+    }
+
+    function requestNotificationPermission() {
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("✓ Уведомления успешно включены!");
+                } else {
+                    alert("Разрешение на уведомления отклонено в браузере.");
+                }
+            });
+        } else {
+            alert("Ваш браузер не поддерживает уведомления.");
+        }
     }
 
     let supabaseClient = null;
@@ -330,20 +367,15 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • ЛС и аватарки активны');
-        } else {
-            logStatus('SDK не загружен', true);
         }
-    } catch (e) {
-        logStatus('Ошибка инициализации: ' + e.message, true);
-    }
+    } catch (e) {}
 
     let selectedCity = localStorage.getItem('pulseCity_v4_city') || 'Иркутск';
     let myName = localStorage.getItem('pulseCity_v4_name') || '';
     let myUsername = localStorage.getItem('pulseCity_v4_username') || '';
     let myAvatar = localStorage.getItem('pulseCity_v4_avatar') || '';
-    let chatMode = 'public'; // 'public' или 'private'
-    let privateRecipient = ''; // с кем идет личный диалог
+    let chatMode = 'public';
+    let privateRecipient = '';
     let selectedNewsFile = null;
     let selectedRegAvatarFile = null;
     let activePostIdForComments = null;
@@ -352,6 +384,19 @@
     document.getElementById('profileCity').textContent = selectedCity;
     document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
 
+    function checkAdminAccess() {
+        // Первый зарегистрированный пользователь или тот, кто установил себя админом
+        if (!localStorage.getItem('pulseCity_admin_handle') && myUsername) {
+            localStorage.setItem('pulseCity_admin_handle', myUsername);
+        }
+        const currentAdmin = localStorage.getItem('pulseCity_admin_handle');
+        if (myUsername && myUsername === currentAdmin) {
+            document.getElementById('adminPanelBtn').style.display = 'block';
+        } else {
+            document.getElementById('adminPanelBtn').style.display = 'none';
+        }
+    }
+
     function updateProfileUI() {
         if (myName && myUsername) {
             document.getElementById('displayProfileName').textContent = myName;
@@ -359,6 +404,7 @@
             if (myAvatar) {
                 document.getElementById('profileAvatarPreview').innerHTML = `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
             }
+            checkAdminAccess();
         }
     }
 
@@ -427,7 +473,6 @@
         }
         if (!uname.startsWith('@')) { uname = '@' + uname; }
 
-        logStatus('Загрузка аватара и регистрация...');
         let avatarUrl = '';
         if (selectedRegAvatarFile) {
             avatarUrl = await uploadFileToSupabase(selectedRegAvatarFile);
@@ -440,33 +485,33 @@
         localStorage.setItem('pulseCity_v4_name', myName);
         localStorage.setItem('pulseCity_v4_username', myUsername);
         localStorage.setItem('pulseCity_v4_avatar', myAvatar);
+        
+        if (!localStorage.getItem('pulseCity_admin_handle')) {
+            localStorage.setItem('pulseCity_admin_handle', myUsername);
+        }
 
         document.getElementById('authModal').classList.remove('open');
         updateProfileUI();
         
-        logStatus('Добро пожаловать, ' + myName + '!');
         loadPostsFromCloud();
         loadPublicMessages();
+        setupRealtimeSubscription();
     }
 
     async function updateUserAvatar(input) {
         if (!input.files || !input.files[0]) return;
-        logStatus('Загрузка нового аватара...');
         const url = await uploadFileToSupabase(input.files[0]);
         if (url) {
             myAvatar = url;
             localStorage.setItem('pulseCity_v4_avatar', myAvatar);
             updateProfileUI();
-            logStatus('✓ Аватар успешно обновлен!');
             playSystemSound('send');
         }
     }
 
     function logoutUser() {
         playSystemSound('click');
-        localStorage.removeItem('pulseCity_v4_name');
-        localStorage.removeItem('pulseCity_v4_username');
-        localStorage.removeItem('pulseCity_v4_avatar');
+        localStorage.clear();
         location.reload();
     }
 
@@ -479,6 +524,23 @@
 
     function openModal(id) { playSystemSound('click'); document.getElementById(id).classList.add('open'); }
     function closeModal(id) { playSystemSound('click'); document.getElementById(id).classList.remove('open'); }
+    function openAdminModal() { openModal('adminModal'); }
+
+    async function adminClearChat() {
+        if (!confirm('Точно очистить весь чат в городе ' + selectedCity + '?')) return;
+        await supabaseClient.from('messages').delete().eq('city', selectedCity);
+        alert('Чат очищен!');
+        closeModal('adminModal');
+        loadPublicMessages();
+    }
+
+    async function adminClearPosts() {
+        if (!confirm('Точно удалить все новости в городе ' + selectedCity + '?')) return;
+        await supabaseClient.from('posts').delete().eq('city', selectedCity);
+        alert('Новости удалены!');
+        closeModal('adminModal');
+        loadPostsFromCloud();
+    }
 
     function switchTab(t, btn) {
         playSystemSound('click');
@@ -510,7 +572,7 @@
                 document.getElementById('activeDmUser').textContent = targetUser;
                 document.getElementById('chatTitle').textContent = 'Личный чат с ' + targetUser;
             } else {
-                document.getElementById('activeDmUser').textContent = privateRecipient || 'не выбран (нажмите на ник в чате)';
+                document.getElementById('activeDmUser').textContent = privateRecipient || 'не выбран';
                 document.getElementById('chatTitle').textContent = 'Личные сообщения';
             }
         }
@@ -521,7 +583,7 @@
     function startPrivateChatWith(username) {
         if (username === myUsername) return;
         switchChatMode('private', username);
-        switchTab('chat', document.getElementById('nav-chat') || document.querySelectorAll('nav button')[1]);
+        switchTab('chat', document.querySelectorAll('nav button')[1]);
     }
 
     function selectCity(c) {
@@ -534,7 +596,6 @@
         }
         document.getElementById('profileCity').textContent = c;
         closeModal('cityModal');
-        logStatus('Город: ' + c);
         lastLoadedMaxPostId = null;
         lastLoadedMaxMsgId = null;
         loadPostsFromCloud();
@@ -669,7 +730,6 @@
         if (!text) { alert('Введите текст новости!'); return; }
         if (!title) { title = 'Новость от ' + myUsername; }
 
-        logStatus('Сжатие и публикация...');
         let publicMediaUrl = null;
         if (selectedNewsFile) {
             publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
@@ -683,13 +743,9 @@
             media_url: publicMediaUrl
         }]);
 
-        if (error) {
-            logStatus('Ошибка публикации', true);
-            return;
-        }
+        if (error) return;
 
         playSystemSound('send');
-        logStatus('✓ Опубликовано!');
         document.getElementById('newsTitleInput').value = '';
         document.getElementById('newsTextInput').value = '';
         document.getElementById('newsMediaInput').value = '';
@@ -713,14 +769,12 @@
                 document.getElementById('chatMessages').innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате (нажав на его аватар или ник), чтобы написать ему лично.</p>';
                 return;
             }
-            // Личные сообщения между мной и privateRecipient
             query = query.eq('chat_type', 'private');
         }
 
         const { data, error } = await query;
         if (error || !data) return;
 
-        // Фильтрация для личных сообщений на клиенте для надежности
         let filteredData = data;
         if (chatMode === 'private' && privateRecipient) {
             filteredData = data.filter(m => 
@@ -731,11 +785,16 @@
         
         const currentMaxId = filteredData.length > 0 ? filteredData[filteredData.length - 1].id : 0;
         
-        // Звуковое уведомление о новом входящем сообщении
         if (lastLoadedMaxMsgId !== null && currentMaxId > lastLoadedMaxMsgId) {
             const latestMsg = filteredData[filteredData.length - 1];
             if (latestMsg && latestMsg.sender !== myUsername) {
                 playSystemSound('receive');
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("⚡ PulseCity • " + latestMsg.sender, {
+                        body: latestMsg.text,
+                        icon: latestMsg.avatar_url || 'https://cdn-icons-png.flaticn.com/512/3076/3076134.png'
+                    });
+                }
             }
         }
         
@@ -784,18 +843,28 @@
         }
     }
 
+    // Supabase Realtime для мгновенной доставки сообщений в фоне
+    function setupRealtimeSubscription() {
+        if (!supabaseClient) return;
+        supabaseClient
+            .channel('public:messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                loadPublicMessages();
+            })
+            .subscribe();
+    }
+
     async function sendPublicMessage() {
         const input = document.getElementById('messageInput');
         const text = input.value.trim();
         if (!text) return;
 
         if (chatMode === 'private' && !privateRecipient) {
-            alert('Сначала выберите пользователя для личного сообщения (нажмите на его аватар или ник в общем чате)!');
+            alert('Сначала выберите пользователя для личного сообщения!');
             return;
         }
 
         playSystemSound('send');
-        logStatus('Отправка сообщения...');
         
         const msgData = {
             chat_type: chatMode,
@@ -807,13 +876,9 @@
         };
 
         const { error } = await supabaseClient.from('messages').insert([msgData]);
+        if (error) return;
 
-        if (error) {
-            logStatus('Ошибка отправки', true);
-            return;
-        }
         input.value = '';
-        logStatus('✓ Отправлено');
         lastLoadedMaxMsgId = null;
         loadPublicMessages();
     }
@@ -821,13 +886,11 @@
     async function handleMediaUpload(input) {
         if (!input.files || !input.files[0]) return;
         if (chatMode === 'private' && !privateRecipient) {
-            alert('Сначала выберите пользователя для личного сообщения!');
+            alert('Сначала выберите пользователя!');
             return;
         }
 
         const file = input.files[0];
-        logStatus('Сжатие и отправка файла...');
-        
         const publicUrl = await uploadFileToSupabase(file);
         if (!publicUrl) return;
 
@@ -845,7 +908,6 @@
         }]);
 
         if (!error) {
-            logStatus('✓ Файл отправлен');
             lastLoadedMaxMsgId = null;
             loadPublicMessages();
         }
@@ -855,6 +917,7 @@
     if (myUsername) {
         loadPostsFromCloud();
         loadPublicMessages();
+        setupRealtimeSubscription();
     }
 
     setInterval(() => {
