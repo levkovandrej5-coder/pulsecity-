@@ -41,14 +41,23 @@
         
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px}
         
-        .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:45vh;overflow-y:auto;padding-right:4px}
-        .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:90%}
+        .chat-tabs{display:flex;gap:10px;margin-bottom:14px}
+        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:10px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+        .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent}
+
+        .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:42vh;overflow-y:auto;padding-right:4px}
+        .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:92%}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
-        .msg-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(0,243,255,0.4)}
+        
+        .msg-user-info{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+        .msg-row.mine .msg-user-info{justify-content:flex-end}
+        
+        .msg-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(0,243,255,0.4);cursor:pointer}
         .msg-avatar img{width:100%;height:100%;object-fit:cover}
+        
         .msg-bubble{background:rgba(255,255,255,0.09);padding:12px 16px;border-radius:18px 18px 18px 6px;font-size:15px;line-height:1.4;word-break:break-word}
         .msg-row.mine .msg-bubble{border-radius:18px 18px 6px 18px;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;font-weight:500}
-        .msg-author{font-size:12px;font-weight:700;color:#00f3ff;margin-bottom:4px}
+        .msg-author{font-size:12px;font-weight:700;color:#00f3ff;cursor:pointer}
         .msg-row.mine .msg-author{display:none}
         .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000;cursor:pointer}
         
@@ -102,16 +111,25 @@
     </div>
 
     <div id="tab-chat" class="content">
-        <div id="public-chat-view">
-            <div class="card">
-                <h3 id="chatTitle">Городской чат • Иркутск</h3>
-                <div class="chat-box" id="chatMessages"></div>
-                <div class="chat-input-area">
-                    <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
-                    <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
-                    <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." onkeydown="if(event.key==='Enter')sendPublicMessage()">
-                    <button class="send-btn" onclick="sendPublicMessage()">➤</button>
-                </div>
+        <div class="card">
+            <div class="chat-tabs">
+                <button class="chat-tab-btn active" id="tabBtnPublic" onclick="switchChatMode('public')">🌍 Общий чат</button>
+                <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные сообщения</button>
+            </div>
+            <h3 id="chatTitle">Городской чат • Иркутск</h3>
+            
+            <div id="privateRecipientBar" style="display:none;margin-bottom:10px;background:rgba(0,243,255,0.1);padding:8px 12px;border-radius:12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;">
+                <span>Диалог с: <strong id="activeDmUser" style="color:#00f3ff">выберите пользователя</strong></span>
+                <button onclick="switchChatMode('public')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
+            </div>
+
+            <div class="chat-box" id="chatMessages"></div>
+            
+            <div class="chat-input-area">
+                <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
+                <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
+                <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." onkeydown="if(event.key==='Enter')sendPublicMessage()">
+                <button class="send-btn" onclick="sendPublicMessage()">➤</button>
             </div>
         </div>
     </div>
@@ -135,7 +153,7 @@
     </div>
 </div>
 
-<!-- Модальное окно регистрации с ником и аватаркой -->
+<!-- Модальное окно регистрации -->
 <div id="authModal" class="modal">
     <div class="modal-card" style="max-width:340px;text-align:center;margin:auto;">
         <div style="font-size:40px;margin-bottom:8px">⚡</div>
@@ -164,7 +182,7 @@
         <div class="setting-row">
             <div>
                 <p style="font-weight:700;font-size:15px">Системные звуки</p>
-                <p style="font-size:12px;color:#94a3b8">Громкий отклик интерфейса</p>
+                <p style="font-size:12px;color:#94a3b8">Максимальная громкость отклика</p>
             </div>
             <div id="soundToggle" class="toggle-switch active" onclick="toggleSystemSound()"></div>
         </div>
@@ -250,7 +268,7 @@
         bar.style.color = isErr ? '#ef4444' : '#10b981';
     }
 
-    // Громкий и надежный синтезатор звуков с авто-возобновлением аудиоконтекста
+    // Сверхгромкий синтезатор звуков для отправки и входящих сообщений
     let soundEnabled = localStorage.getItem('pulseCity_sound') !== 'false';
     let audioCtx = null;
 
@@ -269,16 +287,25 @@
             gain.connect(audioCtx.destination);
             
             if (type === 'send') {
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
-                osc.frequency.exponentialRampToValueAtTime(987.77, audioCtx.currentTime + 0.12); // B5
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime); // увеличенная громкость
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+                // Высокий энергичный сигнал отправки
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(987.77, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime); // максимальная громкость
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            } else if (type === 'receive') {
+                // Двойной громкий сигнал входящего сообщения
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
             } else {
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-                gain.gain.setValueAtTime(0.25, audioCtx.currentTime); // увеличенная громкость
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.07);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.07);
+                // Клик
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.08);
             }
         } catch(e) {}
     }
@@ -303,7 +330,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Аватарки активны');
+            logStatus('База подключена • ЛС и аватарки активны');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -315,6 +342,8 @@
     let myName = localStorage.getItem('pulseCity_v4_name') || '';
     let myUsername = localStorage.getItem('pulseCity_v4_username') || '';
     let myAvatar = localStorage.getItem('pulseCity_v4_avatar') || '';
+    let chatMode = 'public'; // 'public' или 'private'
+    let privateRecipient = ''; // с кем идет личный диалог
     let selectedNewsFile = null;
     let selectedRegAvatarFile = null;
     let activePostIdForComments = null;
@@ -362,7 +391,7 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let width = img.width, height = img.height;
-                    const MAX_SIZE = 512; // компактно для аватарок
+                    const MAX_SIZE = 512;
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
                     else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                     canvas.width = width; canvas.height = height;
@@ -459,12 +488,50 @@
         btn.classList.add('active');
     }
 
+    function switchChatMode(mode, targetUser = '') {
+        playSystemSound('click');
+        chatMode = mode;
+        const btnPub = document.getElementById('tabBtnPublic');
+        const btnPriv = document.getElementById('tabBtnPrivate');
+        const barRec = document.getElementById('privateRecipientBar');
+
+        if (mode === 'public') {
+            btnPub.classList.add('active');
+            btnPriv.classList.remove('active');
+            barRec.style.display = 'none';
+            document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
+            privateRecipient = '';
+        } else {
+            btnPriv.classList.add('active');
+            btnPub.classList.remove('active');
+            barRec.style.display = 'flex';
+            if (targetUser) {
+                privateRecipient = targetUser;
+                document.getElementById('activeDmUser').textContent = targetUser;
+                document.getElementById('chatTitle').textContent = 'Личный чат с ' + targetUser;
+            } else {
+                document.getElementById('activeDmUser').textContent = privateRecipient || 'не выбран (нажмите на ник в чате)';
+                document.getElementById('chatTitle').textContent = 'Личные сообщения';
+            }
+        }
+        lastLoadedMaxMsgId = null;
+        loadPublicMessages();
+    }
+
+    function startPrivateChatWith(username) {
+        if (username === myUsername) return;
+        switchChatMode('private', username);
+        switchTab('chat', document.getElementById('nav-chat') || document.querySelectorAll('nav button')[1]);
+    }
+
     function selectCity(c) {
         playSystemSound('click');
         selectedCity = c;
         localStorage.setItem('pulseCity_v4_city', c);
         document.getElementById('currentCity').textContent = c;
-        document.getElementById('chatTitle').textContent = 'Городской чат • ' + c;
+        if (chatMode === 'public') {
+            document.getElementById('chatTitle').textContent = 'Городской чат • ' + c;
+        }
         document.getElementById('profileCity').textContent = c;
         closeModal('cityModal');
         logStatus('Город: ' + c);
@@ -636,10 +703,42 @@
     let lastLoadedMaxMsgId = null;
     async function loadPublicMessages() {
         if (!supabaseClient || !myUsername) return;
-        const { data, error } = await supabaseClient.from('messages').select('*').eq('city', selectedCity).order('id', { ascending: true });
-        if (error || !data) return;
         
-        const currentMaxId = data.length > 0 ? data[data.length - 1].id : 0;
+        let query = supabaseClient.from('messages').select('*').order('id', { ascending: true });
+
+        if (chatMode === 'public') {
+            query = query.eq('city', selectedCity).eq('chat_type', 'public');
+        } else {
+            if (!privateRecipient) {
+                document.getElementById('chatMessages').innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате (нажав на его аватар или ник), чтобы написать ему лично.</p>';
+                return;
+            }
+            // Личные сообщения между мной и privateRecipient
+            query = query.eq('chat_type', 'private');
+        }
+
+        const { data, error } = await query;
+        if (error || !data) return;
+
+        // Фильтрация для личных сообщений на клиенте для надежности
+        let filteredData = data;
+        if (chatMode === 'private' && privateRecipient) {
+            filteredData = data.filter(m => 
+                (m.sender === myUsername && m.recipient === privateRecipient) ||
+                (m.sender === privateRecipient && m.recipient === myUsername)
+            );
+        }
+        
+        const currentMaxId = filteredData.length > 0 ? filteredData[filteredData.length - 1].id : 0;
+        
+        // Звуковое уведомление о новом входящем сообщении
+        if (lastLoadedMaxMsgId !== null && currentMaxId > lastLoadedMaxMsgId) {
+            const latestMsg = filteredData[filteredData.length - 1];
+            if (latestMsg && latestMsg.sender !== myUsername) {
+                playSystemSound('receive');
+            }
+        }
+        
         if (currentMaxId === lastLoadedMaxMsgId) return;
         lastLoadedMaxMsgId = currentMaxId;
 
@@ -647,11 +746,12 @@
         const isScrolledToBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 50;
 
         box.innerHTML = '';
-        if (data.length === 0) {
-            box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">В чате ${selectedCity} пока тихо. Напишите первое сообщение!</p>`;
+        if (filteredData.length === 0) {
+            box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Здесь пока нет сообщений. Напишите первое!</p>`;
             return;
         }
-        data.forEach(m => {
+
+        filteredData.forEach(m => {
             let mediaTag = '';
             if (m.media_url) {
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
@@ -664,11 +764,21 @@
                 ? `<img src="${m.avatar_url}">` 
                 : (m.sender && m.sender[1] ? m.sender[1].toUpperCase() : 'U');
 
+            const isMine = m.sender === myUsername;
             const row = document.createElement('div');
-            row.className = 'msg-row' + (m.sender === myUsername ? ' mine' : '');
-            row.innerHTML = `<div class="msg-avatar">${avatarHtml}</div><div class="msg-bubble"><div class="msg-author">${m.sender}</div>${m.text}${mediaTag}</div>`;
+            row.className = 'msg-row' + (isMine ? ' mine' : '');
+            
+            row.innerHTML = `
+                <div class="msg-avatar" onclick="startPrivateChatWith('${m.sender}')" title="Написать личное сообщение">${avatarHtml}</div>
+                <div class="msg-bubble">
+                    <div class="msg-user-info">
+                        <span class="msg-author" onclick="startPrivateChatWith('${m.sender}')">${m.sender}</span>
+                    </div>
+                    ${m.text}${mediaTag}
+                </div>`;
             box.appendChild(row);
         });
+
         if (isScrolledToBottom) {
             box.scrollTop = box.scrollHeight;
         }
@@ -679,15 +789,24 @@
         const text = input.value.trim();
         if (!text) return;
 
+        if (chatMode === 'private' && !privateRecipient) {
+            alert('Сначала выберите пользователя для личного сообщения (нажмите на его аватар или ник в общем чате)!');
+            return;
+        }
+
         playSystemSound('send');
         logStatus('Отправка сообщения...');
-        const { error } = await supabaseClient.from('messages').insert([{
-            chat_type: 'public',
+        
+        const msgData = {
+            chat_type: chatMode,
             city: selectedCity,
             sender: myUsername,
+            recipient: chatMode === 'private' ? privateRecipient : 'public',
             text: text,
             avatar_url: myAvatar
-        }]);
+        };
+
+        const { error } = await supabaseClient.from('messages').insert([msgData]);
 
         if (error) {
             logStatus('Ошибка отправки', true);
@@ -701,25 +820,32 @@
 
     async function handleMediaUpload(input) {
         if (!input.files || !input.files[0]) return;
+        if (chatMode === 'private' && !privateRecipient) {
+            alert('Сначала выберите пользователя для личного сообщения!');
+            return;
+        }
+
         const file = input.files[0];
-        logStatus('Сжатие и отправка файла в чат...');
+        logStatus('Сжатие и отправка файла...');
         
         const publicUrl = await uploadFileToSupabase(file);
         if (!publicUrl) return;
 
         const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|3gp|mkv|avi)$/i);
         playSystemSound('send');
+
         const { error } = await supabaseClient.from('messages').insert([{
-            chat_type: 'public',
+            chat_type: chatMode,
             city: selectedCity,
             sender: myUsername,
+            recipient: chatMode === 'private' ? privateRecipient : 'public',
             text: isVideo ? '🎥 Видео' : '🖼️ Фото',
             media_url: publicUrl,
             avatar_url: myAvatar
         }]);
 
         if (!error) {
-            logStatus('✓ Файл отправлен в чат');
+            logStatus('✓ Файл отправлен');
             lastLoadedMaxMsgId = null;
             loadPublicMessages();
         }
