@@ -44,14 +44,10 @@
         
         .card h3{font-size:20px;font-weight:700;margin-bottom:8px;color:#f8fafc}
         .card p{font-size:15px;color:#cbd5e1;line-height:1.5;margin-bottom:16px}
-        .news-media{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block}
+        .news-media{width:100%;max-height:280px;border-radius:16px;object-fit:cover;margin-bottom:14px;display:block;background:#000}
         
         .btn-action{width:100%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
         .btn-sec{background:rgba(255,255,255,0.08);color:#f1f5f9;border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
-        
-        .chat-tabs{display:flex;background:rgba(255,255,255,0.06);padding:6px;border-radius:18px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
-        .chat-tab-btn{flex:1;padding:12px;border:none;border-radius:14px;background:transparent;color:#94a3b8;font-size:14px;font-weight:700;cursor:pointer}
-        .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;box-shadow:0 4px 15px rgba(0,243,255,0.3)}
         
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:45vh;overflow-y:auto;padding-right:4px}
         .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:90%}
@@ -61,7 +57,7 @@
         .msg-row.mine .msg-bubble{border-radius:18px 18px 6px 18px;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;font-weight:500}
         .msg-author{font-size:12px;font-weight:700;color:#00f3ff;margin-bottom:4px}
         .msg-row.mine .msg-author{display:none}
-        .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover}
+        .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000}
         
         .chat-input-area{display:flex;gap:10px;align-items:center}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -86,16 +82,6 @@
 <body>
 
 <div id="debugBar">Статус: Загрузка...</div>
-
-<div id="welcomeScreen" class="welcome-screen">
-    <div class="welcome-badge">ГОРОДСКАЯ ПЛАТФОРМА №1</div>
-    <div class="welcome-hero">
-        <div class="welcome-icon">⚡</div>
-        <h1 class="welcome-title">PulseCity</h1>
-        <p class="welcome-desc">Главные новости твоего города, живые чаты с соседями и защищенные личные диалоги.</p>
-    </div>
-    <button class="btn-main" style="margin-bottom:0;max-width:340px" onclick="goToRegistration()">Начать →</button>
-</div>
 
 <header>
     <div class="logo">PulseCity</div>
@@ -143,14 +129,6 @@
     </div>
 </div>
 
-<div id="authModal" class="modal">
-    <div class="modal-card">
-        <h3>📝 Вход в PulseCity</h3>
-        <input type="text" id="regNameInput" placeholder="Ваше имя или ник...">
-        <button class="btn-main" style="margin:0" onclick="completeRegistration()">Продолжить</button>
-    </div>
-</div>
-
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
         <h3>Выберите город</h3>
@@ -174,7 +152,7 @@
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
             <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
-            <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Медиафайл прикреплен</div>
+            <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Файл выбран для загрузки</div>
         </div>
         <div style="display:flex;gap:10px">
             <button class="btn-sec" onclick="closeModal('newsModal')">Отмена</button>
@@ -213,7 +191,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Кнопки и медиа активны');
+            logStatus('База подключена • Облако готово');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -223,7 +201,7 @@
 
     let selectedCity = 'Иркутск';
     let myName = localStorage.getItem('pulseCity_v4_name') || 'Андрей';
-    let tempNewsMediaUrl = '';
+    let selectedNewsFile = null;
 
     document.getElementById('displayProfileName').textContent = myName;
     document.getElementById('profileNameInput').value = myName;
@@ -262,10 +240,25 @@
 
     function previewNewsMedia(input) {
         if (input.files && input.files[0]) {
-            const file = input.files[0];
-            tempNewsMediaUrl = URL.createObjectURL(file);
+            selectedNewsFile = input.files[0];
             document.getElementById('newsMediaPreview').style.display = 'block';
         }
+    }
+
+    // Надежная загрузка с сохранением правильного расширения файла
+    async function uploadFileToSupabase(file) {
+        const fileExt = file.name.split('.').pop() || 'mp4';
+        const fileName = `${Date.now()}_file.${fileExt}`;
+        const { data, error } = await supabaseClient.storage.from('media').upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+        });
+        if (error) {
+            alert('Ошибка загрузки файла: ' + error.message);
+            return null;
+        }
+        const { data: { publicUrl } } = supabaseClient.storage.from('media').getPublicUrl(fileName);
+        return publicUrl;
     }
 
     async function loadPostsFromCloud() {
@@ -281,8 +274,9 @@
         data.forEach(p => {
             let mediaTag = '';
             if (p.media_url) {
-                mediaTag = p.media_url.includes('video') || p.media_url.startsWith('blob:')
-                    ? `<video src="${p.media_url}" class="news-media" controls playsinline></video>`
+                const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v)$/i) || p.media_url.includes('video');
+                mediaTag = isVid
+                    ? `<video src="${p.media_url}" class="news-media" controls preload="metadata" playsinline></video>`
                     : `<img src="${p.media_url}" class="news-media">`;
             }
             const card = document.createElement('div');
@@ -307,13 +301,18 @@
         const cat = document.getElementById('newsCategorySelect').value;
         if (!title || !text) { alert('Введите заголовок и текст!'); return; }
 
-        logStatus('Публикация новости...');
+        logStatus('Загрузка медиа в облако...');
+        let publicMediaUrl = null;
+        if (selectedNewsFile) {
+            publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
+        }
+
         const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
             category: cat,
             title: title,
             content: text,
-            media_url: tempNewsMediaUrl || null
+            media_url: publicMediaUrl
         }]);
 
         if (error) {
@@ -326,7 +325,7 @@
         document.getElementById('newsTextInput').value = '';
         document.getElementById('newsMediaInput').value = '';
         document.getElementById('newsMediaPreview').style.display = 'none';
-        tempNewsMediaUrl = '';
+        selectedNewsFile = null;
         closeModal('newsModal');
         loadPostsFromCloud();
     }
@@ -340,8 +339,9 @@
         (data || []).forEach(m => {
             let mediaTag = '';
             if (m.media_url) {
-                mediaTag = m.media_url.includes('video') 
-                    ? `<video src="${m.media_url}" class="msg-media" controls playsinline></video>`
+                const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v)$/i) || m.media_url.includes('video');
+                mediaTag = isVid 
+                    ? `<video src="${m.media_url}" class="msg-media" controls preload="metadata" playsinline></video>`
                     : `<img src="${m.media_url}" class="msg-media">`;
             }
             const row = document.createElement('div');
@@ -374,17 +374,21 @@
     async function handleMediaUpload(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
-        const url = URL.createObjectURL(file);
-        const isVideo = file.type.startsWith('video/');
+        logStatus('Загрузка файла в чат...');
+        
+        const publicUrl = await uploadFileToSupabase(file);
+        if (!publicUrl) return;
 
+        const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm)$/i);
         const { error } = await supabaseClient.from('messages').insert([{
             chat_type: 'public',
             sender: myName,
             text: isVideo ? '🎥 Видео' : '🖼️ Фото',
-            media_url: url
+            media_url: publicUrl
         }]);
 
         if (!error) {
+            logStatus('Файл отправлен в чат');
             loadPublicMessages();
         }
         input.value = '';
@@ -392,6 +396,11 @@
 
     loadPostsFromCloud();
     loadPublicMessages();
+
+    setInterval(() => {
+        loadPostsFromCloud();
+        loadPublicMessages();
+    }, 4000);
 </script>
 </body>
 </html>
