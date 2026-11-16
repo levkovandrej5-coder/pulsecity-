@@ -184,10 +184,6 @@
         bar.style.color = isErr ? '#ef4444' : '#10b981';
     }
 
-    window.onerror = function(msg, url, line) {
-        logStatus('Ошибка JS [стр.' + line + ']: ' + msg, true);
-    };
-
     let supabaseClient = null;
     try {
         if (window.supabase) {
@@ -195,7 +191,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Всё работает');
+            logStatus('База подключена • Интерфейс стабилен');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -249,10 +245,53 @@
         }
     }
 
+    // Автоматическое сжатие фото перед отправкой для мгновенной загрузки
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            if (!file.type.startsWith('image/')) {
+                resolve(file); // Видео не сжимаем
+                return;
+            }
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_SIZE = 1024;
+                    if (width > height) {
+                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                    } else {
+                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        const compressedFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    }, 'image/jpeg', 0.75);
+                };
+            };
+        });
+    }
+
     async function uploadFileToSupabase(file) {
+        let fileToUpload = file;
+        if (file.type.startsWith('image/')) {
+            fileToUpload = await compressImage(file);
+        }
+
         const fileExt = file.name.split('.').pop() || 'mp4';
         const fileName = `${Date.now()}_file.${fileExt}`;
-        const { data, error } = await supabaseClient.storage.from('media').upload(fileName, file, {
+        const { data, error } = await supabaseClient.storage.from('media').upload(fileName, fileToUpload, {
             cacheControl: '3600',
             upsert: false
         });
@@ -264,18 +303,19 @@
         return publicUrl;
     }
 
-    let cachedPostsCount = -1;
+    let lastLoadedMaxPostId = null;
     async function loadPostsFromCloud() {
         if (!supabaseClient) return;
         const { data, error } = await supabaseClient.from('posts').select('*').order('id', { ascending: false });
-        if (error) return;
+        if (error || !data) return;
         
-        if (data && data.length === cachedPostsCount) return;
-        cachedPostsCount = data ? data.length : 0;
+        const currentMaxId = data.length > 0 ? data[0].id : 0;
+        if (currentMaxId === lastLoadedMaxPostId) return; // Если ничего не изменилось — не трогаем экран (нет мерцания)
+        lastLoadedMaxPostId = currentMaxId;
 
         const list = document.getElementById('newsList');
         list.innerHTML = '';
-        if (!data || data.length === 0) {
+        if (data.length === 0) {
             list.innerHTML = '<div class="card"><p style="margin:0;text-align:center;color:#94a3b8">Пока нет новостей. Нажмите «Добавить новость» сверху!</p></div>';
             return;
         }
@@ -285,7 +325,7 @@
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
                 mediaTag = isVid
                     ? `<video src="${p.media_url}" class="news-media" controls preload="metadata" playsinline></video>`
-                    : `<img src="${p.media_url}" class="news-media">`;
+                    : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
             }
             const card = document.createElement('div');
             card.className = 'card';
@@ -309,7 +349,7 @@
         const cat = document.getElementById('newsCategorySelect').value;
         if (!title || !text) { alert('Введите заголовок и текст!'); return; }
 
-        logStatus('Загрузка медиа в облако...');
+        logStatus('Сжатие и загрузка медиа...');
         let publicMediaUrl = null;
         if (selectedNewsFile) {
             publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
@@ -335,35 +375,40 @@
         document.getElementById('newsMediaPreview').style.display = 'none';
         selectedNewsFile = null;
         closeModal('newsModal');
-        cachedPostsCount = -1;
+        lastLoadedMaxPostId = null;
         loadPostsFromCloud();
     }
 
-    let cachedMsgsCount = -1;
+    let lastLoadedMaxMsgId = null;
     async function loadPublicMessages() {
         if (!supabaseClient) return;
         const { data, error } = await supabaseClient.from('messages').select('*').eq('chat_type', 'public').order('id', { ascending: true });
-        if (error) return;
+        if (error || !data) return;
         
-        if (data && data.length === cachedMsgsCount) return;
-        cachedMsgsCount = data ? data.length : 0;
+        const currentMaxId = data.length > 0 ? data[data.length - 1].id : 0;
+        if (currentMaxId === lastLoadedMaxMsgId) return; // Если новых сообщений нет — не перерисовываем чат
+        lastLoadedMaxMsgId = currentMaxId;
 
         const box = document.getElementById('chatMessages');
+        const isScrolledToBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 50;
+
         box.innerHTML = '';
-        (data || []).forEach(m => {
+        data.forEach(m => {
             let mediaTag = '';
             if (m.media_url) {
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
                     ? `<video src="${m.media_url}" class="msg-media" controls preload="metadata" playsinline></video>`
-                    : `<img src="${m.media_url}" class="msg-media">`;
+                    : `<img src="${m.media_url}" class="msg-media" loading="lazy">`;
             }
             const row = document.createElement('div');
             row.className = 'msg-row' + (m.sender === myName ? ' mine' : '');
             row.innerHTML = `<div class="msg-avatar">${m.sender[0].toUpperCase()}</div><div class="msg-bubble"><div class="msg-author">${m.sender}</div>${m.text}${mediaTag}</div>`;
             box.appendChild(row);
         });
-        box.scrollTop = box.scrollHeight;
+        if (isScrolledToBottom) {
+            box.scrollTop = box.scrollHeight;
+        }
     }
 
     async function sendPublicMessage() {
@@ -382,14 +427,14 @@
             return;
         }
         input.value = '';
-        cachedMsgsCount = -1;
+        lastLoadedMaxMsgId = null;
         loadPublicMessages();
     }
 
     async function handleMediaUpload(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
-        logStatus('Загрузка файла в чат...');
+        logStatus('Сжатие и отправка файла...');
         
         const publicUrl = await uploadFileToSupabase(file);
         if (!publicUrl) return;
@@ -404,7 +449,7 @@
 
         if (!error) {
             logStatus('Файл отправлен в чат');
-            cachedMsgsCount = -1;
+            lastLoadedMaxMsgId = null;
             loadPublicMessages();
         }
         input.value = '';
@@ -413,6 +458,7 @@
     loadPostsFromCloud();
     loadPublicMessages();
 
+    // Фоновая проверка новых данных каждые 4 секунды (работает плавно, без мерцания)
     setInterval(() => {
         loadPostsFromCloud();
         loadPublicMessages();
