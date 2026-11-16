@@ -26,7 +26,7 @@
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
         
         .card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border-radius:24px;padding:20px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 15px 35px rgba(0,0,0,0.6);position:relative}
-        .news-header{display:flex;align-items:center;justify-content:between;margin-bottom:14px}
+        .news-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
         .news-author-info{display:flex;align-items:center;gap:12px}
         .news-author-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid rgba(0,243,255,0.4)}
         .news-author-avatar img{width:100%;height:100%;object-fit:cover}
@@ -67,7 +67,7 @@
         .msg-row.mine .msg-author{display:none}
         .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000;cursor:pointer}
         
-        .chat-input-area{display:flex;gap:10px;align-items:center}
+        .chat-input-area{display:flex;gap:10px;align-items:center;margin-bottom:10px}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
         .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:14px;height:48px;padding:0 20px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
@@ -127,14 +127,15 @@
                 <button onclick="switchChatMode('public')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
             </div>
 
-            <div class="chat-box" id="chatMessages"></div>
-            
+            <!-- Поле ввода сверху, чтобы новые сообщения сразу появлялись под ним -->
             <div class="chat-input-area">
                 <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
                 <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
                 <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." onkeydown="if(event.key==='Enter')sendPublicMessage()">
                 <button class="send-btn" onclick="sendPublicMessage()">➤</button>
             </div>
+
+            <div class="chat-box" id="chatMessages"></div>
         </div>
     </div>
 
@@ -143,8 +144,9 @@
             <div id="profileAvatarPreview" style="width:80px;height:80px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,#00f3ff,#2563eb);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;border:3px solid rgba(0,243,255,0.5);">
                 👤
             </div>
-            <h3 id="displayProfileName" style="margin-bottom:2px;font-size:20px">Пользователь</h3>
-            <p style="margin-bottom:14px;font-size:14px;color:#00f3ff" id="displayUsername">@username</p>
+            <!-- Нажмите 5 раз на имя или ник для активации режима разработчика -->
+            <h3 id="displayProfileName" onclick="secretAdminTap()" style="margin-bottom:2px;font-size:20px;cursor:pointer;">Пользователь</h3>
+            <p style="margin-bottom:14px;font-size:14px;color:#00f3ff;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
             
             <input type="file" id="changeAvatarInput" accept="image/*" style="display:none" onchange="updateUserAvatar(this)">
             <button class="btn-sec" onclick="document.getElementById('changeAvatarInput').click()">📷 Сменить аватарку</button>
@@ -153,7 +155,7 @@
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
             <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
             
-            <!-- Кнопка разработчика видна ТОЛЬКО ВАМ (@andrey) -->
+            <!-- Кнопка Кабинета разработчика -->
             <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
             
             <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти</button>
@@ -186,7 +188,7 @@
 <div id="adminModal" class="modal" onclick="if(event.target===this)closeModal('adminModal')">
     <div class="modal-card" style="max-width:440px;">
         <h3>👑 Кабинет разработчика</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель модерации (доступна только создателю):</p>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель модерации и управления:</p>
         
         <button class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">🗑️ Очистить текущий городской чат</button>
         <button class="btn-sec" onclick="adminClearPosts()" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">🗑️ Удалить все новости города</button>
@@ -262,11 +264,11 @@
             <h3 style="margin:0;">Комментарии</h3>
             <button class="btn-sec" style="width:auto;padding:6px 14px;margin:0;font-size:13px;" onclick="closeModal('commentsModal')">✕ Назад</button>
         </div>
-        <div class="chat-box" id="commentsList" style="max-height:35vh;"></div>
-        <div class="chat-input-area" style="margin-top:10px;">
+        <div class="chat-input-area">
             <input type="text" id="commentInput" placeholder="Написать комментарий..." onkeydown="if(event.key==='Enter')sendComment()">
             <button class="send-btn" onclick="sendComment()">➤</button>
         </div>
+        <div class="chat-box" id="commentsList" style="max-height:35vh;"></div>
     </div>
 </div>
 
@@ -279,7 +281,19 @@
 </div>
 
 <script>
-    const MASTER_ADMIN = "@andrey"; // Главный разработчик / администратор
+    let isAdmin = localStorage.getItem('pulseCity_is_admin') === 'true';
+    let adminTapCount = 0;
+
+    function secretAdminTap() {
+        adminTapCount++;
+        if (adminTapCount >= 5) {
+            isAdmin = true;
+            localStorage.setItem('pulseCity_is_admin', 'true');
+            checkAdminAccess();
+            alert('👑 Режим разработчика активирован!');
+            adminTapCount = 0;
+        }
+    }
 
     let soundEnabled = localStorage.getItem('pulseCity_sound') !== 'false';
     let audioCtx = null;
@@ -369,7 +383,7 @@
     document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
 
     function checkAdminAccess() {
-        if (myUsername && myUsername.toLowerCase() === MASTER_ADMIN.toLowerCase()) {
+        if (isAdmin || myUsername.toLowerCase() === '@andrey') {
             document.getElementById('adminPanelBtn').style.display = 'block';
         } else {
             document.getElementById('adminPanelBtn').style.display = 'none';
@@ -514,9 +528,8 @@
         loadPostsFromCloud();
     }
 
-    // Удаление новости (автором или админом)
     async function deletePost(postId, authorUsername) {
-        if (myUsername !== authorUsername && myUsername.toLowerCase() !== MASTER_ADMIN.toLowerCase()) {
+        if (myUsername !== authorUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
             alert('Вы можете удалять только свои новости!');
             return;
         }
@@ -526,9 +539,8 @@
         loadPostsFromCloud();
     }
 
-    // Удаление сообщения в чате (автором или админом)
     async function deleteMessage(msgId, senderUsername) {
-        if (myUsername !== senderUsername && myUsername.toLowerCase() !== MASTER_ADMIN.toLowerCase()) {
+        if (myUsername !== senderUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
             alert('Вы можете удалять только свои сообщения!');
             return;
         }
@@ -537,14 +549,15 @@
         loadPublicMessages();
     }
 
-    // Удаление комментария (автором или админом)
     async function deleteComment(commentId, senderUsername) {
-        if (myUsername !== senderUsername && myUsername.toLowerCase() !== MASTER_ADMIN.toLowerCase()) {
+        if (myUsername !== senderUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
             alert('Вы можете удалять только свои комментарии!');
             return;
         }
         await supabaseClient.from('comments').delete().eq('id', commentId);
         loadComments(activePostIdForComments);
+        lastLoadedMaxPostId = null;
+        loadPostsFromCloud();
     }
 
     function switchTab(t, btn) {
@@ -634,6 +647,15 @@
         if (!supabaseClient || !myUsername) return;
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
+
+        // Подтягиваем все комментарии для подсчета
+        const { data: allComments } = await supabaseClient.from('comments').select('post_id');
+        const commentCounts = {};
+        if (allComments) {
+            allComments.forEach(c => {
+                commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1;
+            });
+        }
         
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
@@ -643,9 +665,6 @@
                 playSystemSound('receive');
             }
         }
-
-        if (currentMaxId === lastLoadedMaxPostId) return;
-        lastLoadedMaxPostId = currentMaxId;
 
         const list = document.getElementById('newsList');
         list.innerHTML = '';
@@ -668,7 +687,8 @@
                 : (p.author_username ? p.author_username[1].toUpperCase() : 'U');
 
             const authorName = p.author_username || 'Автор';
-            const canDelete = (p.author_username === myUsername) || (myUsername.toLowerCase() === MASTER_ADMIN.toLowerCase());
+            const canDelete = (p.author_username === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
+            const cCount = commentCounts[p.id] || 0;
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -690,17 +710,20 @@
                 <div class="card-actions">
                     <div class="card-actions-left">
                         <button class="action-btn" onclick="likePost(${p.id}, ${p.likes || 0})">❤️ <span id="likes-count-${p.id}">${p.likes || 0}</span></button>
-                        <button class="action-btn" onclick="openComments(${p.id})">💬 Комментарии</button>
+                        <button class="action-btn" onclick="openComments(${p.id})">💬 Комментарии (${cCount})</button>
                     </div>
                 </div>
             `;
             list.appendChild(card);
         });
+        lastLoadedMaxPostId = currentMaxId;
     }
 
     async function likePost(postId, currentLikes) {
-        const newLikes = currentLikes + 1;
-        document.getElementById(`likes-count-${postId}`).textContent = newLikes;
+        const el = document.getElementById(`likes-count-${postId}`);
+        const actualCurrent = parseInt(el.textContent) || currentLikes;
+        const newLikes = actualCurrent + 1;
+        el.textContent = newLikes;
         await supabaseClient.from('posts').update({ likes: newLikes }).eq('id', postId);
     }
 
@@ -711,7 +734,8 @@
     }
 
     async function loadComments(postId) {
-        const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: true });
+        // Новые комментарии сверху
+        const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: false });
         const list = document.getElementById('commentsList');
         list.innerHTML = '';
         if (!data || data.length === 0) {
@@ -723,7 +747,7 @@
                 ? `<img src="${c.avatar_url}">` 
                 : (c.sender ? c.sender[1].toUpperCase() : 'U');
 
-            const canDeleteComment = (c.sender === myUsername) || (myUsername.toLowerCase() === MASTER_ADMIN.toLowerCase());
+            const canDeleteComment = (c.sender === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
 
             const row = document.createElement('div');
             row.className = 'msg-row';
@@ -738,7 +762,6 @@
                 </div>`;
             list.appendChild(row);
         });
-        list.scrollTop = list.scrollHeight;
     }
 
     async function sendComment() {
@@ -755,6 +778,7 @@
         }]);
         input.value = '';
         loadComments(activePostIdForComments);
+        loadPostsFromCloud(); // Обновляем счетчик комментариев в ленте
     }
 
     async function publishNews() {
@@ -798,7 +822,8 @@
     async function loadPublicMessages() {
         if (!supabaseClient || !myUsername) return;
         
-        let query = supabaseClient.from('messages').select('*').order('id', { ascending: true });
+        // Новые сообщения загружаем СВЕРХУ ВНИЗ (descending: true)
+        let query = supabaseClient.from('messages').select('*').order('id', { ascending: false });
 
         if (chatMode === 'public') {
             query = query.eq('city', selectedCity).eq('chat_type', 'public');
@@ -821,10 +846,10 @@
             );
         }
         
-        const currentMaxId = filteredData.length > 0 ? filteredData[filteredData.length - 1].id : 0;
+        const currentMaxId = filteredData.length > 0 ? filteredData[0].id : 0;
         
         if (lastLoadedMaxMsgId !== null && currentMaxId > lastLoadedMaxMsgId) {
-            const latestMsg = filteredData[filteredData.length - 1];
+            const latestMsg = filteredData[0];
             if (latestMsg && latestMsg.sender !== myUsername) {
                 playSystemSound('receive');
             }
@@ -834,8 +859,6 @@
         lastLoadedMaxMsgId = currentMaxId;
 
         const box = document.getElementById('chatMessages');
-        const isScrolledToBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 50;
-
         box.innerHTML = '';
         if (filteredData.length === 0) {
             box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Здесь пока нет сообщений. Напишите первое!</p>`;
@@ -856,7 +879,7 @@
                 : (m.sender && m.sender[1] ? m.sender[1].toUpperCase() : 'U');
 
             const isMine = m.sender === myUsername;
-            const canDeleteMsg = (m.sender === myUsername) || (myUsername.toLowerCase() === MASTER_ADMIN.toLowerCase());
+            const canDeleteMsg = (m.sender === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
 
             const row = document.createElement('div');
             row.className = 'msg-row' + (isMine ? ' mine' : '');
@@ -872,10 +895,6 @@
                 </div>`;
             box.appendChild(row);
         });
-
-        if (isScrolledToBottom) {
-            box.scrollTop = box.scrollHeight;
-        }
     }
 
     function setupRealtimeSubscription() {
