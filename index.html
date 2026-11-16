@@ -56,8 +56,8 @@
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
         .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:14px;height:48px;padding:0 20px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
-        .modal{display:none;pointer-events:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
-        .modal.open{display:flex;pointer-events:auto}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:2500;align-items:center;justify-content:center;padding:20px}
+        .modal.open{display:flex}
         .modal-card{background:#141829;border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:24px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.8);max-height:85vh;display:flex;flex-direction:column}
         .modal-card h3{font-size:20px;margin-bottom:16px}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
@@ -130,7 +130,7 @@
 </div>
 
 <!-- Модальное окно регистрации с уникальным ником -->
-<div id="authModal" class="modal" style="display:flex;pointer-events:auto;">
+<div id="authModal" class="modal">
     <div class="modal-card" style="max-width:340px;text-align:center;margin:auto;">
         <div style="font-size:40px;margin-bottom:12px">⚡</div>
         <h3>Регистрация в PulseCity</h3>
@@ -235,7 +235,6 @@
         bar.style.color = isErr ? '#ef4444' : '#10b981';
     }
 
-    // Встроенный синтезатор системных звуков (без внешних файлов!)
     let soundEnabled = localStorage.getItem('pulseCity_sound') !== 'false';
     function playSystemSound(type = 'click') {
         if (!soundEnabled) return;
@@ -247,13 +246,13 @@
             gain.connect(ctx.destination);
             
             if (type === 'send') {
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1); // A5
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
                 gain.gain.setValueAtTime(0.15, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
                 osc.start(); osc.stop(ctx.currentTime + 0.1);
             } else {
-                osc.frequency.setValueAtTime(440, ctx.currentTime); // A4
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
                 gain.gain.setValueAtTime(0.1, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
                 osc.start(); osc.stop(ctx.currentTime + 0.05);
@@ -281,7 +280,7 @@
                 'https://igmgobjvjovfscjehcuu.supabase.co',
                 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
-            logStatus('База подключена • Защита активна');
+            logStatus('База подключена • Готово');
         } else {
             logStatus('SDK не загружен', true);
         }
@@ -307,8 +306,7 @@
         document.getElementById('displayUsername').textContent = myUsername;
     }
 
-    // Регистрация с уникальным никнеймом
-    async function registerUniqueUser() {
+    function registerUniqueUser() {
         playSystemSound('click');
         const name = document.getElementById('regNameInput').value.trim();
         let uname = document.getElementById('regUsernameInput').value.trim();
@@ -319,11 +317,6 @@
         }
         if (!uname.startsWith('@')) { uname = '@' + uname; }
 
-        logStatus('Проверка уникальности ника...');
-        
-        // Проверяем в базе, не занят ли ник
-        const { data: existing } = await supabaseClient.from('messages').select('sender').eq('sender', uname).limit(1);
-        
         myName = name;
         myUsername = uname;
         localStorage.setItem('pulseCity_v4_name', myName);
