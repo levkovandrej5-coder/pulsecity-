@@ -26,6 +26,8 @@
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 25px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px}
         
         .card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border-radius:24px;padding:20px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 15px 35px rgba(0,0,0,0.6);position:relative}
+        .card.admin-card{border:1px solid rgba(0,243,255,0.4);background:linear-gradient(135deg,rgba(0,243,255,0.08),rgba(37,99,235,0.04));}
+        
         .news-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
         .news-author-info{display:flex;align-items:center;gap:12px}
         .news-author-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid rgba(0,243,255,0.4)}
@@ -182,15 +184,22 @@
     </div>
 </div>
 
-<!-- Модальное окно: Кабинет разработчика (с полным функционалом модерации) -->
+<!-- Модальное окно: Кабинет разработчика -->
 <div id="adminModal" class="modal" onclick="if(event.target===this)closeModal('adminModal')">
     <div class="modal-card" style="max-width:440px;">
         <h3>👑 Кабинет разработчика</h3>
         <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель управления и модерации:</p>
         
         <div style="background:rgba(0,243,255,0.06);padding:14px;border-radius:16px;margin-bottom:14px;">
-            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#00f3ff">📢 Написать объявление от Админа</p>
-            <input type="text" id="adminBroadcastInput" placeholder="Текст официального объявления..." style="margin-bottom:8px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#00f3ff">✨ Опубликовать от PulseCity в ленту</p>
+            <input type="text" id="adminFeedTitleInput" placeholder="Заголовок..." style="margin-bottom:8px;">
+            <textarea id="adminFeedTextInput" placeholder="Текст официальной новости..." style="height:70px;margin-bottom:8px;"></textarea>
+            <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="publishAdminFeedPost()">Опубликовать в ленту</button>
+        </div>
+
+        <div style="background:rgba(0,243,255,0.06);padding:14px;border-radius:16px;margin-bottom:14px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#00f3ff">📢 Написать объявление в чат</p>
+            <input type="text" id="adminBroadcastInput" placeholder="Текст объявления..." style="margin-bottom:8px;">
             <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="sendAdminBroadcast()">Отправить в общий чат</button>
         </div>
 
@@ -207,7 +216,7 @@
     </div>
 </div>
 
-<!-- Красивое модальное окно подтверждения удаления вместо системных плашек -->
+<!-- Окно подтверждения удаления -->
 <div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirmModal(false)">
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚠️</div>
@@ -401,7 +410,6 @@
     let selectedRegAvatarFile = null;
     let activePostIdForComments = null;
 
-    // Проверка черного списка заблокированных пользователей
     let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
     if (bannedList.includes(myUsername)) {
         alert('Ваш аккаунт заблокирован администратором.');
@@ -543,7 +551,6 @@
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     function openAdminModal() { openModal('adminModal'); }
 
-    // Кастомное подтверждение удаления вместо браузерного окна
     let confirmCallback = null;
     function showConfirm(title, text, callback) {
         document.getElementById('confirmTitle').textContent = title;
@@ -577,7 +584,31 @@
         });
     }
 
-    // Отправка объявления от Администратора
+    async function publishAdminFeedPost() {
+        const title = document.getElementById('adminFeedTitleInput').value.trim();
+        const text = document.getElementById('adminFeedTextInput').value.trim();
+        if (!text) { alert('Введите текст объявления!'); return; }
+
+        const { error } = await supabaseClient.from('posts').insert([{
+            city: selectedCity,
+            category: 'events',
+            title: title || '⚡ PulseCity • Официально',
+            content: text,
+            media_url: null,
+            author_username: '⚡ PulseCity',
+            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
+            likes: 0
+        }]);
+
+        if (!error) {
+            document.getElementById('adminFeedTitleInput').value = '';
+            document.getElementById('adminFeedTextInput').value = '';
+            closeModal('adminModal');
+            lastLoadedMaxPostId = null;
+            loadPostsFromCloud();
+        }
+    }
+
     async function sendAdminBroadcast() {
         const input = document.getElementById('adminBroadcastInput');
         const text = input.value.trim();
@@ -587,9 +618,9 @@
         await supabaseClient.from('messages').insert([{
             chat_type: chatMode,
             city: selectedCity,
-            sender: '👑 АДМИНИСТРАТОР',
+            sender: '⚡ PulseCity',
             recipient: chatMode === 'private' ? privateRecipient : 'public',
-            text: '📢 ОФИЦИАЛЬНОЕ ОБЪЯВЛЕНИЕ:\n' + text,
+            text: '📢 ОБЪЯВЛЕНИЕ:\n' + text,
             avatar_url: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png'
         }]);
 
@@ -598,7 +629,6 @@
         loadPublicMessages();
     }
 
-    // Блокировка пользователя
     function banUser() {
         const input = document.getElementById('adminBanInput');
         let target = input.value.trim();
@@ -769,6 +799,8 @@
             return;
         }
 
+        let myLikes = JSON.parse(localStorage.getItem('pulseCity_likes') || '{}');
+
         data.forEach(p => {
             let mediaTag = '';
             if (p.media_url) {
@@ -785,9 +817,12 @@
             const authorName = p.author_username || 'Автор';
             const canDelete = (p.author_username === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
             const cCount = commentCounts[p.id] || 0;
+            const isAdminPost = authorName === '⚡ PulseCity';
+
+            const isLiked = myLikes[p.id] === true;
 
             const card = document.createElement('div');
-            card.className = 'card';
+            card.className = 'card' + (isAdminPost ? ' admin-card' : '');
             card.setAttribute('data-category', p.category);
             card.innerHTML = `
                 <div class="news-header">
@@ -795,7 +830,7 @@
                         <div class="news-author-avatar">${authorAvatarHtml}</div>
                         <div class="news-meta">
                             <span class="news-author-name">${authorName}</span>
-                            <span class="news-city-tag">${p.city} • ${p.category}</span>
+                            <span class="news-city-tag">${p.city}</span>
                         </div>
                     </div>
                     ${canDelete ? `<button class="delete-btn" onclick="deletePost(${p.id}, '${p.author_username}')">Удалить</button>` : ''}
@@ -805,7 +840,9 @@
                 <p>${p.content}</p>
                 <div class="card-actions">
                     <div class="card-actions-left">
-                        <button class="action-btn" onclick="likePost(${p.id}, ${p.likes || 0})">❤️ <span id="likes-count-${p.id}">${p.likes || 0}</span></button>
+                        <button class="action-btn" onclick="likePost(${p.id}, ${p.likes || 0})" style="color:${isLiked ? '#ef4444' : '#fff'}">
+                            <span id="like-icon-${p.id}">${isLiked ? '❤️' : '🤍'}</span> <span id="likes-count-${p.id}">${p.likes || 0}</span>
+                        </button>
                         <button class="action-btn" onclick="openComments(${p.id})">💬 Комментарии (${cCount})</button>
                     </div>
                 </div>
@@ -816,10 +853,28 @@
     }
 
     async function likePost(postId, currentLikes) {
-        const el = document.getElementById(`likes-count-${postId}`);
-        const actualCurrent = parseInt(el.textContent) || currentLikes;
-        const newLikes = actualCurrent + 1;
-        el.textContent = newLikes;
+        let myLikes = JSON.parse(localStorage.getItem('pulseCity_likes') || '{}');
+        const isLiked = myLikes[postId] === true;
+        const elCount = document.getElementById(`likes-count-${postId}`);
+        const elIcon = document.getElementById(`like-icon-${postId}`);
+        
+        let actualCurrent = parseInt(elCount.textContent) || currentLikes;
+        let newLikes;
+
+        if (isLiked) {
+            newLikes = Math.max(0, actualCurrent - 1);
+            myLikes[postId] = false;
+            elIcon.textContent = '🤍';
+            elCount.parentElement.style.color = '#fff';
+        } else {
+            newLikes = actualCurrent + 1;
+            myLikes[postId] = true;
+            elIcon.textContent = '❤️';
+            elCount.parentElement.style.color = '#ef4444';
+        }
+
+        localStorage.setItem('pulseCity_likes', JSON.stringify(myLikes));
+        elCount.textContent = newLikes;
         await supabaseClient.from('posts').update({ likes: newLikes }).eq('id', postId);
     }
 
