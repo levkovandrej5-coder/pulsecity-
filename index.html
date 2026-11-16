@@ -9,7 +9,6 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#161d36,#06070a 65%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
         
-        /* Мини-строка статуса для проверки на телефоне */
         #debugBar{background:#0f172a;color:#00f3ff;font-size:11px;padding:4px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);z-index:5000}
 
         .welcome-screen{position:fixed;inset:0;background:radial-gradient(circle at top,#1b2547,#06070a 75%);z-index:3000;display:none;pointer-events:none;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 24px 36px;text-align:center}
@@ -206,7 +205,7 @@
         if (window.supabase) {
             supabaseClient = window.supabase.createClient(
                 'https://igmgobjvjovfscjehcuu.supabase.co',
-                'Sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
+                'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'
             );
             logStatus('База подключена • Кнопки активны');
         } else {
