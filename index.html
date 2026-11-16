@@ -127,7 +127,6 @@
                 <button onclick="switchChatMode('public')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
             </div>
 
-            <!-- Поле ввода сверху, чтобы новые сообщения сразу появлялись под ним -->
             <div class="chat-input-area">
                 <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
                 <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
@@ -144,7 +143,6 @@
             <div id="profileAvatarPreview" style="width:80px;height:80px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,#00f3ff,#2563eb);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;border:3px solid rgba(0,243,255,0.5);">
                 👤
             </div>
-            <!-- Нажмите 5 раз на имя или ник для активации режима разработчика -->
             <h3 id="displayProfileName" onclick="secretAdminTap()" style="margin-bottom:2px;font-size:20px;cursor:pointer;">Пользователь</h3>
             <p style="margin-bottom:14px;font-size:14px;color:#00f3ff;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
             
@@ -184,16 +182,41 @@
     </div>
 </div>
 
-<!-- Модальное окно: Кабинет разработчика -->
+<!-- Модальное окно: Кабинет разработчика (с полным функционалом модерации) -->
 <div id="adminModal" class="modal" onclick="if(event.target===this)closeModal('adminModal')">
     <div class="modal-card" style="max-width:440px;">
         <h3>👑 Кабинет разработчика</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель модерации и управления:</p>
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель управления и модерации:</p>
         
-        <button class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">🗑️ Очистить текущий городской чат</button>
-        <button class="btn-sec" onclick="adminClearPosts()" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);">🗑️ Удалить все новости города</button>
+        <div style="background:rgba(0,243,255,0.06);padding:14px;border-radius:16px;margin-bottom:14px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#00f3ff">📢 Написать объявление от Админа</p>
+            <input type="text" id="adminBroadcastInput" placeholder="Текст официального объявления..." style="margin-bottom:8px;">
+            <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="sendAdminBroadcast()">Отправить в общий чат</button>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.06);padding:14px;border-radius:16px;margin-bottom:14px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#ef4444">🚫 Заблокировать пользователя</p>
+            <input type="text" id="adminBanInput" placeholder="Введите @никнейм..." style="margin-bottom:8px;">
+            <button class="btn-sec" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);margin:0;" onclick="banUser()">Заблокировать навсегда</button>
+        </div>
         
-        <button class="btn-sec" onclick="closeModal('adminModal')">Закрыть</button>
+        <button class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Очистить весь городской чат</button>
+        <button class="btn-sec" onclick="adminClearPosts()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Удалить все новости города</button>
+        
+        <button class="btn-sec" onclick="closeModal('adminModal')" style="margin-top:10px;">Закрыть</button>
+    </div>
+</div>
+
+<!-- Красивое модальное окно подтверждения удаления вместо системных плашек -->
+<div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirmModal(false)">
+    <div class="modal-card" style="max-width:320px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:10px">⚠️</div>
+        <h3 id="confirmTitle" style="font-size:18px;margin-bottom:8px;">Подтверждение</h3>
+        <p id="confirmText" style="color:#cbd5e1;font-size:14px;margin-bottom:20px;">Вы уверены, что хотите это удалить?</p>
+        <div style="display:flex;gap:10px;">
+            <button class="btn-sec" onclick="closeConfirmModal(false)" style="margin:0;background:rgba(255,255,255,0.06);">Отмена</button>
+            <button class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 25px rgba(239,68,68,0.4);">Удалить</button>
+        </div>
     </div>
 </div>
 
@@ -257,7 +280,7 @@
     <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:20px auto 10px;text-decoration:none;text-align:center;">📥 Скачать файл</a>
 </div>
 
-<!-- Модальное окно комментариев (с кнопкой Назад) -->
+<!-- Модальное окно комментариев -->
 <div id="commentsModal" class="modal" onclick="if(event.target===this)closeModal('commentsModal')">
     <div class="modal-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -377,6 +400,14 @@
     let selectedNewsFile = null;
     let selectedRegAvatarFile = null;
     let activePostIdForComments = null;
+
+    // Проверка черного списка заблокированных пользователей
+    let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
+    if (bannedList.includes(myUsername)) {
+        alert('Ваш аккаунт заблокирован администратором.');
+        localStorage.clear();
+        location.reload();
+    }
 
     document.getElementById('currentCity').textContent = selectedCity;
     document.getElementById('profileCity').textContent = selectedCity;
@@ -512,20 +543,79 @@
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     function openAdminModal() { openModal('adminModal'); }
 
+    // Кастомное подтверждение удаления вместо браузерного окна
+    let confirmCallback = null;
+    function showConfirm(title, text, callback) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        confirmCallback = callback;
+        document.getElementById('confirmModal').classList.add('open');
+    }
+    function closeConfirmModal(result) {
+        document.getElementById('confirmModal').classList.remove('open');
+        if (confirmCallback) {
+            confirmCallback(result);
+            confirmCallback = null;
+        }
+    }
+
     async function adminClearChat() {
-        if (!confirm('Точно очистить весь чат в городе ' + selectedCity + '?')) return;
-        await supabaseClient.from('messages').delete().eq('city', selectedCity);
-        alert('Чат очищен!');
+        showConfirm('Очистка чата', 'Вы уверены, что хотите полностью очистить городской чат?', async (res) => {
+            if (!res) return;
+            await supabaseClient.from('messages').delete().eq('city', selectedCity);
+            closeModal('adminModal');
+            loadPublicMessages();
+        });
+    }
+
+    async function adminClearPosts() {
+        showConfirm('Удаление новостей', 'Вы уверены, что хотите удалить все новости в этом городе?', async (res) => {
+            if (!res) return;
+            await supabaseClient.from('posts').delete().eq('city', selectedCity);
+            closeModal('adminModal');
+            loadPostsFromCloud();
+        });
+    }
+
+    // Отправка объявления от Администратора
+    async function sendAdminBroadcast() {
+        const input = document.getElementById('adminBroadcastInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        playSystemSound('send');
+        await supabaseClient.from('messages').insert([{
+            chat_type: chatMode,
+            city: selectedCity,
+            sender: '👑 АДМИНИСТРАТОР',
+            recipient: chatMode === 'private' ? privateRecipient : 'public',
+            text: '📢 ОФИЦИАЛЬНОЕ ОБЪЯВЛЕНИЕ:\n' + text,
+            avatar_url: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png'
+        }]);
+
+        input.value = '';
         closeModal('adminModal');
         loadPublicMessages();
     }
 
-    async function adminClearPosts() {
-        if (!confirm('Точно удалить все новости в городе ' + selectedCity + '?')) return;
-        await supabaseClient.from('posts').delete().eq('city', selectedCity);
-        alert('Новости удалены!');
-        closeModal('adminModal');
-        loadPostsFromCloud();
+    // Блокировка пользователя
+    function banUser() {
+        const input = document.getElementById('adminBanInput');
+        let target = input.value.trim();
+        if (!target) return;
+        if (!target.startsWith('@')) target = '@' + target;
+
+        showConfirm('Блокировка', `Заблокировать пользователя ${target} навсегда?`, (res) => {
+            if (!res) return;
+            let list = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
+            if (!list.includes(target)) {
+                list.push(target);
+                localStorage.setItem('pulseCity_banned', JSON.stringify(list));
+            }
+            alert(`Пользователь ${target} заблокирован.`);
+            input.value = '';
+            closeModal('adminModal');
+        });
     }
 
     async function deletePost(postId, authorUsername) {
@@ -533,10 +623,12 @@
             alert('Вы можете удалять только свои новости!');
             return;
         }
-        if (!confirm('Удалить эту новость?')) return;
-        await supabaseClient.from('posts').delete().eq('id', postId);
-        lastLoadedMaxPostId = null;
-        loadPostsFromCloud();
+        showConfirm('Удаление новости', 'Вы уверены, что хотите удалить эту новость?', async (res) => {
+            if (!res) return;
+            await supabaseClient.from('posts').delete().eq('id', postId);
+            lastLoadedMaxPostId = null;
+            loadPostsFromCloud();
+        });
     }
 
     async function deleteMessage(msgId, senderUsername) {
@@ -544,9 +636,12 @@
             alert('Вы можете удалять только свои сообщения!');
             return;
         }
-        await supabaseClient.from('messages').delete().eq('id', msgId);
-        lastLoadedMaxMsgId = null;
-        loadPublicMessages();
+        showConfirm('Удаление сообщения', 'Вы уверены, что хотите удалить это сообщение?', async (res) => {
+            if (!res) return;
+            await supabaseClient.from('messages').delete().eq('id', msgId);
+            lastLoadedMaxMsgId = null;
+            loadPublicMessages();
+        });
     }
 
     async function deleteComment(commentId, senderUsername) {
@@ -554,10 +649,12 @@
             alert('Вы можете удалять только свои комментарии!');
             return;
         }
-        await supabaseClient.from('comments').delete().eq('id', commentId);
-        loadComments(activePostIdForComments);
-        lastLoadedMaxPostId = null;
-        loadPostsFromCloud();
+        showConfirm('Удаление комментария', 'Вы уверены, что хотите удалить этот комментарий?', async (res) => {
+            if (!res) return;
+            await supabaseClient.from('comments').delete().eq('id', commentId);
+            loadComments(activePostIdForComments);
+            loadPostsFromCloud();
+        });
     }
 
     function switchTab(t, btn) {
@@ -648,7 +745,6 @@
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
 
-        // Подтягиваем все комментарии для подсчета
         const { data: allComments } = await supabaseClient.from('comments').select('post_id');
         const commentCounts = {};
         if (allComments) {
@@ -734,7 +830,6 @@
     }
 
     async function loadComments(postId) {
-        // Новые комментарии сверху
         const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: false });
         const list = document.getElementById('commentsList');
         list.innerHTML = '';
@@ -778,7 +873,7 @@
         }]);
         input.value = '';
         loadComments(activePostIdForComments);
-        loadPostsFromCloud(); // Обновляем счетчик комментариев в ленте
+        loadPostsFromCloud();
     }
 
     async function publishNews() {
@@ -822,7 +917,6 @@
     async function loadPublicMessages() {
         if (!supabaseClient || !myUsername) return;
         
-        // Новые сообщения загружаем СВЕРХУ ВНИЗ (descending: true)
         let query = supabaseClient.from('messages').select('*').order('id', { ascending: false });
 
         if (chatMode === 'public') {
