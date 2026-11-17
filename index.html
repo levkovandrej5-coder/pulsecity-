@@ -676,7 +676,8 @@
             content: text,
             media_url: null,
             author_username: '⚡ PulseCity',
-            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png'
+            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
+            views: 1
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
@@ -867,6 +868,28 @@
         });
     }
 
+    // Реальный учет уникальных просмотров поста пользователем
+    let viewedPostsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '[]'));
+
+    async function trackPostView(post) {
+        if (!supabaseClient || !post || !post.id) return;
+        if (viewedPostsSet.has(post.id)) return;
+
+        viewedPostsSet.add(post.id);
+        localStorage.setItem('pulseCity_viewed_posts', JSON.stringify([...viewedPostsSet]));
+
+        const nextViews = (post.views || 0) + 1;
+        post.views = nextViews;
+
+        const badge = document.getElementById(`views-count-${post.id}`);
+        if (badge) badge.textContent = nextViews;
+
+        await supabaseClient
+            .from('posts')
+            .update({ views: nextViews })
+            .eq('id', post.id);
+    }
+
     let lastLoadedMaxPostId = null;
     let cachedPostsSignature = '';
     let globalPostsData = [];
@@ -881,7 +904,6 @@
 
         globalPostsData = data;
 
-        // Загружаем комментарии из облака
         const { data: allComments } = await supabaseClient.from('comments').select('post_id');
         globalCommentsData = {};
         if (allComments) {
@@ -890,7 +912,6 @@
             });
         }
 
-        // Загружаем реакции из облака Supabase для синхронизации на всех устройствах
         const { data: allReactions } = await supabaseClient.from('post_reactions').select('*');
         globalReactionsData = {};
         if (allReactions) {
@@ -903,7 +924,6 @@
             });
         }
 
-        // Загружаем голоса опросов из облака Supabase
         const { data: allPollVotes } = await supabaseClient.from('poll_votes').select('*');
         globalPollVotesData = {};
         let userVotedStorage = {};
@@ -918,7 +938,7 @@
         }
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
         
-        let newSignature = data.map(p => `${p.id}-${JSON.stringify(globalReactionsData[p.id] || {})}-${globalCommentsData[p.id] || 0}-${JSON.stringify(globalPollVotesData[p.id] || {})}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${JSON.stringify(globalReactionsData[p.id] || {})}-${globalCommentsData[p.id] || 0}-${JSON.stringify(globalPollVotesData[p.id] || {})}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -952,6 +972,9 @@
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
         postsToRender.forEach(p => {
+            // Засчитываем просмотр при появлении поста в ленте
+            trackPostView(p);
+
             let mediaTag = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
@@ -999,7 +1022,6 @@
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
-            // Реакции из облака Supabase
             let postReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
 
             let reactionsHtml = '';
@@ -1009,7 +1031,7 @@
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            let realViews = 24 + (p.id * 11) % 140;
+            let realViews = p.views || 1;
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -1033,7 +1055,7 @@
                         ${reactionsHtml}
                         <button class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
                     </div>
-                    <div class="views-badge">👁️ ${realViews}</div>
+                    <div class="views-badge">👁️ <span id="views-count-${p.id}">${realViews}</span></div>
                 </div>
             `;
             container.appendChild(card);
@@ -1190,7 +1212,8 @@
             content: text,
             media_url: publicMediaUrl,
             author_username: myUsername,
-            author_avatar: myAvatar
+            author_avatar: myAvatar,
+            views: 1
         };
 
         if (pollQ && poll1 && poll2) {
@@ -1198,12 +1221,17 @@
             postData.poll_options = [poll1, poll2];
         }
 
-        const { error } = await supabaseClient.from('posts').insert([postData]);
+        const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
 
         document.getElementById('loadingModal').classList.remove('open');
         if (error) {
             showPulseAlert('Ошибка публикации: ' + error.message);
             return;
+        }
+
+        if (data && data[0]) {
+            viewedPostsSet.add(data[0].id);
+            localStorage.setItem('pulseCity_viewed_posts', JSON.stringify([...viewedPostsSet]));
         }
 
         playSystemSound('send');
