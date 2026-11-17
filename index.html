@@ -949,7 +949,6 @@
             return;
         }
 
-        let savedPollsStorage = JSON.parse(localStorage.getItem('pulseCity_saved_polls') || '{}');
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
         postsToRender.forEach(p => {
@@ -962,14 +961,14 @@
             }
 
             let pollHtml = '';
-            let postPoll = savedPollsStorage[p.id];
-            if (postPoll && postPoll.question && postPoll.options) {
+            if (p.poll_question && p.poll_options) {
+                let optionsArr = typeof p.poll_options === 'string' ? JSON.parse(p.poll_options) : p.poll_options;
                 let votes = globalPollVotesData[p.id] || { "0": 0, "1": 0 };
                 let totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
                 let userVotedOpt = pollVotesStorage[p.id];
 
                 let optionsHtml = '';
-                postPoll.options.forEach((optText, idx) => {
+                optionsArr.forEach((optText, idx) => {
                     let optVotes = votes[idx] || 0;
                     let percent = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0;
                     let isChosen = userVotedOpt === idx;
@@ -984,7 +983,7 @@
 
                 pollHtml = `
                     <div class="poll-box">
-                        <div class="poll-question">📊 ${postPoll.question}</div>
+                        <div class="poll-question">📊 ${p.poll_question}</div>
                         ${optionsHtml}
                     </div>
                 `;
@@ -1194,22 +1193,17 @@
             author_avatar: myAvatar
         };
 
-        const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
+        if (pollQ && poll1 && poll2) {
+            postData.poll_question = pollQ;
+            postData.poll_options = [poll1, poll2];
+        }
+
+        const { error } = await supabaseClient.from('posts').insert([postData]);
 
         document.getElementById('loadingModal').classList.remove('open');
         if (error) {
             showPulseAlert('Ошибка публикации: ' + error.message);
             return;
-        }
-
-        if (pollQ && poll1 && poll2 && data && data[0]) {
-            let newId = data[0].id;
-            let savedPollsStorage = JSON.parse(localStorage.getItem('pulseCity_saved_polls') || '{}');
-            savedPollsStorage[newId] = {
-                question: pollQ,
-                options: [poll1, poll2]
-            };
-            localStorage.setItem('pulseCity_saved_polls', JSON.stringify(savedPollsStorage));
         }
 
         playSystemSound('send');
