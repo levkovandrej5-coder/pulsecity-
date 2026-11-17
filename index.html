@@ -15,7 +15,6 @@
         .header-actions{display:flex;gap:8px;align-items:center}
         .city-btn{background:rgba(255,107,0,0.12);color:#ff9500;font-size:13px;font-weight:700;padding:8px 14px;border-radius:18px;border:1px solid rgba(255,107,0,0.35);cursor:pointer;display:flex;align-items:center;gap:4px}
         
-        /* Мини-кнопки фишек в шапке */
         .top-mini-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ff9500;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s}
         .top-mini-btn:active{transform:scale(0.9)}
 
@@ -111,7 +110,7 @@
         
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(15px);z-index:2500;align-items:center;justify-content:center;padding:20px}
         .modal.open{display:flex}
-        .modal-card{background:#140e0a;border:1px solid rgba(255,107,0,0.25);border-radius:28px;padding:26px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;display:flex;flex-direction:column}
+        .modal-card{background:#140e0a;border:1px solid rgba(255,107,0,0.25);border-radius:28px;padding:26px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;overflow-y:auto;display:flex;flex-direction:column}
         .modal-card h3{font-size:22px;margin-bottom:16px;font-weight:800}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
         .modal-card textarea{height:90px;resize:none}
@@ -139,7 +138,6 @@
 <header>
     <div class="logo">⚡ PulseCity</div>
     <div class="header-actions">
-        <!-- Аккуратные мини-кнопки фишек в шапке -->
         <button class="top-mini-btn" onclick="openChallengeModal()" title="Вызов дня">🎯</button>
         <button class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
         <button class="city-btn" onclick="openModal('cityModal')">📍 <span id="currentCity">Иркутск</span> ▾</button>
@@ -202,10 +200,11 @@
             </div>
             <h3 id="displayProfileName" onclick="secretAdminTap()" style="margin-bottom:2px;font-size:20px;cursor:pointer;">Пользователь</h3>
             <p style="margin-bottom:6px;font-size:14px;color:#ff9500;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
+            <p id="displayBio" style="font-size:13px;color:#9ca3af;margin-bottom:14px;font-style:italic;">О себе пока ничего не написано...</p>
+            
             <div id="userBadge" style="display:inline-block;background:rgba(255,107,0,0.15);color:#ff9500;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,107,0,0.35)">⭐ Местный эксперт</div>
             
-            <input type="file" id="changeAvatarInput" accept="image/*" style="display:none" onchange="updateUserAvatar(this)">
-            <button class="btn-sec" onclick="document.getElementById('changeAvatarInput').click()">📷 Сменить аватарку</button>
+            <button class="btn-main" onclick="openEditProfileModal()" style="margin-bottom:10px;">✏️ Настроить профиль</button>
             <p style="margin:12px 0;font-size:15px">Текущий город: <strong id="profileCity" style="color:#ff9500">Иркутск</strong></p>
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
@@ -214,6 +213,49 @@
             <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
             
             <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования профиля и конфиденциальности -->
+<div id="editProfileModal" class="modal" onclick="if(event.target===this)closeModal('editProfileModal')">
+    <div class="modal-card">
+        <h3>Редактирование профиля</h3>
+        <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Настройте свою публичную информацию и приватность:</p>
+        
+        <div style="text-align:center;margin-bottom:12px;">
+            <input type="file" id="editAvatarFile" accept="image/*" style="display:none" onchange="previewEditAvatar(this)">
+            <div id="editAvatarBox" onclick="document.getElementById('editAvatarFile').click()" style="width:70px;height:70px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px dashed rgba(255,107,0,0.5);overflow:hidden;">
+                📷
+            </div>
+            <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Изменить аватар</span>
+        </div>
+
+        <input type="text" id="editNameInput" placeholder="Ваше имя...">
+        <input type="text" id="editUsernameInput" placeholder="@никнейм">
+        <textarea id="editBioInput" placeholder="О себе (пару слов для горожан)..." style="height:60px;"></textarea>
+
+        <p style="font-size:13px;font-weight:700;color:#ff9500;margin:10px 0 6px;">🔒 Конфиденциальность</p>
+        
+        <div class="setting-row">
+            <div>
+                <p style="font-weight:700;font-size:13px">Скрывать мой статус</p>
+                <p style="font-size:11px;color:#9ca3af">Не показывать, когда я в сети</p>
+            </div>
+            <div id="privacyStatusToggle" class="toggle-switch" onclick="togglePrivacyStatus()"></div>
+        </div>
+
+        <div class="setting-row" style="margin-bottom:14px;">
+            <div>
+                <p style="font-weight:700;font-size:13px">Запретить ЛС от незнакомцев</p>
+                <p style="font-size:11px;color:#9ca3af">Писать смогут только избранные</p>
+            </div>
+            <div id="privacyDmToggle" class="toggle-switch" onclick="togglePrivacyDm()"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+            <button class="btn-sec" onclick="closeModal('editProfileModal')">Отмена</button>
+            <button class="btn-main" style="margin:0" onclick="saveProfileChanges()">Сохранить</button>
         </div>
     </div>
 </div>
@@ -365,7 +407,6 @@
         <input type="text" id="pollOpt1Input" placeholder="Вариант ответа 1">
         <input type="text" id="pollOpt2Input" placeholder="Вариант ответа 2">
 
-        <!-- Переключатель анонимности -->
         <div class="setting-row" style="margin:10px 0;">
             <div>
                 <p style="font-weight:700;font-size:14px">🕶️ Анонимная маска</p>
@@ -481,7 +522,22 @@
         document.getElementById('soundToggle').classList.remove('active');
     }
 
-    // Анонимность
+    // Переключатели конфиденциальности
+    let privacyHideStatus = localStorage.getItem('pulseCity_privacy_status') === 'true';
+    let privacyBlockDm = localStorage.getItem('pulseCity_privacy_dm') === 'true';
+
+    function togglePrivacyStatus() {
+        privacyHideStatus = !privacyHideStatus;
+        localStorage.setItem('pulseCity_privacy_status', privacyHideStatus);
+        document.getElementById('privacyStatusToggle').classList.toggle('active', privacyHideStatus);
+    }
+
+    function togglePrivacyDm() {
+        privacyBlockDm = !privacyBlockDm;
+        localStorage.setItem('pulseCity_privacy_dm', privacyBlockDm);
+        document.getElementById('privacyDmToggle').classList.toggle('active', privacyBlockDm);
+    }
+
     let isAnonymousPost = false;
     function toggleAnonymousPost() {
         isAnonymousPost = !isAnonymousPost;
@@ -495,7 +551,6 @@
         { name: '⚡ Инкогнито', avatar: 'https://cdn-icons-png.flaticn.com/512/456/456212.png' }
     ];
 
-    // Вызов дня
     const challengesList = [
         "Сфоткайте самый необычный закат или рассвет в вашем районе 🌅",
         "Поделитесь лучшим рецептом домашнего вечернего чая или кофе ☕",
@@ -552,10 +607,12 @@
     let myName = localStorage.getItem('pulseCity_v4_name') || '';
     let myUsername = localStorage.getItem('pulseCity_v4_username') || '';
     let myAvatar = localStorage.getItem('pulseCity_v4_avatar') || '';
+    let myBio = localStorage.getItem('pulseCity_v4_bio') || '';
     let chatMode = 'public';
     let privateRecipient = '';
     let selectedNewsFile = null;
     let selectedRegAvatarFile = null;
+    let selectedEditAvatarFile = null;
     let activePostIdForComments = null;
 
     let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
@@ -582,6 +639,7 @@
         if (myName && myUsername) {
             document.getElementById('displayProfileName').textContent = myName;
             document.getElementById('displayUsername').textContent = myUsername;
+            document.getElementById('displayBio').textContent = myBio || 'О себе пока ничего не написано...';
             if (myAvatar) {
                 document.getElementById('profileAvatarPreview').innerHTML = `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
             }
@@ -605,6 +663,64 @@
             };
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function previewEditAvatar(input) {
+        if (input.files && input.files[0]) {
+            selectedEditAvatarFile = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('editAvatarBox').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function openEditProfileModal() {
+        document.getElementById('editNameInput').value = myName;
+        document.getElementById('editUsernameInput').value = myUsername;
+        document.getElementById('editBioInput').value = myBio;
+        if (myAvatar) {
+            document.getElementById('editAvatarBox').innerHTML = `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        document.getElementById('privacyStatusToggle').classList.toggle('active', privacyHideStatus);
+        document.getElementById('privacyDmToggle').classList.toggle('active', privacyBlockDm);
+        openModal('editProfileModal');
+    }
+
+    async function saveProfileChanges() {
+        const name = document.getElementById('editNameInput').value.trim();
+        let uname = document.getElementById('editUsernameInput').value.trim();
+        const bio = document.getElementById('editBioInput').value.trim();
+
+        if (!name || !uname) {
+            showPulseAlert('Имя и никнейм не могут быть пустыми!');
+            return;
+        }
+        if (!uname.startsWith('@')) uname = '@' + uname;
+
+        document.getElementById('loadingTitle').textContent = 'Сохранение профиля...';
+        document.getElementById('loadingModal').classList.add('open');
+
+        if (selectedEditAvatarFile) {
+            const url = await uploadFileToSupabase(selectedEditAvatarFile);
+            if (url) myAvatar = url;
+        }
+
+        myName = name;
+        myUsername = uname;
+        myBio = bio;
+
+        localStorage.setItem('pulseCity_v4_name', myName);
+        localStorage.setItem('pulseCity_v4_username', myUsername);
+        localStorage.setItem('pulseCity_v4_avatar', myAvatar);
+        localStorage.setItem('pulseCity_v4_bio', myBio);
+
+        document.getElementById('loadingModal').classList.remove('open');
+        closeModal('editProfileModal');
+        updateProfileUI();
+        showPulseAlert('✓ Профиль успешно обновлен!');
+        playSystemSound('send');
     }
 
     async function compressImage(file) {
@@ -689,20 +805,6 @@
         setupRealtimeSubscriptions();
     }
 
-    async function updateUserAvatar(input) {
-        if (!input.files || !input.files[0]) return;
-        document.getElementById('loadingTitle').textContent = 'Обновление фото...';
-        document.getElementById('loadingModal').classList.add('open');
-        const url = await uploadFileToSupabase(input.files[0]);
-        document.getElementById('loadingModal').classList.remove('open');
-        if (url) {
-            myAvatar = url;
-            localStorage.setItem('pulseCity_v4_avatar', myAvatar);
-            updateProfileUI();
-            playSystemSound('send');
-        }
-    }
-
     function logoutUser() {
         localStorage.clear();
         location.reload();
@@ -715,7 +817,6 @@
     }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
-    
     function closeModal(id) { 
         if (id === 'fullscreenModal') {
             const content = document.getElementById('fullscreenContent');
@@ -1519,6 +1620,7 @@
     let typingTimer = null;
     function notifyTyping() {
         if (!supabaseClient || !myUsername) return;
+        if (privacyHideStatus) return; // Если включена конфиденциальность статуса, не шлем печатает
         supabaseClient.from('typing').upsert([{ username: myUsername, city: selectedCity, updated_at: new Date() }]).then(()=>{});
     }
 
@@ -1536,7 +1638,7 @@
             .subscribe();
 
         setInterval(async () => {
-            if (!selectedCity) return;
+            if (!selectedCity || privacyHideStatus) return;
             const { data } = await supabaseClient.from('typing').select('*').eq('city', selectedCity);
             if (!data) return;
             const now = new Date();
