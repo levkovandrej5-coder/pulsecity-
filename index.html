@@ -79,8 +79,10 @@
         #scrollTopBtn:active{transform:scale(0.9)}
 
         .chat-tabs{display:flex;gap:10px;margin-bottom:14px}
-        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;padding:12px;border-radius:16px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;padding:12px;border-radius:16px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;position:relative}
         .chat-tab-btn.active{background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(255,107,0,0.35)}
+
+        .unread-badge{background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:6px;display:inline-block;vertical-align:middle}
 
         .pinned-msg-box{background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.3);border-radius:18px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
         
@@ -162,7 +164,7 @@
         <div class="card">
             <div class="chat-tabs">
                 <button class="chat-tab-btn active" id="tabBtnPublic" onclick="switchChatMode('public')">🌍 Общий чат</button>
-                <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные чаты</button>
+                <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные чаты <span id="totalUnreadBadge" style="display:none;" class="unread-badge">0</span></button>
             </div>
             
             <h3 id="chatTitle" style="margin-bottom:8px;">Городской чат • Иркутск</h3>
@@ -179,9 +181,11 @@
             <div id="privateSectionContainer" style="display:none;margin-bottom:10px;">
                 <div id="conversationsList" style="display:flex;flex-direction:column;gap:8px;max-height:35vh;overflow-y:auto;"></div>
                 
-                <div id="activeDmHeader" style="display:none;background:rgba(255,107,0,0.12);padding:8px 12px;border-radius:12px;font-size:13px;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <span>Диалог с: <strong id="activeDmUser" style="color:#ff9500">выберите пользователя</strong></span>
-                    <button onclick="backToConversationsList()" style="background:none;border:none;color:#ff9500;cursor:pointer;font-size:12px;font-weight:700;">← К списку чатов</button>
+                <!-- Заметная и крупная кнопка возврата к списку чатов -->
+                <div id="activeDmHeader" style="display:none;margin-bottom:12px;">
+                    <button class="btn-main" onclick="backToConversationsList()" style="padding:12px 18px;font-size:14px;background:linear-gradient(135deg,#ff9500,#ff6b00);box-shadow:0 6px 20px rgba(255,107,0,0.3);">
+                        ← Назад к списком чатов (<span id="activeDmUser" style="color:#fff">диалог</span>)
+                    </button>
                 </div>
             </div>
 
@@ -457,7 +461,7 @@
     <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:20px auto 10px;text-decoration:none;text-align:center;">📥 Скачать файл</a>
 </div>
 
-<!-- Комментарии (без лишней кнопки назад, закрываются по тапу на фон) -->
+<!-- Комментарии -->
 <div id="commentsModal" class="modal" onclick="if(event.target===this)closeModal('commentsModal')">
     <div class="modal-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -1171,6 +1175,9 @@
         document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
         document.getElementById('tab-' + t).classList.add('active');
         btn.classList.add('active');
+        if (t === 'chat' && chatMode === 'private' && !privateRecipient) {
+            loadConversationsList();
+        }
     }
 
     function switchChatMode(mode, targetUser = '') {
@@ -1196,11 +1203,17 @@
 
             if (targetUser) {
                 privateRecipient = targetUser;
-                dmHeader.style.display = 'flex';
+                dmHeader.style.display = 'block';
                 convList.style.display = 'none';
                 inputArea.style.display = 'flex';
                 document.getElementById('activeDmUser').textContent = targetUser;
                 document.getElementById('chatTitle').textContent = 'Личный чат с ' + targetUser;
+
+                // Отмечаем сообщения как прочитанные в локальном хранилище
+                let readMap = JSON.parse(localStorage.getItem('pulseCity_read_dms') || '{}');
+                readMap[targetUser] = Date.now();
+                localStorage.setItem('pulseCity_read_dms', JSON.stringify(readMap));
+                loadConversationsList();
             } else {
                 privateRecipient = '';
                 dmHeader.style.display = 'none';
@@ -1236,21 +1249,40 @@
         convList.innerHTML = '';
 
         if (error || !data || data.length === 0) {
-            convList.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:15px 0;">У вас пока нет активных личных чатов.<br>Нажмите на аватарку любого пользователя в общем чате, чтобы начать.</p>';
+            convList.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:15px 0;">У вас пока нет активных личных чатов.<br>Нажмите на аватарку любого пользователя в общем чате, чтобы написать ему.</p>';
+            document.getElementById('totalUnreadBadge').style.display = 'none';
             return;
         }
 
         let interlocutors = {};
+        let readMap = JSON.parse(localStorage.getItem('pulseCity_read_dms') || '{}');
+        let totalUnreadCount = 0;
+
         data.forEach(m => {
             let partner = m.sender === myUsername ? m.recipient : m.sender;
-            if (partner && partner !== myUsername && !interlocutors[partner]) {
-                interlocutors[partner] = {
-                    lastText: m.text,
-                    lastTime: m.created_at,
-                    avatar: m.sender === partner ? m.avatar_url : ''
-                };
+            if (partner && partner !== myUsername) {
+                let msgTime = new Date(m.created_at).getTime();
+                let lastReadTime = readMap[partner] || 0;
+                let isUnread = (m.sender === partner) && (msgTime > lastReadTime);
+
+                if (!interlocutors[partner]) {
+                    interlocutors[partner] = {
+                        lastText: m.text,
+                        lastTime: m.created_at,
+                        unread: isUnread
+                    };
+                }
+                if (isUnread) totalUnreadCount++;
             }
         });
+
+        const badgeEl = document.getElementById('totalUnreadBadge');
+        if (totalUnreadCount > 0) {
+            badgeEl.textContent = totalUnreadCount;
+            badgeEl.style.display = 'inline-block';
+        } else {
+            badgeEl.style.display = 'none';
+        }
 
         let partnersKeys = Object.keys(interlocutors);
         if (partnersKeys.length === 0) {
@@ -1263,13 +1295,18 @@
             let timeStr = formatNiceTime(info.lastTime);
             
             let item = document.createElement('div');
-            item.style.cssText = "background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);padding:10px 14px;border-radius:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s;";
+            let unreadStyle = info.unread ? 'border-color:rgba(255,107,0,0.6);background:rgba(255,107,0,0.12);' : 'background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08);';
+            
+            item.style.cssText = `${unreadStyle} padding:12px 16px;border-radius:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s;`;
             item.onclick = () => switchChatMode('private', partner);
             
             item.innerHTML = `
                 <div>
-                    <strong style="color:#ff9500;font-size:14px;">${partner}</strong>
-                    <p style="color:#9ca3af;font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${info.lastText}</p>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <strong style="color:#ff9500;font-size:14px;">${partner}</strong>
+                        ${info.unread ? '<span class="unread-badge">новое</span>' : ''}
+                    </div>
+                    <p style="color:${info.unread ? '#fff' : '#9ca3af'};font-size:12px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;font-weight:${info.unread ? '700' : '400'};">${info.lastText}</p>
                 </div>
                 <span style="font-size:10px;color:rgba(255,255,255,0.4);">${timeStr}</span>
             `;
@@ -1743,6 +1780,7 @@
         } else {
             if (!privateRecipient) {
                 document.getElementById('chatMessages').innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в списке чатов.</p>';
+                loadConversationsList();
                 return;
             }
             query = query.eq('chat_type', 'private');
@@ -1771,6 +1809,9 @@
         lastKnownMaxMsgId = currentMaxMsgId;
 
         renderMessagesList(globalMessagesData);
+        if (chatMode === 'private' && !privateRecipient) {
+            loadConversationsList();
+        }
     }
 
     function renderMessagesList(msgs) {
