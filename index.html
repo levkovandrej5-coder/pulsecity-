@@ -678,8 +678,7 @@
             content: text,
             media_url: null,
             author_username: '⚡ PulseCity',
-            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
-            views: 1
+            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png'
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
@@ -890,7 +889,8 @@
         }
         
         let localReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
+        let localViews = JSON.parse(localStorage.getItem('pulseCity_views_data') || '{}');
+        let newSignature = data.map(p => `${p.id}-${localViews[p.id] || 1}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -909,15 +909,20 @@
         renderPostsList(globalPostsData, commentCounts);
     }
 
-    async function incrementPostView(postId, currentViews) {
+    function getPostViews(postId) {
+        let localViews = JSON.parse(localStorage.getItem('pulseCity_views_data') || '{}');
         let viewedStorage = JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '{}');
-        if (viewedStorage[postId]) return;
-
-        viewedStorage[postId] = true;
-        localStorage.setItem('pulseCity_viewed_posts', JSON.stringify(viewedStorage));
-
-        let newViews = (currentViews || 0) + 1;
-        await supabaseClient.from('posts').update({ views: newViews }).eq('id', postId);
+        
+        if (!localViews[postId]) {
+            localViews[postId] = 12 + (postId * 5) % 35; // Стартовая база
+        }
+        if (!viewedStorage[postId]) {
+            viewedStorage[postId] = true;
+            localViews[postId] += 1;
+            localStorage.setItem('pulseCity_views_data', JSON.stringify(localViews));
+            localStorage.setItem('pulseCity_viewed_posts', JSON.stringify(viewedStorage));
+        }
+        return localViews[postId];
     }
 
     function renderPostsList(postsToRender, commentCounts = {}) {
@@ -937,8 +942,6 @@
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
         postsToRender.forEach(p => {
-            incrementPostView(p.id, p.views);
-
             let mediaTag = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
@@ -987,6 +990,7 @@
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
+            // Реакции
             let postReactions = savedReactions[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
             let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
             let userReacted = myReactions[p.id] || null;
@@ -998,7 +1002,7 @@
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            let realViews = p.views || 1;
+            let realViews = getPostViews(p.id);
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -1077,6 +1081,7 @@
         localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
         localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
         
+        // 100% срабатывание поп-анимации эмодзи
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
         if (btnEl) {
             btnEl.classList.remove('pop');
@@ -1180,8 +1185,7 @@
             content: text,
             media_url: publicMediaUrl,
             author_username: myUsername,
-            author_avatar: myAvatar,
-            views: 1
+            author_avatar: myAvatar
         };
 
         const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
@@ -1426,7 +1430,7 @@
             return;
         }
 
-        const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|3gp|mkv|avi)$/i);
+        const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i);
         playSystemSound('send');
 
         const { error } = await supabaseClient.from('messages').insert([{
