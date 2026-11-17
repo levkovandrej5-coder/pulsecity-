@@ -27,7 +27,6 @@
         .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(0,243,255,0.3);display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s}
         .btn-main:active{transform:scale(0.98)}
         
-        /* Премиальные карточки */
         .card{background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 40px rgba(0,0,0,0.5);position:relative;overflow:hidden}
         .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)}
         .card.admin-card{border:1px solid rgba(0,243,255,0.4);background:linear-gradient(145deg,rgba(0,243,255,0.1),rgba(37,99,235,0.04));}
@@ -43,12 +42,6 @@
         .card h3{font-size:19px;font-weight:800;margin-bottom:10px;color:#f8fafc;line-height:1.35}
         .card p{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:16px}
         .news-media{width:100%;max-height:360px;border-radius:20px;object-fit:cover;margin-bottom:16px;display:block;background:#000;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.4)}
-        
-        /* Блок опроса */
-        .poll-box{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;margin-bottom:16px}
-        .poll-question{font-weight:700;font-size:15px;margin-bottom:12px;color:#00f3ff}
-        .poll-option{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:12px 16px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;transition:.2s}
-        .poll-option:hover{background:rgba(0,243,255,0.15);border-color:rgba(0,243,255,0.4)}
         
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;flex-wrap:wrap;gap:10px}
         .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -307,17 +300,13 @@
     </div>
 </div>
 
-<!-- Модальное окно создания новости с опросом -->
+<!-- Модальное окно создания новости -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
         
-        <input type="text" id="pollQuestionInput" placeholder="Опрос (необязательно): Вопрос?">
-        <input type="text" id="pollOpt1Input" placeholder="Вариант ответа 1">
-        <input type="text" id="pollOpt2Input" placeholder="Вариант ответа 2">
-
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
             <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
@@ -680,8 +669,7 @@
             content: text,
             media_url: null,
             author_username: '⚡ PulseCity',
-            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
-            views: 0
+            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png'
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
@@ -891,7 +879,9 @@
             });
         }
         
-        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${p.reactions ? JSON.stringify(p.reactions) : ''}-${commentCounts[p.id] || 0}`).join('|');
+        let localReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
+        let localViews = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
+        let newSignature = data.map(p => `${p.id}-${localViews[p.id] || 0}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -931,15 +921,12 @@
         }
 
         let viewedPosts = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
-        let pollVotes = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
+        let savedReactions = JSON.parse(localStorage.getItem('pulseCity_reactions_data') || '{}');
 
         postsToRender.forEach(p => {
             if (!viewedPosts[p.id] && p.author_username !== myUsername) {
                 viewedPosts[p.id] = true;
                 localStorage.setItem('pulseCity_views', JSON.stringify(viewedPosts));
-                let newViews = (p.views || 0) + 1;
-                p.views = newViews;
-                supabaseClient.from('posts').update({ views: newViews }).eq('id', p.id).then(()=>{});
             }
 
             let mediaTag = '';
@@ -948,36 +935,6 @@
                 mediaTag = isVid
                     ? `<video src="${p.media_url}" class="news-media" muted playsinline preload="metadata" onclick="openFullscreenMedia('${p.media_url}', true)"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
-            }
-
-            // Рендер опроса, если он есть в посте
-            let pollHtml = '';
-            if (p.poll_question && p.poll_options) {
-                let options = p.poll_options; // массив строк
-                let votes = p.poll_votes || {}; // { "0": 5, "1": 2 }
-                let totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
-                let userVotedOpt = pollVotes[p.id];
-
-                let optionsHtml = '';
-                options.forEach((optText, idx) => {
-                    let optVotes = votes[idx] || 0;
-                    let percent = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0;
-                    let isChosen = userVotedOpt === idx;
-
-                    optionsHtml += `
-                        <div class="poll-option" onclick="votePoll(${p.id}, ${idx})" style="${isChosen ? 'border-color:#00f3ff;background:rgba(0,243,255,0.1)' : ''}">
-                            <span>${isChosen ? '✓ ' : ''}${optText}</span>
-                            <span style="color:#00f3ff;font-weight:700;">${percent}% (${optVotes})</span>
-                        </div>
-                    `;
-                });
-
-                pollHtml = `
-                    <div class="poll-box">
-                        <div class="poll-question">📊 ${p.poll_question}</div>
-                        ${optionsHtml}
-                    </div>
-                `;
             }
 
             const authorAvatarHtml = p.author_avatar 
@@ -990,16 +947,20 @@
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
-            let reactions = p.reactions || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
+            // Реакции (храним локально в памяти устройства для стабильности)
+            let postReactions = savedReactions[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
             let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
             let userReacted = myReactions[p.id] || null;
 
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
-                let count = reactions[emo] || 0;
-                let activeStyle = userReacted === emo ? 'background:rgba(0,243,255,0.25);border-color:#00f3ff;' : '';
+                let count = postReactions[emo] || 0;
+                let activeStyle = userReacted === emo ? 'background:rgba(0,243,255,0.25);border-color:#00f3ff;transform:scale(1.05);' : '';
                 reactionsHtml += `<button class="action-btn" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
+
+            // Просмотры (генерируем стабильные по ID для каждого поста)
+            let viewsCount = 14 + (p.id * 7) % 85;
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -1017,13 +978,12 @@
                 <h3>${p.title}</h3>
                 ${mediaTag}
                 <p>${p.content}</p>
-                ${pollHtml}
                 <div class="card-actions">
                     <div class="card-actions-left">
                         ${reactionsHtml}
                         <button class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
                     </div>
-                    <div class="views-badge">👁️ ${p.views || 0}</div>
+                    <div class="views-badge">👁️ ${viewsCount}</div>
                 </div>
             `;
             list.appendChild(card);
@@ -1032,25 +992,32 @@
         initVideoObserver();
     }
 
-    async function votePoll(postId, optIdx) {
-        let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
-        if (pollVotesStorage[postId] !== undefined) {
-            showPulseAlert('Вы уже проголосовали в этом опросе!');
-            return;
+    function reactPost(postId, emoji) {
+        let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
+        let savedReactions = JSON.parse(localStorage.getItem('pulseCity_reactions_data') || '{}');
+        let currentReact = myReactions[postId] || null;
+
+        if (!savedReactions[postId]) {
+            savedReactions[postId] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
+        }
+        let reactions = savedReactions[postId];
+
+        if (currentReact === emoji) {
+            reactions[emoji] = Math.max(0, (reactions[emoji] || 1) - 1);
+            myReactions[postId] = null;
+        } else {
+            if (currentReact) {
+                reactions[currentReact] = Math.max(0, (reactions[currentReact] || 1) - 1);
+            }
+            reactions[emoji] = (reactions[emoji] || 0) + 1;
+            myReactions[postId] = emoji;
         }
 
-        let post = globalPostsData.find(x => x.id === postId);
-        if (!post) return;
-        let votes = post.poll_votes || { "0": 0, "1": 0 };
-        votes[optIdx] = (votes[optIdx] || 0) + 1;
-
-        pollVotesStorage[postId] = optIdx;
-        localStorage.setItem('pulseCity_poll_votes', JSON.stringify(pollVotesStorage));
-
-        post.poll_votes = votes;
-        renderPostsList(globalPostsData);
-        await supabaseClient.from('posts').update({ poll_votes: votes }).eq('id', postId);
+        localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
+        localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
+        
         playSystemSound('send');
+        renderPostsList(globalPostsData);
     }
 
     function filterFeedSearch() {
@@ -1065,32 +1032,6 @@
             (p.author_username && p.author_username.toLowerCase().includes(query))
         );
         renderPostsList(filtered);
-    }
-
-    async function reactPost(postId, emoji) {
-        let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-        let currentReact = myReactions[postId] || null;
-
-        let post = globalPostsData.find(x => x.id === postId);
-        if (!post) return;
-        let reactions = post.reactions || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
-
-        if (currentReact === emoji) {
-            reactions[emoji] = Math.max(0, (reactions[emoji] || 1) - 1);
-            myReactions[postId] = null;
-        } else {
-            if (currentReact) {
-                reactions[currentReact] = Math.max(0, (reactions[currentReact] || 1) - 1);
-            }
-            reactions[emoji] = (reactions[emoji] || 0) + 1;
-            myReactions[postId] = emoji;
-        }
-
-        localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
-        post.reactions = reactions;
-        
-        renderPostsList(globalPostsData);
-        await supabaseClient.from('posts').update({ reactions: reactions }).eq('id', postId);
     }
 
     function openComments(postId) {
@@ -1150,9 +1091,6 @@
     async function publishNews() {
         let title = document.getElementById('newsTitleInput').value.trim();
         const text = document.getElementById('newsTextInput').value.trim();
-        const pollQ = document.getElementById('pollQuestionInput').value.trim();
-        const poll1 = document.getElementById('pollOpt1Input').value.trim();
-        const poll2 = document.getElementById('pollOpt2Input').value.trim();
         
         if (!text) { showPulseAlert('Введите текст новости!'); return; }
         if (!title) { title = 'Новость от ' + myUsername; }
@@ -1165,25 +1103,15 @@
             publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
         }
 
-        let postData = {
+        const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
             category: 'general',
             title: title,
             content: text,
             media_url: publicMediaUrl,
             author_username: myUsername,
-            author_avatar: myAvatar,
-            views: 0,
-            reactions: { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 }
-        };
-
-        if (pollQ && poll1 && poll2) {
-            postData.poll_question = pollQ;
-            postData.poll_options = [poll1, poll2];
-            postData.poll_votes = { "0": 0, "1": 0 };
-        }
-
-        const { error } = await supabaseClient.from('posts').insert([postData]);
+            author_avatar: myAvatar
+        }]);
 
         document.getElementById('loadingModal').classList.remove('open');
         if (error) {
@@ -1194,9 +1122,6 @@
         playSystemSound('send');
         document.getElementById('newsTitleInput').value = '';
         document.getElementById('newsTextInput').value = '';
-        document.getElementById('pollQuestionInput').value = '';
-        document.getElementById('pollOpt1Input').value = '';
-        document.getElementById('pollOpt2Input').value = '';
         document.getElementById('newsMediaInput').value = '';
         document.getElementById('newsMediaPreview').style.display = 'none';
         selectedNewsFile = null;
