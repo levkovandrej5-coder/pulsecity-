@@ -909,10 +909,9 @@
         renderPostsList(globalPostsData, commentCounts);
     }
 
-    // Увеличение реального счетчика просмотров в базе данных
     async function incrementPostView(postId, currentViews) {
         let viewedStorage = JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '{}');
-        if (viewedStorage[postId]) return; // Уже засчитано с этого телефона
+        if (viewedStorage[postId]) return;
 
         viewedStorage[postId] = true;
         localStorage.setItem('pulseCity_viewed_posts', JSON.stringify(viewedStorage));
@@ -938,7 +937,6 @@
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
         postsToRender.forEach(p => {
-            // Засчитываем просмотр при рендере поста в ленте
             incrementPostView(p.id, p.views);
 
             let mediaTag = '';
@@ -989,7 +987,6 @@
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
-            // Реакции
             let postReactions = savedReactions[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
             let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
             let userReacted = myReactions[p.id] || null;
@@ -1001,7 +998,6 @@
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            // Реальный счетчик просмотров из базы данных
             let realViews = p.views || 1;
 
             const card = document.createElement('div');
@@ -1081,7 +1077,6 @@
         localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
         localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
         
-        // 100% срабатывание поп-анимации эмодзи
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
         if (btnEl) {
             btnEl.classList.remove('pop');
@@ -1434,7 +1429,7 @@
         const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|3gp|mkv|avi)$/i);
         playSystemSound('send');
 
-        const { error } = await supabaseClient.messages.insert([{
+        const { error } = await supabaseClient.from('messages').insert([{
             chat_type: chatMode,
             city: selectedCity,
             sender: myUsername,
