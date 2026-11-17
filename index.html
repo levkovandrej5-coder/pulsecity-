@@ -52,11 +52,11 @@
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;flex-wrap:wrap;gap:10px}
         .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
         
-        /* Гарантированная анимация эмодзи */
+        /* 100% Рабочая анимация эмодзи */
         .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transform-origin:center;transition:background 0.2s ease;}
         .action-btn:active{transform:scale(0.9)}
-        .action-btn.pop{animation:popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.45) !important;}
-        @keyframes popEffect{
+        .action-btn.pop{animation:popAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.45) !important;}
+        @keyframes popAnim{
             0%{transform:scale(1)}
             40%{transform:scale(1.5)}
             100%{transform:scale(1)}
@@ -678,7 +678,8 @@
             content: text,
             media_url: null,
             author_username: '⚡ PulseCity',
-            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png'
+            author_avatar: 'https://cdn-icons-png.flaticn.com/512/1828/1828644.png',
+            views: 1
         }]);
 
         document.getElementById('loadingModal').classList.remove('open');
@@ -889,7 +890,7 @@
         }
         
         let localReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-        let newSignature = data.map(p => `${p.id}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -906,6 +907,18 @@
         lastLoadedMaxPostId = currentMaxId;
 
         renderPostsList(globalPostsData, commentCounts);
+    }
+
+    // Увеличение реального счетчика просмотров в базе данных
+    async function incrementPostView(postId, currentViews) {
+        let viewedStorage = JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '{}');
+        if (viewedStorage[postId]) return; // Уже засчитано с этого телефона
+
+        viewedStorage[postId] = true;
+        localStorage.setItem('pulseCity_viewed_posts', JSON.stringify(viewedStorage));
+
+        let newViews = (currentViews || 0) + 1;
+        await supabaseClient.from('posts').update({ views: newViews }).eq('id', postId);
     }
 
     function renderPostsList(postsToRender, commentCounts = {}) {
@@ -925,6 +938,9 @@
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
         postsToRender.forEach(p => {
+            // Засчитываем просмотр при рендере поста в ленте
+            incrementPostView(p.id, p.views);
+
             let mediaTag = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
@@ -933,7 +949,6 @@
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
 
-            // Надежные локальные опросы, не требующие изменений в базе данных Supabase
             let pollHtml = '';
             let postPoll = savedPollsStorage[p.id];
             if (postPoll && postPoll.question && postPoll.options) {
@@ -986,7 +1001,8 @@
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            let viewsCount = 42 + (p.id * 7) % 65;
+            // Реальный счетчик просмотров из базы данных
+            let realViews = p.views || 1;
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -1010,7 +1026,7 @@
                         ${reactionsHtml}
                         <button class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
                     </div>
-                    <div class="views-badge">👁️ ${viewsCount}</div>
+                    <div class="views-badge">👁️ ${realViews}</div>
                 </div>
             `;
             container.appendChild(card);
@@ -1065,7 +1081,7 @@
         localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
         localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
         
-        // Гарантированный запуск плавной поп-анимации эмодзи
+        // 100% срабатывание поп-анимации эмодзи
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
         if (btnEl) {
             btnEl.classList.remove('pop');
@@ -1169,7 +1185,8 @@
             content: text,
             media_url: publicMediaUrl,
             author_username: myUsername,
-            author_avatar: myAvatar
+            author_avatar: myAvatar,
+            views: 1
         };
 
         const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
@@ -1180,7 +1197,6 @@
             return;
         }
 
-        // Сохраняем опрос в безопасное локальное хранилище для созданного поста
         if (pollQ && poll1 && poll2 && data && data[0]) {
             let newId = data[0].id;
             let savedPollsStorage = JSON.parse(localStorage.getItem('pulseCity_saved_polls') || '{}');
@@ -1418,7 +1434,7 @@
         const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|3gp|mkv|avi)$/i);
         playSystemSound('send');
 
-        const { error } = await supabaseClient.from('messages').insert([{
+        const { error } = await supabaseClient.messages.insert([{
             chat_type: chatMode,
             city: selectedCity,
             sender: myUsername,
