@@ -735,7 +735,6 @@
             document.getElementById('adminFeedTitleInput').value = '';
             document.getElementById('adminFeedTextInput').value = '';
             closeModal('adminModal');
-            cachedPostsSignature = '';
             loadPostsFromCloud();
         }
     }
@@ -787,7 +786,6 @@
         showConfirm('Удаление новости', 'Вы уверены, что хотите удалить эту новость?', async (res) => {
             if (!res) return;
             await supabaseClient.from('posts').delete().eq('id', postId);
-            cachedPostsSignature = '';
             loadPostsFromCloud();
         });
     }
@@ -813,7 +811,6 @@
             if (!res) return;
             await supabaseClient.from('comments').delete().eq('id', commentId);
             loadComments(activePostIdForComments);
-            cachedPostsSignature = '';
             loadPostsFromCloud();
         });
     }
@@ -869,7 +866,6 @@
         }
         document.getElementById('profileCity').textContent = c;
         closeModal('cityModal');
-        cachedPostsSignature = '';
         loadPostsFromCloud();
         loadPublicMessages();
         loadPinnedMessage();
@@ -933,11 +929,11 @@
             .eq('id', post.id);
     }
 
-    let cachedPostsSignature = '';
     let globalPostsData = [];
     let globalReactionsData = {};
     let globalCommentsData = {};
     let globalPollVotesData = {};
+    let lastKnownMaxPostId = 0;
 
     async function loadPostsFromCloud() {
         if (!supabaseClient || !myUsername) return;
@@ -945,6 +941,15 @@
         if (error || !data) return;
 
         globalPostsData = data;
+        const currentMaxId = data.length > 0 ? data[0].id : 0;
+
+        if (lastKnownMaxPostId !== 0 && currentMaxId > lastKnownMaxPostId) {
+            const latest = data[0];
+            if (latest && latest.author_username !== myUsername) {
+                playSystemSound('receive');
+            }
+        }
+        lastKnownMaxPostId = currentMaxId;
 
         const { data: allComments } = await supabaseClient.from('comments').select('post_id');
         globalCommentsData = {};
@@ -979,13 +984,6 @@
             });
         }
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
-        
-        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${p.content || ''}`).join('|');
-
-        if (newSignature === cachedPostsSignature && document.querySelectorAll('#newsItemsContainer .card').length > 0) {
-            return;
-        }
-        cachedPostsSignature = newSignature;
 
         renderPostsList(globalPostsData);
     }
@@ -1149,7 +1147,6 @@
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(pollVotesStorage));
 
         playSystemSound('send');
-        cachedPostsSignature = '';
         loadPostsFromCloud();
     }
 
@@ -1217,7 +1214,6 @@
         }]);
         input.value = '';
         loadComments(activePostIdForComments);
-        cachedPostsSignature = '';
         loadPostsFromCloud();
     }
 
@@ -1278,11 +1274,11 @@
         document.getElementById('newsMediaPreview').style.display = 'none';
         selectedNewsFile = null;
         closeModal('newsModal');
-        cachedPostsSignature = '';
         loadPostsFromCloud();
     }
 
     let globalMessagesData = [];
+    let lastKnownMaxMsgId = 0;
 
     async function loadPublicMessages() {
         if (!supabaseClient || !myUsername) return;
@@ -1311,6 +1307,16 @@
         }
         
         globalMessagesData = filteredData;
+        const currentMaxMsgId = filteredData.length > 0 ? filteredData[0].id : 0;
+
+        if (lastKnownMaxMsgId !== 0 && currentMaxMsgId > lastKnownMaxMsgId) {
+            const latestMsg = filteredData[0];
+            if (latestMsg && latestMsg.sender !== myUsername) {
+                playSystemSound('receive');
+            }
+        }
+        lastKnownMaxMsgId = currentMaxMsgId;
+
         renderMessagesList(globalMessagesData);
     }
 
@@ -1407,7 +1413,6 @@
     function setupRealtimeSubscriptions() {
         if (!supabaseClient) return;
         
-        // Подписка на появление новых постов или реакций в реальном времени без сброса ленты
         supabaseClient
             .channel('public:db_changes')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
@@ -1415,16 +1420,6 @@
             })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, () => {
                 loadPinnedMessage();
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
-                cachedPostsSignature = ''; // Сбрасываем подпись, чтобы подгрузить свежий пост
-                loadPostsFromCloud();
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
-                loadPostsFromCloud();
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'poll_votes' }, () => {
-                loadPostsFromCloud();
             })
             .subscribe();
 
@@ -1519,12 +1514,13 @@
         setupRealtimeSubscriptions();
     }
 
-    // Автообновление только для чата, лента обновляется без рывков через Realtime
+    // Фоновое обновление ленты и чата каждые 3 секунды без рывков и мерцания
     setInterval(() => {
         if (myUsername) {
+            loadPostsFromCloud();
             loadPublicMessages();
         }
-    }, 5000);
+    }, 3000);
 </script>
 </body>
 </html>
