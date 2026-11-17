@@ -872,6 +872,7 @@
     let globalPostsData = [];
     let globalReactionsData = {};
     let globalCommentsData = {};
+    let globalPollVotesData = {};
 
     async function loadPostsFromCloud() {
         if (!supabaseClient || !myUsername) return;
@@ -901,8 +902,23 @@
                 }
             });
         }
+
+        // Загружаем голоса опросов из облака Supabase
+        const { data: allPollVotes } = await supabaseClient.from('poll_votes').select('*');
+        globalPollVotesData = {};
+        let userVotedStorage = {};
+        if (allPollVotes) {
+            allPollVotes.forEach(v => {
+                if (!globalPollVotesData[v.post_id]) globalPollVotesData[v.post_id] = { "0": 0, "1": 0 };
+                globalPollVotesData[v.post_id][v.option_index] = (globalPollVotesData[v.post_id][v.option_index] || 0) + 1;
+                if (v.username === myUsername) {
+                    userVotedStorage[v.post_id] = v.option_index;
+                }
+            });
+        }
+        localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
         
-        let newSignature = data.map(p => `${p.id}-${JSON.stringify(globalReactionsData[p.id] || {})}-${globalCommentsData[p.id] || 0}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${JSON.stringify(globalReactionsData[p.id] || {})}-${globalCommentsData[p.id] || 0}-${JSON.stringify(globalPollVotesData[p.id] || {})}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -948,8 +964,7 @@
             let pollHtml = '';
             let postPoll = savedPollsStorage[p.id];
             if (postPoll && postPoll.question && postPoll.options) {
-                if (!postPoll.votes) postPoll.votes = { "0": 0, "1": 0 };
-                let votes = postPoll.votes;
+                let votes = globalPollVotesData[p.id] || { "0": 0, "1": 0 };
                 let totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
                 let userVotedOpt = pollVotesStorage[p.id];
 
@@ -1033,12 +1048,10 @@
         
         let postReacts = globalReactionsData[postId] || { userReacted: null };
         
-        // Если уже стояла реакция — удаляем старую из базы
         if (postReacts.userReacted) {
             await supabaseClient.from('post_reactions').delete().eq('post_id', postId).eq('username', myUsername);
         }
 
-        // Если кликнули не на ту же самую — записываем новую реакцию в Supabase
         if (postReacts.userReacted !== emoji) {
             await supabaseClient.from('post_reactions').insert([{
                 post_id: postId,
@@ -1057,26 +1070,32 @@
         loadPostsFromCloud();
     }
 
-    function votePoll(postId, optIdx) {
+    async function votePoll(postId, optIdx) {
+        if (!supabaseClient || !myUsername) return;
+
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
         if (pollVotesStorage[postId] !== undefined) {
             showPulseAlert('Вы уже проголосовали в этом опросе!');
             return;
         }
 
-        let savedPollsStorage = JSON.parse(localStorage.getItem('pulseCity_saved_polls') || '{}');
-        if (!savedPollsStorage[postId]) return;
+        const { error } = await supabaseClient.from('poll_votes').insert([{
+            post_id: postId,
+            option_index: optIdx,
+            username: myUsername
+        }]);
 
-        let poll = savedPollsStorage[postId];
-        if (!poll.votes) poll.votes = { "0": 0, "1": 0 };
-        poll.votes[optIdx] = (poll.votes[optIdx] || 0) + 1;
+        if (error) {
+            showPulseAlert('Ошибка при голосовании: ' + error.message);
+            return;
+        }
 
         pollVotesStorage[postId] = optIdx;
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(pollVotesStorage));
-        localStorage.setItem('pulseCity_saved_polls', JSON.stringify(savedPollsStorage));
 
-        renderPostsList(globalPostsData);
         playSystemSound('send');
+        cachedPostsSignature = '';
+        loadPostsFromCloud();
     }
 
     function filterFeedSearch() {
@@ -1188,8 +1207,7 @@
             let savedPollsStorage = JSON.parse(localStorage.getItem('pulseCity_saved_polls') || '{}');
             savedPollsStorage[newId] = {
                 question: pollQ,
-                options: [poll1, poll2],
-                votes: { "0": 0, "1": 0 }
+                options: [poll1, poll2]
             };
             localStorage.setItem('pulseCity_saved_polls', JSON.stringify(savedPollsStorage));
         }
