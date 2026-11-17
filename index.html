@@ -7,46 +7,49 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
-        body{background:radial-gradient(circle at top right,#121829,#050608 70%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+        body{background:radial-gradient(circle at top right,#1c130b,#080504 70%);color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
-        header{background:rgba(14,18,30,0.85);backdrop-filter:blur(25px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);z-index:20}
-        .logo{font-size:24px;font-weight:900;background:linear-gradient(135deg,#00f3ff,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
+        header{background:rgba(20,14,10,0.88);backdrop-filter:blur(25px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,107,0,0.12);z-index:20}
+        .logo{font-size:24px;font-weight:900;background:linear-gradient(135deg,#ff6b00,#ffa200,#ff3300);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
         .header-actions{display:flex;gap:10px;align-items:center}
-        .city-btn{background:rgba(0,243,255,0.1);color:#00f3ff;font-size:14px;font-weight:700;padding:10px 18px;border-radius:20px;border:1px solid rgba(0,243,255,0.3);cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 15px rgba(0,243,255,0.15)}
+        .city-btn{background:rgba(255,107,0,0.12);color:#ff9500;font-size:14px;font-weight:700;padding:10px 18px;border-radius:20px;border:1px solid rgba(255,107,0,0.35);cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 15px rgba(255,107,0,0.2)}
         
         .container{flex:1;overflow-y:auto;padding:20px;padding-bottom:130px}
         .content{display:none;animation:fadeIn .25s ease}
         .content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         
-        .feed-sticky-header{position:sticky;top:0;background:linear-gradient(180deg,rgba(18,24,41,0.98),rgba(18,24,41,0.85));backdrop-filter:blur(15px);padding-top:6px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+        .feed-sticky-header{position:sticky;top:0;background:linear-gradient(180deg,rgba(16,11,8,0.98),rgba(16,11,8,0.85));backdrop-filter:blur(15px);padding-top:6px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
         
         .search-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:14px 18px;color:#fff;font-size:14px;outline:none;transition:.2s}
-        .search-input:focus{border-color:#00f3ff;background:rgba(255,255,255,0.08);box-shadow:0 0 20px rgba(0,243,255,0.2)}
+        .search-input:focus{border-color:#ff9500;background:rgba(255,107,0,0.08);box-shadow:0 0 20px rgba(255,107,0,0.25)}
 
-        .btn-main{width:100%;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:20px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(0,243,255,0.3);display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s}
+        .btn-main{width:100%;background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border:none;border-radius:20px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(255,107,0,0.35);display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s}
         .btn-main:active{transform:scale(0.98)}
         
-        .card{background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 40px rgba(0,0,0,0.5);position:relative;overflow:hidden}
-        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)}
-        .card.admin-card{border:1px solid rgba(0,243,255,0.4);background:linear-gradient(145deg,rgba(0,243,255,0.1),rgba(37,99,235,0.04));}
+        .card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 40px rgba(0,0,0,0.6);position:relative;overflow:hidden}
+        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,0,0.4),transparent)}
+        .card.admin-card{border:1px solid rgba(255,149,0,0.5);background:linear-gradient(145deg,rgba(255,107,0,0.12),rgba(255,51,0,0.04));}
         
         .news-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
         .news-author-info{display:flex;align-items:center;gap:12px}
-        .news-author-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid rgba(0,243,255,0.5);box-shadow:0 4px 12px rgba(139,92,246,0.3)}
+        .news-author-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,149,0,0.6);box-shadow:0 4px 12px rgba(255,107,0,0.3)}
         .news-author-avatar img{width:100%;height:100%;object-fit:cover}
         .news-meta{display:flex;flex-direction:column;gap:3px}
         .news-author-name{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
-        .news-city-tag{font-size:11px;font-weight:600;color:#00f3ff;text-transform:uppercase;letter-spacing:0.5px}
+        .news-city-tag{font-size:11px;font-weight:600;color:#ff9500;text-transform:uppercase;letter-spacing:0.5px}
         
-        .card h3{font-size:19px;font-weight:800;margin-bottom:10px;color:#f8fafc;line-height:1.35}
-        .card p{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:16px}
+        .card h3{font-size:19px;font-weight:800;margin-bottom:10px;color:#fff;line-height:1.35}
+        .card p{font-size:15px;color:#d1d5db;line-height:1.6;margin-bottom:16px}
         .news-media{width:100%;max-height:360px;border-radius:20px;object-fit:cover;margin-bottom:16px;display:block;background:#000;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.4)}
         
-        .poll-box{background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;margin-bottom:16px}
-        .poll-question{font-weight:700;font-size:15px;margin-bottom:12px;color:#00f3ff}
-        .poll-option{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:12px 16px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;transition:.2s}
-        .poll-option:hover{background:rgba(0,243,255,0.15);border-color:rgba(0,243,255,0.4)}
+        /* Крутой дизайн опросов с полосой прогресса */
+        .poll-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,107,0,0.2);border-radius:20px;padding:18px;margin-bottom:16px}
+        .poll-question{font-weight:700;font-size:15px;margin-bottom:14px;color:#ff9500}
+        .poll-option{position:relative;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:14px 16px;border-radius:14px;margin-bottom:10px;cursor:pointer;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;overflow:hidden;transition:.2s}
+        .poll-option:hover{background:rgba(255,107,0,0.12);border-color:rgba(255,107,0,0.4)}
+        .poll-progress-bar{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,rgba(255,107,0,0.25),rgba(255,149,0,0.4));z-index:1;transition:width 0.4s ease}
+        .poll-option span{position:relative;z-index:2}
 
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;flex-wrap:wrap;gap:10px}
         .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -60,17 +63,17 @@
             100%{transform:scale(1)}
         }
         
-        .views-badge{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:5px;font-weight:600}
+        .views-badge{font-size:13px;color:#9ca3af;display:flex;align-items:center;gap:5px;font-weight:600}
         .delete-btn{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer}
         
         .btn-sec{background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px;transition:.2s}
         .btn-sec:hover{background:rgba(255,255,255,0.1)}
         
         .chat-tabs{display:flex;gap:10px;margin-bottom:14px}
-        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;padding:12px;border-radius:16px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
-        .chat-tab-btn.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(0,243,255,0.3)}
+        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;padding:12px;border-radius:16px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+        .chat-tab-btn.active{background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(255,107,0,0.35)}
 
-        .pinned-msg-box{background:rgba(0,243,255,0.08);border:1px solid rgba(0,243,255,0.25);border-radius:18px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+        .pinned-msg-box{background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.3);border-radius:18px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
         
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:38vh;overflow-y:auto;padding-right:4px}
         .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:92%;position:relative}
@@ -79,45 +82,45 @@
         .msg-user-info{display:flex;align-items:center;gap:8px;margin-bottom:4px}
         .msg-row.mine .msg-user-info{justify-content:flex-end}
         
-        .msg-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(0,243,255,0.4);cursor:pointer}
+        .msg-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(255,149,0,0.5);cursor:pointer}
         .msg-avatar img{width:100%;height:100%;object-fit:cover}
         
         .msg-bubble{background:rgba(255,255,255,0.08);padding:14px 18px;border-radius:20px 20px 20px 6px;font-size:15px;line-height:1.45;word-break:break-word;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
-        .msg-row.mine .msg-bubble{border-radius:20px 20px 6px 20px;background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;font-weight:500;box-shadow:0 6px 20px rgba(0,243,255,0.3)}
-        .msg-author{font-size:12px;font-weight:700;color:#00f3ff;cursor:pointer}
+        .msg-row.mine .msg-bubble{border-radius:20px 20px 6px 20px;background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;font-weight:500;box-shadow:0 6px 20px rgba(255,107,0,0.3)}
+        .msg-author{font-size:12px;font-weight:700;color:#ff9500;cursor:pointer}
         .msg-row.mine .msg-author{display:none}
         .msg-media{max-width:100%;max-height:240px;border-radius:14px;margin-top:8px;display:block;object-fit:cover;background:#000;cursor:pointer}
         
-        .typing-indicator{font-size:12px;color:#00f3ff;height:18px;margin-bottom:6px;font-style:italic}
+        .typing-indicator{font-size:12px;color:#ff9500;height:18px;margin-bottom:6px;font-style:italic}
 
         .chat-input-area{display:flex;gap:10px;align-items:center;margin-bottom:10px}
-        .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#00f3ff;width:48px;height:48px;border-radius:16px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+        .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff9500;width:48px;height:48px;border-radius:16px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
-        .send-btn{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border:none;border-radius:16px;height:48px;padding:0 22px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
+        .send-btn{background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border:none;border-radius:16px;height:48px;padding:0 22px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(15px);z-index:2500;align-items:center;justify-content:center;padding:20px}
         .modal.open{display:flex}
-        .modal-card{background:#131826;border:1px solid rgba(255,255,255,0.12);border-radius:28px;padding:26px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;display:flex;flex-direction:column}
+        .modal-card{background:#140e0a;border:1px solid rgba(255,107,0,0.25);border-radius:28px;padding:26px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;display:flex;flex-direction:column}
         .modal-card h3{font-size:22px;margin-bottom:16px;font-weight:800}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
         .modal-card textarea{height:90px;resize:none}
         .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:14px 18px;border-radius:16px;font-size:16px;font-weight:600;margin-bottom:10px;cursor:pointer;transition:.2s}
-        .city-option:hover{background:rgba(0,243,255,0.15);border-color:#00f3ff}
+        .city-option:hover{background:rgba(255,107,0,0.15);border-color:#ff9500}
         
         .setting-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:16px;border-radius:16px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)}
         .toggle-switch{width:48px;height:26px;background:rgba(255,255,255,0.2);border-radius:16px;position:relative;cursor:pointer;transition:.2s}
-        .toggle-switch.active{background:#00f3ff}
+        .toggle-switch.active{background:#ff6b00}
         .toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
         .toggle-switch.active::after{left:25px}
 
-        .loader-spinner{width:48px;height:48px;border:4px solid rgba(0,243,255,0.2);border-top-color:#00f3ff;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+        .loader-spinner{width:48px;height:48px;border:4px solid rgba(255,107,0,0.2);border-top-color:#ff6b00;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
         @keyframes spin{to{transform:rotate(360deg)}}
 
         .nav-wrapper{position:fixed;bottom:16px;left:16px;right:16px;z-index:1000}
-        nav{background:linear-gradient(180deg,rgba(22,28,48,0.95),rgba(10,13,24,0.99));backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,0.15);border-radius:32px;display:flex;padding:8px;box-shadow:0 25px 50px rgba(0,0,0,0.9);gap:8px}
-        nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:26px;padding:12px 8px;color:#94a3b8;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.2s}
+        nav{background:linear-gradient(180deg,rgba(22,15,11,0.96),rgba(10,7,5,0.99));backdrop-filter:blur(30px);border:1px solid rgba(255,107,0,0.25);border-radius:32px;display:flex;padding:8px;box-shadow:0 25px 50px rgba(0,0,0,0.9);gap:8px}
+        nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:26px;padding:12px 8px;color:#9ca3af;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.2s}
         nav button span.icon{font-size:26px;line-height:1}
-        nav button.active{background:linear-gradient(135deg,#00f3ff,#2563eb);color:#fff;border-color:rgba(255,255,255,0.3);box-shadow:0 10px 25px rgba(0,243,255,0.4)}
+        nav button.active{background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border-color:rgba(255,255,255,0.3);box-shadow:0 10px 25px rgba(255,107,0,0.4)}
     </style>
 </head>
 <body>
@@ -133,7 +136,7 @@
     <div id="tab-feed" class="content active">
         <div class="feed-sticky-header">
             <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
-            <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Поиск по премиум-ленте..." oninput="filterFeedSearch()">
+            <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Поиск по ленте города..." oninput="filterFeedSearch()">
         </div>
         <div id="newsItemsContainer"></div>
     </div>
@@ -150,14 +153,14 @@
 
             <div id="pinnedMsgContainer" class="pinned-msg-box" style="display:none;">
                 <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;padding-right:8px;">
-                    📌 <strong style="color:#00f3ff">Закреплено:</strong> <span id="pinnedMsgText" style="color:#cbd5e1">...</span>
+                    📌 <strong style="color:#ff9500">Закреплено:</strong> <span id="pinnedMsgText" style="color:#e5e7eb">...</span>
                 </div>
                 <button onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;display:none;">✕ Снять</button>
             </div>
             
-            <div id="privateRecipientBar" style="display:none;margin-bottom:10px;background:rgba(0,243,255,0.1);padding:8px 12px;border-radius:12px;font-size:13px;justify-content:space-between;align-items:center;">
-                <span>Диалог с: <strong id="activeDmUser" style="color:#00f3ff">выберите пользователя</strong></span>
-                <button onclick="switchChatMode('public')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
+            <div id="privateRecipientBar" style="display:none;margin-bottom:10px;background:rgba(255,107,0,0.12);padding:8px 12px;border-radius:12px;font-size:13px;justify-content:space-between;align-items:center;">
+                <span>Диалог с: <strong id="activeDmUser" style="color:#ff9500">выберите пользователя</strong></span>
+                <button onclick="switchChatMode('public')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
             </div>
 
             <div class="typing-indicator" id="typingIndicator"></div>
@@ -175,16 +178,16 @@
 
     <div id="tab-profile" class="content">
         <div class="card" style="text-align:center;">
-            <div id="profileAvatarPreview" style="width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,#00f3ff,#2563eb);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;border:3px solid rgba(0,243,255,0.6);box-shadow:0 8px 25px rgba(0,243,255,0.3)">
+            <div id="profileAvatarPreview" style="width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;border:3px solid rgba(255,149,0,0.6);box-shadow:0 8px 25px rgba(255,107,0,0.3)">
                 👤
             </div>
             <h3 id="displayProfileName" onclick="secretAdminTap()" style="margin-bottom:2px;font-size:20px;cursor:pointer;">Пользователь</h3>
-            <p style="margin-bottom:6px;font-size:14px;color:#00f3ff;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
-            <div id="userBadge" style="display:inline-block;background:rgba(0,243,255,0.15);color:#00f3ff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(0,243,255,0.3)">⭐ Местный эксперт</div>
+            <p style="margin-bottom:6px;font-size:14px;color:#ff9500;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
+            <div id="userBadge" style="display:inline-block;background:rgba(255,107,0,0.15);color:#ff9500;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,107,0,0.35)">⭐ Местный эксперт</div>
             
             <input type="file" id="changeAvatarInput" accept="image/*" style="display:none" onchange="updateUserAvatar(this)">
             <button class="btn-sec" onclick="document.getElementById('changeAvatarInput').click()">📷 Сменить аватарку</button>
-            <p style="margin:12px 0;font-size:15px">Текущий город: <strong id="profileCity" style="color:#00f3ff">Иркутск</strong></p>
+            <p style="margin:12px 0;font-size:15px">Текущий город: <strong id="profileCity" style="color:#ff9500">Иркутск</strong></p>
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
             <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
@@ -201,14 +204,14 @@
     <div class="modal-card" style="max-width:340px;text-align:center;margin:auto;">
         <div style="font-size:40px;margin-bottom:8px">⚡</div>
         <h3>Регистрация в PulseCity</h3>
-        <p style="color:#cbd5e1;font-size:13px;margin-bottom:14px">Укажите имя, никнейм и выберите аватарку:</p>
+        <p style="color:#d1d5db;font-size:13px;margin-bottom:14px">Укажите имя, никнейм и выберите аватарку:</p>
         
         <div style="margin-bottom:12px;">
             <input type="file" id="regAvatarFile" accept="image/*" style="display:none" onchange="previewRegAvatar(this)">
-            <div id="regAvatarBox" onclick="document.getElementById('regAvatarFile').click()" style="width:70px;height:70px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px dashed rgba(0,243,255,0.5);overflow:hidden;">
+            <div id="regAvatarBox" onclick="document.getElementById('regAvatarFile').click()" style="width:70px;height:70px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px dashed rgba(255,107,0,0.5);overflow:hidden;">
                 📷
             </div>
-            <span style="font-size:11px;color:#00f3ff;display:block;margin-top:4px;">Нажмите, чтобы загрузить фото</span>
+            <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Нажмите, чтобы загрузить фото</span>
         </div>
 
         <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:700;margin-bottom:8px">
@@ -221,17 +224,17 @@
 <div id="adminModal" class="modal" onclick="if(event.target===this)closeModal('adminModal')">
     <div class="modal-card" style="max-width:440px;">
         <h3>👑 Кабинет разработчика</h3>
-        <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Панель управления и модерации:</p>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px">Панель управления и модерации:</p>
         
-        <div style="background:rgba(0,243,255,0.06);padding:14px;border-radius:16px;margin-bottom:14px;">
-            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#00f3ff">✨ Опубликовать от PulseCity в ленту</p>
+        <div style="background:rgba(255,107,0,0.08);padding:14px;border-radius:16px;margin-bottom:14px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#ff9500">✨ Опубликовать от PulseCity в ленту</p>
             <input type="text" id="adminFeedTitleInput" placeholder="Заголовок..." style="margin-bottom:8px;">
             <textarea id="adminFeedTextInput" placeholder="Текст официальной новости..." style="height:70px;margin-bottom:8px;"></textarea>
             <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="publishAdminFeedPost()">Опубликовать в ленту</button>
         </div>
 
-        <div style="background:rgba(0,243,255,0.06);padding:14px;border-radius:16px;margin-bottom:14px;">
-            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#00f3ff">📢 Написать объявление в чат</p>
+        <div style="background:rgba(255,107,0,0.08);padding:14px;border-radius:16px;margin-bottom:14px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#ff9500">📢 Написать объявление в чат</p>
             <input type="text" id="adminBroadcastInput" placeholder="Текст объявления..." style="margin-bottom:8px;">
             <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="sendAdminBroadcast()">Отправить в общий чат</button>
         </div>
@@ -254,7 +257,7 @@
     <div class="modal-card" style="max-width:280px;text-align:center;align-items:center;">
         <div class="loader-spinner"></div>
         <h3 id="loadingTitle" style="font-size:18px;margin-bottom:6px;">Загрузка медиа...</h3>
-        <p style="color:#00f3ff;font-size:13px;">⚡ PulseCity сжимает и отправляет файл</p>
+        <p style="color:#ff9500;font-size:13px;">⚡ PulseCity сжимает и отправляет файл</p>
     </div>
 </div>
 
@@ -263,7 +266,7 @@
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚡</div>
         <h3 id="alertTitle" style="font-size:18px;margin-bottom:8px;">PulseCity</h3>
-        <p id="alertText" style="color:#cbd5e1;font-size:14px;margin-bottom:20px;"></p>
+        <p id="alertText" style="color:#d1d5db;font-size:14px;margin-bottom:20px;"></p>
         <button class="btn-main" onclick="closeModal('alertModal')" style="margin:0;">ОК</button>
     </div>
 </div>
@@ -273,7 +276,7 @@
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚠️</div>
         <h3 id="confirmTitle" style="font-size:18px;margin-bottom:8px;">Подтверждение</h3>
-        <p id="confirmText" style="color:#cbd5e1;font-size:14px;margin-bottom:20px;">Вы уверены, что хотите это удалить?</p>
+        <p id="confirmText" style="color:#d1d5db;font-size:14px;margin-bottom:20px;">Вы уверены, что хотите это удалить?</p>
         <div style="display:flex;gap:10px;">
             <button class="btn-sec" onclick="closeConfirmModal(false)" style="margin:0;background:rgba(255,255,255,0.06);">Отмена</button>
             <button class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 25px rgba(239,68,68,0.4);">Удалить</button>
@@ -289,12 +292,12 @@
         <div class="setting-row">
             <div>
                 <p style="font-weight:700;font-size:15px">Звуки и виброотклик</p>
-                <p style="font-size:12px;color:#94a3b8">Сигнал при отправке и получении</p>
+                <p style="font-size:12px;color:#9ca3af">Сигнал при отправке и получении</p>
             </div>
             <div id="soundToggle" class="toggle-switch active" onclick="toggleSystemSound()"></div>
         </div>
 
-        <button class="btn-sec" onclick="requestNotificationPermission()" style="margin-top:10px;background:rgba(0,243,255,0.15);color:#00f3ff;border-color:rgba(0,243,255,0.3)">🔔 Включить push-уведомления</button>
+        <button class="btn-sec" onclick="requestNotificationPermission()" style="margin-top:10px;background:rgba(255,107,0,0.15);color:#ff9500;border-color:rgba(255,107,0,0.35)">🔔 Включить push-уведомления</button>
         <button class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
         <button class="btn-sec" onclick="closeModal('settingsModal')">Закрыть</button>
     </div>
@@ -324,7 +327,7 @@
 
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
-            <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
+            <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#ff9500;border-color:rgba(255,107,0,0.35)">📎 Прикрепить фото или видео</button>
             <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Файл выбран</div>
         </div>
         <div style="display:flex;gap:10px">
@@ -868,7 +871,6 @@
         });
     }
 
-    // Реальный учет уникальных просмотров поста пользователем
     let viewedPostsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '[]'));
 
     async function trackPostView(post) {
@@ -964,7 +966,7 @@
         if (postsToRender.length === 0) {
             const emptyCard = document.createElement('div');
             emptyCard.className = 'card';
-            emptyCard.innerHTML = `<p style="margin:0;text-align:center;color:#94a3b8">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p>`;
+            emptyCard.innerHTML = `<p style="margin:0;text-align:center;color:#9ca3af">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p>`;
             container.appendChild(emptyCard);
             return;
         }
@@ -972,7 +974,6 @@
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
         postsToRender.forEach(p => {
-            // Засчитываем просмотр при появлении поста в ленте
             trackPostView(p);
 
             let mediaTag = '';
@@ -997,9 +998,10 @@
                     let isChosen = userVotedOpt === idx;
 
                     optionsHtml += `
-                        <div class="poll-option" onclick="votePoll(${p.id}, ${idx})" style="${isChosen ? 'border-color:#00f3ff;background:rgba(0,243,255,0.15)' : ''}">
+                        <div class="poll-option" onclick="votePoll(${p.id}, ${idx})" style="${isChosen ? 'border-color:#ff9500;background:rgba(255,107,0,0.18)' : ''}">
+                            <div class="poll-progress-bar" style="width: ${percent}%;"></div>
                             <span>${isChosen ? '✓ ' : ''}${optText}</span>
-                            <span style="color:#00f3ff;font-weight:700;">${percent}% (${optVotes})</span>
+                            <span style="color:#ff9500;font-weight:700;">${percent}% (${optVotes})</span>
                         </div>
                     `;
                 });
@@ -1027,7 +1029,7 @@
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
                 let count = postReacts[emo] || 0;
-                let activeStyle = postReacts.userReacted === emo ? 'background:rgba(0,243,255,0.3);border-color:#00f3ff;' : '';
+                let activeStyle = postReacts.userReacted === emo ? 'background:rgba(255,107,0,0.35);border-color:#ff9500;' : '';
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
@@ -1144,7 +1146,7 @@
         const list = document.getElementById('commentsList');
         list.innerHTML = '';
         if (!data || data.length === 0) {
-            list.innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:10px 0;">Пока нет комментариев. Напишите первый!</p>';
+            list.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:14px;margin:10px 0;">Пока нет комментариев. Напишите первый!</p>';
             return;
         }
         data.forEach(c => {
@@ -1261,7 +1263,7 @@
             query = query.eq('city', selectedCity).eq('chat_type', 'public');
         } else {
             if (!privateRecipient) {
-                document.getElementById('chatMessages').innerHTML = '<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате, чтобы написать ему лично.</p>';
+                document.getElementById('chatMessages').innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате, чтобы написать ему лично.</p>';
                 return;
             }
             query = query.eq('chat_type', 'private');
@@ -1296,7 +1298,7 @@
         const box = document.getElementById('chatMessages');
         box.innerHTML = '';
         if (msgs.length === 0) {
-            box.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:14px;margin:20px 0;">Сообщений пока нет.</p>`;
+            box.innerHTML = `<p style="color:#9ca3af;text-align:center;font-size:14px;margin:20px 0;">Сообщений пока нет.</p>`;
             return;
         }
 
@@ -1326,7 +1328,7 @@
                     <div class="msg-user-info" style="justify-content:space-between;">
                         <span class="msg-author" onclick="startPrivateChatWith('${m.sender}')">${m.sender}</span>
                         <div style="display:flex;gap:4px;">
-                            ${canPin ? `<button class="delete-btn" style="padding:1px 5px;font-size:9px;background:rgba(0,243,255,0.2);color:#00f3ff;" onclick="pinMessage(${m.id}, '${m.text.replace(/'/g, "")}')">📌</button>` : ''}
+                            ${canPin ? `<button class="delete-btn" style="padding:1px 5px;font-size:9px;background:rgba(255,107,0,0.25);color:#ff9500;" onclick="pinMessage(${m.id}, '${m.text.replace(/'/g, "")}')">📌</button>` : ''}
                             ${canDeleteMsg ? `<button class="delete-btn" style="padding:1px 5px;font-size:9px;" onclick="deleteMessage(${m.id}, '${m.sender}')">✕</button>` : ''}
                         </div>
                     </div>
