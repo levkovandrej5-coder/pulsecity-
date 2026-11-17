@@ -162,8 +162,9 @@
         <div class="card">
             <div class="chat-tabs">
                 <button class="chat-tab-btn active" id="tabBtnPublic" onclick="switchChatMode('public')">🌍 Общий чат</button>
-                <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные сообщения</button>
+                <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные чаты</button>
             </div>
+            
             <h3 id="chatTitle" style="margin-bottom:8px;">Городской чат • Иркутск</h3>
             
             <input type="text" id="chatSearchInput" class="search-input" placeholder="🔍 Поиск по сообщениям..." oninput="filterChatSearch()" style="margin-bottom:10px;">
@@ -175,14 +176,18 @@
                 <button onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;display:none;">✕ Снять</button>
             </div>
             
-            <div id="privateRecipientBar" style="display:none;margin-bottom:10px;background:rgba(255,107,0,0.12);padding:8px 12px;border-radius:12px;font-size:13px;justify-content:space-between;align-items:center;">
-                <span>Диалог с: <strong id="activeDmUser" style="color:#ff9500">выберите пользователя</strong></span>
-                <button onclick="switchChatMode('public')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">✕ Закрыть ЛС</button>
+            <div id="privateSectionContainer" style="display:none;margin-bottom:10px;">
+                <div id="conversationsList" style="display:flex;flex-direction:column;gap:8px;max-height:35vh;overflow-y:auto;"></div>
+                
+                <div id="activeDmHeader" style="display:none;background:rgba(255,107,0,0.12);padding:8px 12px;border-radius:12px;font-size:13px;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span>Диалог с: <strong id="activeDmUser" style="color:#ff9500">выберите пользователя</strong></span>
+                    <button onclick="backToConversationsList()" style="background:none;border:none;color:#ff9500;cursor:pointer;font-size:12px;font-weight:700;">← К списку чатов</button>
+                </div>
             </div>
 
             <div class="typing-indicator" id="typingIndicator"></div>
 
-            <div class="chat-input-area">
+            <div class="chat-input-area" id="chatInputAreaWrapper">
                 <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
                 <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
                 <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." oninput="notifyTyping()" onkeydown="if(event.key==='Enter')sendPublicMessage()">
@@ -218,7 +223,7 @@
     </div>
 </div>
 
-<!-- Модальное окно регистрации / входа по российской почте -->
+<!-- Модальное окно регистрации / входа -->
 <div id="authModal" class="modal">
     <div class="modal-card" style="max-width:360px;text-align:center;margin:auto;">
         <div style="font-size:40px;margin-bottom:8px">⚡</div>
@@ -239,7 +244,7 @@
                 <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Выбрать фото профиля</span>
             </div>
 
-            <input type="text" id="regNameInput" placeholder="Ваше имя (например, Андрей)..." style="text-align:center;font-weight:600;margin-bottom:8px">
+            <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:600;margin-bottom:8px">
             <input type="text" id="regUsernameInput" placeholder="@уникальный_ник" style="text-align:center;font-weight:600;margin-bottom:8px">
         </div>
 
@@ -248,14 +253,14 @@
 
         <div id="privacyAgreeRow" style="font-size:11px;color:#9ca3af;margin-bottom:14px;text-align:left;padding:0 4px;display:flex;align-items:flex-start;gap:8px;">
             <input type="checkbox" id="privacyAgreeCheck" checked style="width:auto;margin-top:2px;">
-            <span>Согласен с <span style="color:#ff9500;text-decoration:underline;cursor:pointer;" onclick="showPulseAlert('Приложение обрабатывает только указанные вами данные (почту, никнейм и аватар) для работы городского чата и ленты новостей.')">Политикой конфиденциальности</span></span>
+            <span>Согласен с <span style="color:#ff9500;text-decoration:underline;cursor:pointer;" onclick="showPulseAlert('Приложение обрабатывает только указанные вами данные для работы городского чата и ленты новостей.')">Политикой конфиденциальности</span></span>
         </div>
 
         <button class="btn-main" id="authSubmitBtn" style="margin:0" onclick="handleAuthSubmit()">Создать аккаунт</button>
     </div>
 </div>
 
-<!-- Модальное окно редактирования профиля и конфиденциальности -->
+<!-- Модальное окно редактирования профиля -->
 <div id="editProfileModal" class="modal" onclick="if(event.target===this)closeModal('editProfileModal')">
     <div class="modal-card">
         <h3>Редактирование профиля</h3>
@@ -360,7 +365,7 @@
     </div>
 </div>
 
-<!-- Фирменное модальное окно уведомлений -->
+<!-- Уведомления -->
 <div id="alertModal" class="modal" onclick="if(event.target===this)closeModal('alertModal')">
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚡</div>
@@ -370,7 +375,7 @@
     </div>
 </div>
 
-<!-- Окно подтверждения удаления -->
+<!-- Подтверждение -->
 <div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirmModal(false)">
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚠️</div>
@@ -383,7 +388,7 @@
     </div>
 </div>
 
-<!-- Модальное окно Настройки -->
+<!-- Настройки -->
 <div id="settingsModal" class="modal" onclick="if(event.target===this)closeModal('settingsModal')">
     <div class="modal-card">
         <h3>Безопасность и настройки</h3>
@@ -398,15 +403,12 @@
 
         <button class="btn-sec" onclick="requestNotificationPermission()" style="margin-top:10px;background:rgba(255,107,0,0.15);color:#ff9500;border-color:rgba(255,107,0,0.35)">🔔 Включить push-уведомления</button>
         <button class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
-        
-        <!-- Обязательная кнопка для правил RuStore -->
         <button class="btn-sec" onclick="deleteAccountCompletely()" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.3);margin-top:10px;">🗑️ Удалить аккаунт и данные</button>
-        
         <button class="btn-sec" onclick="closeModal('settingsModal')">Закрыть</button>
     </div>
 </div>
 
-<!-- Модальное окно выбора города -->
+<!-- Выбор города -->
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
         <h3>Выберите ваш город</h3>
@@ -417,7 +419,7 @@
     </div>
 </div>
 
-<!-- Модальное окно создания новости с анонимностью -->
+<!-- Создание новости -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
@@ -448,19 +450,19 @@
     </div>
 </div>
 
-<!-- Модальное окно просмотра медиа -->
+<!-- Просмотр медиа -->
 <div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;">
     <button class="btn-sec" style="position:absolute;top:20px;right:20px;width:auto;padding:8px 16px;z-index:3000;" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
     <div id="fullscreenContent" style="max-width:95%;max-height:75vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
     <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:20px auto 10px;text-decoration:none;text-align:center;">📥 Скачать файл</a>
 </div>
 
-<!-- Модальное окно комментариев -->
+<!-- Комментарии (без лишней кнопки назад, закрываются по тапу на фон) -->
 <div id="commentsModal" class="modal" onclick="if(event.target===this)closeModal('commentsModal')">
     <div class="modal-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
             <h3 style="margin:0;">Комментарии</h3>
-            <button class="btn-sec" style="width:auto;padding:6px 14px;margin:0;font-size:13px;" onclick="closeModal('commentsModal')">✕ Назад</button>
+            <button class="btn-sec" style="width:auto;padding:6px 12px;margin:0;font-size:13px;background:rgba(255,255,255,0.06);" onclick="closeModal('commentsModal')">✕</button>
         </div>
         <div class="chat-input-area">
             <input type="text" id="commentInput" placeholder="Написать комментарий..." onkeydown="if(event.key==='Enter')sendComment()">
@@ -676,7 +678,6 @@
         updateProfileUI();
     }
 
-    // Логика переключения Регистрация / Вход и проверка российских почтовых доменов
     let currentAuthMode = 'register';
 
     function switchAuthMode(mode) {
@@ -1176,29 +1177,104 @@
         chatMode = mode;
         const btnPub = document.getElementById('tabBtnPublic');
         const btnPriv = document.getElementById('tabBtnPrivate');
-        const barRec = document.getElementById('privateRecipientBar');
+        const privSection = document.getElementById('privateSectionContainer');
+        const dmHeader = document.getElementById('activeDmHeader');
+        const convList = document.getElementById('conversationsList');
+        const inputArea = document.getElementById('chatInputAreaWrapper');
 
         if (mode === 'public') {
             btnPub.classList.add('active');
             btnPriv.classList.remove('active');
-            barRec.style.display = 'none';
+            privSection.style.display = 'none';
+            inputArea.style.display = 'flex';
             document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
             privateRecipient = '';
         } else {
             btnPriv.classList.add('active');
             btnPub.classList.remove('active');
-            barRec.style.display = 'flex';
+            privSection.style.display = 'block';
+
             if (targetUser) {
                 privateRecipient = targetUser;
+                dmHeader.style.display = 'flex';
+                convList.style.display = 'none';
+                inputArea.style.display = 'flex';
                 document.getElementById('activeDmUser').textContent = targetUser;
                 document.getElementById('chatTitle').textContent = 'Личный чат с ' + targetUser;
             } else {
-                document.getElementById('activeDmUser').textContent = privateRecipient || 'не выбран';
-                document.getElementById('chatTitle').textContent = 'Личные сообщения';
+                privateRecipient = '';
+                dmHeader.style.display = 'none';
+                convList.style.display = 'flex';
+                inputArea.style.display = 'none';
+                document.getElementById('chatTitle').textContent = 'Ваши личные чаты';
+                loadConversationsList();
             }
         }
         loadPublicMessages();
         loadPinnedMessage();
+    }
+
+    function backToConversationsList() {
+        privateRecipient = '';
+        document.getElementById('activeDmHeader').style.display = 'none';
+        document.getElementById('conversationsList').style.display = 'flex';
+        document.getElementById('chatInputAreaWrapper').style.display = 'none';
+        document.getElementById('chatTitle').textContent = 'Ваши личные чаты';
+        loadConversationsList();
+    }
+
+    async function loadConversationsList() {
+        if (!supabaseClient || !myUsername) return;
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .select('*')
+            .eq('chat_type', 'private')
+            .or(`sender.eq.${myUsername},recipient.eq.${myUsername}`)
+            .order('id', { ascending: false });
+
+        const convList = document.getElementById('conversationsList');
+        convList.innerHTML = '';
+
+        if (error || !data || data.length === 0) {
+            convList.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:15px 0;">У вас пока нет активных личных чатов.<br>Нажмите на аватарку любого пользователя в общем чате, чтобы начать.</p>';
+            return;
+        }
+
+        let interlocutors = {};
+        data.forEach(m => {
+            let partner = m.sender === myUsername ? m.recipient : m.sender;
+            if (partner && partner !== myUsername && !interlocutors[partner]) {
+                interlocutors[partner] = {
+                    lastText: m.text,
+                    lastTime: m.created_at,
+                    avatar: m.sender === partner ? m.avatar_url : ''
+                };
+            }
+        });
+
+        let partnersKeys = Object.keys(interlocutors);
+        if (partnersKeys.length === 0) {
+            convList.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:15px 0;">Нет активных диалогов.</p>';
+            return;
+        }
+
+        partnersKeys.forEach(partner => {
+            let info = interlocutors[partner];
+            let timeStr = formatNiceTime(info.lastTime);
+            
+            let item = document.createElement('div');
+            item.style.cssText = "background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);padding:10px 14px;border-radius:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s;";
+            item.onclick = () => switchChatMode('private', partner);
+            
+            item.innerHTML = `
+                <div>
+                    <strong style="color:#ff9500;font-size:14px;">${partner}</strong>
+                    <p style="color:#9ca3af;font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${info.lastText}</p>
+                </div>
+                <span style="font-size:10px;color:rgba(255,255,255,0.4);">${timeStr}</span>
+            `;
+            convList.appendChild(item);
+        });
     }
 
     function startPrivateChatWith(username) {
@@ -1666,7 +1742,7 @@
             query = query.eq('city', selectedCity).eq('chat_type', 'public');
         } else {
             if (!privateRecipient) {
-                document.getElementById('chatMessages').innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в общем чате, чтобы написать ему лично.</p>';
+                document.getElementById('chatMessages').innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:14px;margin:20px 0;">Выберите пользователя в списке чатов.</p>';
                 return;
             }
             query = query.eq('chat_type', 'private');
