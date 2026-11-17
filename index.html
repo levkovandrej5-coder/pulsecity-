@@ -27,12 +27,9 @@
         .btn-main{width:100%;background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border:none;border-radius:20px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(255,107,0,0.35);display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s}
         .btn-main:active{transform:scale(0.98)}
         
-        .card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 40px rgba(0,0,0,0.6);position:relative;overflow:hidden;animation:cardAppear 0.3s ease}
-        @keyframes cardAppear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,0,0.4),transparent)}
+        .card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 40px rgba(0,0,0,0.6);position:relative;overflow:hidden}
         .card.admin-card{border:1px solid rgba(255,149,0,0.5);background:linear-gradient(145deg,rgba(255,107,0,0.12),rgba(255,51,0,0.04));}
         
-        /* Скелетон заглушка */
         .skeleton-card{background:rgba(255,255,255,0.03);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.05);animation:pulseSkeleton 1.5s infinite ease-in-out}
         @keyframes pulseSkeleton{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}
         .skeleton-line{height:16px;background:rgba(255,255,255,0.08);border-radius:8px;margin-bottom:12px}
@@ -74,7 +71,6 @@
         .btn-sec{background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px;transition:.2s}
         .btn-sec:hover{background:rgba(255,255,255,0.1)}
         
-        /* Кнопка возврата наверх */
         #scrollTopBtn{position:fixed;bottom:90px;right:20px;background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;width:44px;height:44px;border-radius:50%;border:none;box-shadow:0 8px 25px rgba(255,107,0,0.5);font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:900;transition:.2s}
         #scrollTopBtn:active{transform:scale(0.9)}
 
@@ -85,7 +81,7 @@
         .pinned-msg-box{background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.3);border-radius:18px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
         
         .chat-box{display:flex;flex-direction:column;gap:14px;margin:14px 0;max-height:38vh;overflow-y:auto;padding-right:4px}
-        .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:92%;position:relative;animation:cardAppear 0.2s ease}
+        .msg-row{display:flex;align-items:flex-end;gap:10px;max-width:92%;position:relative}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
         
         .msg-user-info{display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -151,7 +147,6 @@
             <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Поиск по ленте города..." oninput="filterFeedSearch()">
         </div>
         <div id="newsItemsContainer">
-            <!-- Скелетон-заглушки при старте -->
             <div class="skeleton-card"><div class="skeleton-line" style="width:50%;"></div><div class="skeleton-line" style="height:120px;"></div></div>
             <div class="skeleton-card"><div class="skeleton-line" style="width:60%;"></div><div class="skeleton-line" style="height:80px;"></div></div>
         </div>
@@ -647,7 +642,6 @@
 
     function openAdminModal() { openModal('adminModal'); }
 
-    // Кнопка возврата наверх
     function checkScrollPosition() {
         const container = document.getElementById('mainContainer');
         const btn = document.getElementById('scrollTopBtn');
@@ -662,7 +656,6 @@
         document.getElementById('mainContainer').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Форматирование даты и времени
     function formatNiceTime(dateString) {
         if (!dateString) return 'недавно';
         const d = new Date(dateString);
@@ -670,7 +663,7 @@
         const diffMin = Math.floor((now - d) / 60000);
 
         if (diffMin < 1) return 'только что';
-        if (diffMin < 60) return `${diffмин || diffMin} мин назад`;
+        if (diffMin < 60) return `${diffMin} мин назад`;
 
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
@@ -742,7 +735,6 @@
             document.getElementById('adminFeedTitleInput').value = '';
             document.getElementById('adminFeedTextInput').value = '';
             closeModal('adminModal');
-            lastLoadedMaxPostId = null;
             cachedPostsSignature = '';
             loadPostsFromCloud();
         }
@@ -795,7 +787,6 @@
         showConfirm('Удаление новости', 'Вы уверены, что хотите удалить эту новость?', async (res) => {
             if (!res) return;
             await supabaseClient.from('posts').delete().eq('id', postId);
-            lastLoadedMaxPostId = null;
             cachedPostsSignature = '';
             loadPostsFromCloud();
         });
@@ -809,7 +800,6 @@
         showConfirm('Удаление сообщения', 'Вы уверены, что хотите удалить это сообщение?', async (res) => {
             if (!res) return;
             await supabaseClient.from('messages').delete().eq('id', msgId);
-            lastLoadedMaxMsgId = null;
             loadPublicMessages();
         });
     }
@@ -860,7 +850,6 @@
                 document.getElementById('chatTitle').textContent = 'Личные сообщения';
             }
         }
-        lastLoadedMaxMsgId = null;
         loadPublicMessages();
         loadPinnedMessage();
     }
@@ -880,8 +869,6 @@
         }
         document.getElementById('profileCity').textContent = c;
         closeModal('cityModal');
-        lastLoadedMaxPostId = null;
-        lastLoadedMaxMsgId = null;
         cachedPostsSignature = '';
         loadPostsFromCloud();
         loadPublicMessages();
@@ -946,7 +933,6 @@
             .eq('id', post.id);
     }
 
-    let lastLoadedMaxPostId = null;
     let cachedPostsSignature = '';
     let globalPostsData = [];
     let globalReactionsData = {};
@@ -994,21 +980,12 @@
         }
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
         
-        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${JSON.stringify(globalReactionsData[p.id] || {})}-${globalCommentsData[p.id] || 0}-${JSON.stringify(globalPollVotesData[p.id] || {})}`).join('|');
-        const currentMaxId = data.length > 0 ? data[0].id : 0;
-        
-        if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
-            const latestPost = data[0];
-            if (latestPost && latestPost.author_username !== myUsername) {
-                playSystemSound('receive');
-            }
-        }
+        let newSignature = data.map(p => `${p.id}-${p.views || 0}-${p.content || ''}`).join('|');
 
         if (newSignature === cachedPostsSignature && document.querySelectorAll('#newsItemsContainer .card').length > 0) {
             return;
         }
         cachedPostsSignature = newSignature;
-        lastLoadedMaxPostId = currentMaxId;
 
         renderPostsList(globalPostsData);
     }
@@ -1301,12 +1278,10 @@
         document.getElementById('newsMediaPreview').style.display = 'none';
         selectedNewsFile = null;
         closeModal('newsModal');
-        lastLoadedMaxPostId = null;
         cachedPostsSignature = '';
         loadPostsFromCloud();
     }
 
-    let lastLoadedMaxMsgId = null;
     let globalMessagesData = [];
 
     async function loadPublicMessages() {
@@ -1336,16 +1311,6 @@
         }
         
         globalMessagesData = filteredData;
-        const currentMaxId = filteredData.length > 0 ? filteredData[0].id : 0;
-        
-        if (lastLoadedMaxMsgId !== null && currentMaxId > lastLoadedMaxMsgId) {
-            const latestMsg = filteredData[0];
-            if (latestMsg && latestMsg.sender !== myUsername) {
-                playSystemSound('receive');
-            }
-        }
-        
-        lastLoadedMaxMsgId = currentMaxId;
         renderMessagesList(globalMessagesData);
     }
 
@@ -1442,13 +1407,24 @@
     function setupRealtimeSubscriptions() {
         if (!supabaseClient) return;
         
+        // Подписка на появление новых постов или реакций в реальном времени без сброса ленты
         supabaseClient
-            .channel('public:messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            .channel('public:db_changes')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
                 loadPublicMessages();
             })
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, payload => {
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, () => {
                 loadPinnedMessage();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+                cachedPostsSignature = ''; // Сбрасываем подпись, чтобы подгрузить свежий пост
+                loadPostsFromCloud();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
+                loadPostsFromCloud();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'poll_votes' }, () => {
+                loadPostsFromCloud();
             })
             .subscribe();
 
@@ -1494,7 +1470,6 @@
         if (error) return;
 
         input.value = '';
-        lastLoadedMaxMsgId = null;
         loadPublicMessages();
     }
 
@@ -1532,7 +1507,6 @@
         document.getElementById('loadingModal').classList.remove('open');
 
         if (!error) {
-            lastLoadedMaxMsgId = null;
             loadPublicMessages();
         }
         input.value = '';
@@ -1545,12 +1519,12 @@
         setupRealtimeSubscriptions();
     }
 
+    // Автообновление только для чата, лента обновляется без рывков через Realtime
     setInterval(() => {
         if (myUsername) {
-            loadPostsFromCloud();
             loadPublicMessages();
         }
-    }, 4000);
+    }, 5000);
 </script>
 </body>
 </html>
