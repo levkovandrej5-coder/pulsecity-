@@ -199,8 +199,9 @@
                 👤
             </div>
             <h3 id="displayProfileName" onclick="secretAdminTap()" style="margin-bottom:2px;font-size:20px;cursor:pointer;">Пользователь</h3>
-            <p style="margin-bottom:6px;font-size:14px;color:#ff9500;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
-            <p id="displayBio" style="font-size:13px;color:#9ca3af;margin-bottom:14px;font-style:italic;">О себе пока ничего не написано...</p>
+            <p style="margin-bottom:4px;font-size:14px;color:#ff9500;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
+            <p style="margin-bottom:8px;font-size:12px;color:#9ca3af;" id="displayEmail">email@yandex.ru</p>
+            <p id="displayBio" style="font-size:13px;color:#d1d5db;margin-bottom:14px;font-style:italic;">О себе пока ничего не написано...</p>
             
             <div id="userBadge" style="display:inline-block;background:rgba(255,107,0,0.15);color:#ff9500;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,107,0,0.35)">⭐ Местный эксперт</div>
             
@@ -212,8 +213,45 @@
             
             <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
             
-            <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти</button>
+            <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти из аккаунта</button>
         </div>
+    </div>
+</div>
+
+<!-- Модальное окно регистрации / входа по российской почте -->
+<div id="authModal" class="modal">
+    <div class="modal-card" style="max-width:360px;text-align:center;margin:auto;">
+        <div style="font-size:40px;margin-bottom:8px">⚡</div>
+        <h3 id="authModalTitle">Регистрация в PulseCity</h3>
+        <p style="color:#d1d5db;font-size:12px;margin-bottom:12px">Используйте российскую почту (Яндекс, Mail.ru, VK и др.)</p>
+
+        <div class="chat-tabs" style="margin-bottom:14px;">
+            <button class="chat-tab-btn active" id="btnModeReg" onclick="switchAuthMode('register')">Регистрация</button>
+            <button class="chat-tab-btn" id="btnModeLogin" onclick="switchAuthMode('login')">Вход</button>
+        </div>
+        
+        <div id="regOnlyFields">
+            <div style="margin-bottom:12px;">
+                <input type="file" id="regAvatarFile" accept="image/*" style="display:none" onchange="previewRegAvatar(this)">
+                <div id="regAvatarBox" onclick="document.getElementById('regAvatarFile').click()" style="width:66px;height:66px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;border:2px dashed rgba(255,107,0,0.5);overflow:hidden;">
+                    📷
+                </div>
+                <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Выбрать фото профиля</span>
+            </div>
+
+            <input type="text" id="regNameInput" placeholder="Ваше имя (например, Андрей)..." style="text-align:center;font-weight:600;margin-bottom:8px">
+            <input type="text" id="regUsernameInput" placeholder="@уникальный_ник" style="text-align:center;font-weight:600;margin-bottom:8px">
+        </div>
+
+        <input type="email" id="authEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:8px">
+        <input type="password" id="authPasswordInput" placeholder="Пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px">
+
+        <div id="privacyAgreeRow" style="font-size:11px;color:#9ca3af;margin-bottom:14px;text-align:left;padding:0 4px;display:flex;align-items:flex-start;gap:8px;">
+            <input type="checkbox" id="privacyAgreeCheck" checked style="width:auto;margin-top:2px;">
+            <span>Согласен с <span style="color:#ff9500;text-decoration:underline;cursor:pointer;" onclick="showPulseAlert('Приложение обрабатывает только указанные вами данные (почту, никнейм и аватар) для работы городского чата и ленты новостей.')">Политикой конфиденциальности</span></span>
+        </div>
+
+        <button class="btn-main" id="authSubmitBtn" style="margin:0" onclick="handleAuthSubmit()">Создать аккаунт</button>
     </div>
 </div>
 
@@ -221,7 +259,7 @@
 <div id="editProfileModal" class="modal" onclick="if(event.target===this)closeModal('editProfileModal')">
     <div class="modal-card">
         <h3>Редактирование профиля</h3>
-        <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Настройте свою публичную информацию и приватность:</p>
+        <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Настройте публичную информацию и приватность:</p>
         
         <div style="text-align:center;margin-bottom:12px;">
             <input type="file" id="editAvatarFile" accept="image/*" style="display:none" onchange="previewEditAvatar(this)">
@@ -240,15 +278,15 @@
         <div class="setting-row">
             <div>
                 <p style="font-weight:700;font-size:13px">Скрывать мой статус</p>
-                <p style="font-size:11px;color:#9ca3af">Не показывать, когда я в сети</p>
+                <p style="font-size:11px;color:#9ca3af">Не показывать, когда я печатаю</p>
             </div>
             <div id="privacyStatusToggle" class="toggle-switch" onclick="togglePrivacyStatus()"></div>
         </div>
 
         <div class="setting-row" style="margin-bottom:14px;">
             <div>
-                <p style="font-weight:700;font-size:13px">Запретить ЛС от незнакомцев</p>
-                <p style="font-size:11px;color:#9ca3af">Писать смогут только избранные</p>
+                <p style="font-weight:700;font-size:13px">Закрыть личные сообщения</p>
+                <p style="font-size:11px;color:#9ca3af">Запретить писать мне в ЛС</p>
             </div>
             <div id="privacyDmToggle" class="toggle-switch" onclick="togglePrivacyDm()"></div>
         </div>
@@ -278,27 +316,6 @@
         <h3>Индекс пульса города</h3>
         <p id="modalPulseText" style="color:#ff9500;font-size:16px;font-weight:700;line-height:1.5;margin-bottom:20px;background:rgba(255,107,0,0.08);padding:16px;border-radius:16px;border:1px solid rgba(255,107,0,0.25);">Анализируем активность...</p>
         <button class="btn-main" onclick="closeModal('pulseModal')" style="margin:0;">Понятно</button>
-    </div>
-</div>
-
-<!-- Модальное окно регистрации -->
-<div id="authModal" class="modal">
-    <div class="modal-card" style="max-width:340px;text-align:center;margin:auto;">
-        <div style="font-size:40px;margin-bottom:8px">⚡</div>
-        <h3>Регистрация в PulseCity</h3>
-        <p style="color:#d1d5db;font-size:13px;margin-bottom:14px">Укажите имя, никнейм и выберите аватарку:</p>
-        
-        <div style="margin-bottom:12px;">
-            <input type="file" id="regAvatarFile" accept="image/*" style="display:none" onchange="previewRegAvatar(this)">
-            <div id="regAvatarBox" onclick="document.getElementById('regAvatarFile').click()" style="width:70px;height:70px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px dashed rgba(255,107,0,0.5);overflow:hidden;">
-                📷
-            </div>
-            <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Нажмите, чтобы загрузить фото</span>
-        </div>
-
-        <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:700;margin-bottom:8px">
-        <input type="text" id="regUsernameInput" placeholder="@уникальный_ник" style="text-align:center;font-weight:700;">
-        <button class="btn-main" style="margin:0" onclick="registerUniqueUser()">Войти в город</button>
     </div>
 </div>
 
@@ -338,8 +355,8 @@
 <div id="loadingModal" class="modal" style="background:rgba(0,0,0,0.9);z-index:4000;">
     <div class="modal-card" style="max-width:280px;text-align:center;align-items:center;">
         <div class="loader-spinner"></div>
-        <h3 id="loadingTitle" style="font-size:18px;margin-bottom:6px;">Загрузка медиа...</h3>
-        <p style="color:#ff9500;font-size:13px;">⚡ PulseCity сжимает и отправляет файл</p>
+        <h3 id="loadingTitle" style="font-size:18px;margin-bottom:6px;">Загрузка...</h3>
+        <p style="color:#ff9500;font-size:13px;">⚡ PulseCity обрабатывает запрос</p>
     </div>
 </div>
 
@@ -358,10 +375,10 @@
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚠️</div>
         <h3 id="confirmTitle" style="font-size:18px;margin-bottom:8px;">Подтверждение</h3>
-        <p id="confirmText" style="color:#d1d5db;font-size:14px;margin-bottom:20px;">Вы уверены, что хотите это удалить?</p>
+        <p id="confirmText" style="color:#d1d5db;font-size:14px;margin-bottom:20px;">Вы уверены?</p>
         <div style="display:flex;gap:10px;">
             <button class="btn-sec" onclick="closeConfirmModal(false)" style="margin:0;background:rgba(255,255,255,0.06);">Отмена</button>
-            <button class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 25px rgba(239,68,68,0.4);">Удалить</button>
+            <button class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 25px rgba(239,68,68,0.4);">Подтвердить</button>
         </div>
     </div>
 </div>
@@ -381,6 +398,10 @@
 
         <button class="btn-sec" onclick="requestNotificationPermission()" style="margin-top:10px;background:rgba(255,107,0,0.15);color:#ff9500;border-color:rgba(255,107,0,0.35)">🔔 Включить push-уведомления</button>
         <button class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
+        
+        <!-- Обязательная кнопка для правил RuStore -->
+        <button class="btn-sec" onclick="deleteAccountCompletely()" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.3);margin-top:10px;">🗑️ Удалить аккаунт и данные</button>
+        
         <button class="btn-sec" onclick="closeModal('settingsModal')">Закрыть</button>
     </div>
 </div>
@@ -522,7 +543,6 @@
         document.getElementById('soundToggle').classList.remove('active');
     }
 
-    // Переключатели конфиденциальности
     let privacyHideStatus = localStorage.getItem('pulseCity_privacy_status') === 'true';
     let privacyBlockDm = localStorage.getItem('pulseCity_privacy_dm') === 'true';
 
@@ -606,6 +626,7 @@
     let selectedCity = localStorage.getItem('pulseCity_v4_city') || 'Иркутск';
     let myName = localStorage.getItem('pulseCity_v4_name') || '';
     let myUsername = localStorage.getItem('pulseCity_v4_username') || '';
+    let myEmail = localStorage.getItem('pulseCity_v4_email') || '';
     let myAvatar = localStorage.getItem('pulseCity_v4_avatar') || '';
     let myBio = localStorage.getItem('pulseCity_v4_bio') || '';
     let chatMode = 'public';
@@ -639,6 +660,7 @@
         if (myName && myUsername) {
             document.getElementById('displayProfileName').textContent = myName;
             document.getElementById('displayUsername').textContent = myUsername;
+            document.getElementById('displayEmail').textContent = myEmail || 'Почта привязана';
             document.getElementById('displayBio').textContent = myBio || 'О себе пока ничего не написано...';
             if (myAvatar) {
                 document.getElementById('profileAvatarPreview').innerHTML = `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -652,6 +674,169 @@
     } else {
         document.getElementById('authModal').classList.remove('open');
         updateProfileUI();
+    }
+
+    // Логика переключения Регистрация / Вход и проверка российских почтовых доменов
+    let currentAuthMode = 'register';
+
+    function switchAuthMode(mode) {
+        currentAuthMode = mode;
+        document.getElementById('btnModeReg').classList.toggle('active', mode === 'register');
+        document.getElementById('btnModeLogin').classList.toggle('active', mode === 'login');
+        
+        if (mode === 'register') {
+            document.getElementById('authModalTitle').textContent = 'Регистрация в PulseCity';
+            document.getElementById('regOnlyFields').style.display = 'block';
+            document.getElementById('privacyAgreeRow').style.display = 'flex';
+            document.getElementById('authSubmitBtn').textContent = 'Создать аккаунт';
+        } else {
+            document.getElementById('authModalTitle').textContent = 'Вход в PulseCity';
+            document.getElementById('regOnlyFields').style.display = 'none';
+            document.getElementById('privacyAgreeRow').style.display = 'none';
+            document.getElementById('authSubmitBtn').textContent = 'Войти';
+        }
+    }
+
+    function isAllowedRussianEmail(email) {
+        const lower = email.toLowerCase().trim();
+        const blockedDomains = ['gmail.com', 'googlemail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'me.com'];
+        const domain = lower.split('@')[1];
+        if (!domain) return false;
+        if (blockedDomains.includes(domain)) return false;
+        return true;
+    }
+
+    async function handleAuthSubmit() {
+        const email = document.getElementById('authEmailInput').value.trim();
+        const password = document.getElementById('authPasswordInput').value.trim();
+
+        if (!email || !email.includes('@')) {
+            showPulseAlert('Введите корректный адрес электронной почты!');
+            return;
+        }
+        if (!isAllowedRussianEmail(email)) {
+            showPulseAlert('Регистрация с зарубежных почтовых сервисов (Gmail и др.) недоступна. Пожалуйста, используйте российскую почту (@yandex.ru, @mail.ru, @vk.com, @rambler.ru и т. д.).');
+            return;
+        }
+        if (password.length < 6) {
+            showPulseAlert('Пароль должен содержать минимум 6 символов!');
+            return;
+        }
+
+        if (currentAuthMode === 'register') {
+            const name = document.getElementById('regNameInput').value.trim();
+            let uname = document.getElementById('regUsernameInput').value.trim();
+            const agreed = document.getElementById('privacyAgreeCheck').checked;
+
+            if (!agreed) {
+                showPulseAlert('Необходимо принять условия Политики конфиденциальности.');
+                return;
+            }
+            if (!name || !uname) {
+                showPulseAlert('Укажите ваше имя и уникальный никнейм!');
+                return;
+            }
+            if (!uname.startsWith('@')) uname = '@' + uname;
+
+            document.getElementById('loadingTitle').textContent = 'Создание профиля...';
+            document.getElementById('loadingModal').classList.add('open');
+
+            let avatarUrl = '';
+            if (selectedRegAvatarFile) {
+                avatarUrl = await uploadFileToSupabase(selectedRegAvatarFile);
+            }
+
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            username: uname,
+                            avatar_url: avatarUrl || ''
+                        }
+                    }
+                });
+
+                if (error) {
+                    document.getElementById('loadingModal').classList.remove('open');
+                    showPulseAlert('Ошибка регистрации: ' + error.message);
+                    return;
+                }
+            }
+
+            myName = name;
+            myUsername = uname;
+            myEmail = email;
+            myAvatar = avatarUrl || '';
+
+            localStorage.setItem('pulseCity_v4_name', myName);
+            localStorage.setItem('pulseCity_v4_username', myUsername);
+            localStorage.setItem('pulseCity_v4_email', myEmail);
+            localStorage.setItem('pulseCity_v4_avatar', myAvatar);
+
+            document.getElementById('loadingModal').classList.remove('open');
+            document.getElementById('authModal').classList.remove('open');
+            updateProfileUI();
+            loadPostsFromCloud();
+            loadPublicMessages();
+            setupRealtimeSubscriptions();
+            showPulseAlert('✓ Добро пожаловать в PulseCity!');
+
+        } else {
+            document.getElementById('loadingTitle').textContent = 'Вход в аккаунт...';
+            document.getElementById('loadingModal').classList.add('open');
+
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                document.getElementById('loadingModal').classList.remove('open');
+
+                if (error) {
+                    showPulseAlert('Неверная почта или пароль: ' + error.message);
+                    return;
+                }
+
+                const meta = data.user?.user_metadata || {};
+                myName = meta.full_name || email.split('@')[0];
+                myUsername = meta.username || ('@' + email.split('@')[0]);
+                myEmail = email;
+                myAvatar = meta.avatar_url || '';
+
+                localStorage.setItem('pulseCity_v4_name', myName);
+                localStorage.setItem('pulseCity_v4_username', myUsername);
+                localStorage.setItem('pulseCity_v4_email', myEmail);
+                localStorage.setItem('pulseCity_v4_avatar', myAvatar);
+
+                document.getElementById('authModal').classList.remove('open');
+                updateProfileUI();
+                loadPostsFromCloud();
+                loadPublicMessages();
+                setupRealtimeSubscriptions();
+            }
+        }
+    }
+
+    function deleteAccountCompletely() {
+        showConfirm('Удаление аккаунта', 'Все ваши данные, посты и профиль будут безвозвратно удалены. Продолжить?', async (res) => {
+            if (!res) return;
+            document.getElementById('loadingTitle').textContent = 'Удаление данных...';
+            document.getElementById('loadingModal').classList.add('open');
+
+            if (supabaseClient && myUsername) {
+                await supabaseClient.from('posts').delete().eq('author_username', myUsername);
+                await supabaseClient.from('messages').delete().eq('sender', myUsername);
+                await supabaseClient.auth.signOut();
+            }
+
+            localStorage.clear();
+            document.getElementById('loadingModal').classList.remove('open');
+            location.reload();
+        });
     }
 
     function previewRegAvatar(input) {
@@ -710,6 +895,16 @@
         myName = name;
         myUsername = uname;
         myBio = bio;
+
+        if (supabaseClient) {
+            await supabaseClient.auth.updateUser({
+                data: {
+                    full_name: myName,
+                    username: myUsername,
+                    avatar_url: myAvatar
+                }
+            }).catch(() => {});
+        }
 
         localStorage.setItem('pulseCity_v4_name', myName);
         localStorage.setItem('pulseCity_v4_username', myUsername);
@@ -771,41 +966,10 @@
         return publicUrl;
     }
 
-    async function registerUniqueUser() {
-        const name = document.getElementById('regNameInput').value.trim();
-        let uname = document.getElementById('regUsernameInput').value.trim();
-        
-        if (!name || !uname) {
-            showPulseAlert('Введите имя и уникальный никнейм!');
-            return;
+    async function logoutUser() {
+        if (supabaseClient) {
+            await supabaseClient.auth.signOut().catch(() => {});
         }
-        if (!uname.startsWith('@')) { uname = '@' + uname; }
-
-        let avatarUrl = '';
-        if (selectedRegAvatarFile) {
-            document.getElementById('loadingTitle').textContent = 'Загрузка аватара...';
-            document.getElementById('loadingModal').classList.add('open');
-            avatarUrl = await uploadFileToSupabase(selectedRegAvatarFile);
-            document.getElementById('loadingModal').classList.remove('open');
-        }
-
-        myName = name;
-        myUsername = uname;
-        myAvatar = avatarUrl || '';
-        
-        localStorage.setItem('pulseCity_v4_name', myName);
-        localStorage.setItem('pulseCity_v4_username', myUsername);
-        localStorage.setItem('pulseCity_v4_avatar', myAvatar);
-
-        document.getElementById('authModal').classList.remove('open');
-        updateProfileUI();
-        
-        loadPostsFromCloud();
-        loadPublicMessages();
-        setupRealtimeSubscriptions();
-    }
-
-    function logoutUser() {
         localStorage.clear();
         location.reload();
     }
@@ -1617,10 +1781,9 @@
         }
     }
 
-    let typingTimer = null;
     function notifyTyping() {
         if (!supabaseClient || !myUsername) return;
-        if (privacyHideStatus) return; // Если включена конфиденциальность статуса, не шлем печатает
+        if (privacyHideStatus) return;
         supabaseClient.from('typing').upsert([{ username: myUsername, city: selectedCity, updated_at: new Date() }]).then(()=>{});
     }
 
