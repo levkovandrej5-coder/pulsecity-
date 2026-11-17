@@ -21,6 +21,9 @@
         
         .feed-sticky-header{position:sticky;top:0;background:linear-gradient(180deg,rgba(16,11,8,0.98),rgba(16,11,8,0.85));backdrop-filter:blur(15px);padding-top:6px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
         
+        /* Уникальный индекс пульса города */
+        .city-pulse-ticker{background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.25);border-radius:16px;padding:10px 14px;font-size:13px;color:#ff9500;display:flex;align-items:center;gap:8px;font-weight:600;box-shadow:0 4px 15px rgba(255,107,0,0.1)}
+
         .search-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:14px 18px;color:#fff;font-size:14px;outline:none;transition:.2s}
         .search-input:focus{border-color:#ff9500;background:rgba(255,107,0,0.08);box-shadow:0 0 20px rgba(255,107,0,0.25)}
 
@@ -144,6 +147,7 @@
     <div id="tab-feed" class="content active">
         <div class="feed-sticky-header">
             <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
+            <div class="city-pulse-ticker" id="cityPulseTicker">⚡ Индекс пульса города: активный обмен новостями</div>
             <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Поиск по ленте города..." oninput="filterFeedSearch()">
         </div>
         <div id="newsItemsContainer">
@@ -325,7 +329,7 @@
     </div>
 </div>
 
-<!-- Модальное окно создания новости с опросом -->
+<!-- Модальное окно создания новости с уникальными фишками -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
@@ -335,6 +339,15 @@
         <input type="text" id="pollQuestionInput" placeholder="Опрос (необязательно): Вопрос?">
         <input type="text" id="pollOpt1Input" placeholder="Вариант ответа 1">
         <input type="text" id="pollOpt2Input" placeholder="Вариант ответа 2">
+
+        <!-- Уникальный переключатель анонимности -->
+        <div class="setting-row" style="margin:10px 0;">
+            <div>
+                <p style="font-weight:700;font-size:14px">🕶️ Анонимная маска</p>
+                <p style="font-size:11px;color:#9ca3af">Опубликовать под тайным ником</p>
+            </div>
+            <div id="anonToggle" class="toggle-switch" onclick="toggleAnonymousPost()"></div>
+        </div>
 
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
@@ -442,6 +455,20 @@
     if (!soundEnabled) {
         document.getElementById('soundToggle').classList.remove('active');
     }
+
+    // Уникальная логика анонимности
+    let isAnonymousPost = false;
+    function toggleAnonymousPost() {
+        isAnonymousPost = !isAnonymousPost;
+        document.getElementById('anonToggle').classList.toggle('active', isAnonymousPost);
+    }
+
+    const anonPersonas = [
+        { name: '🌙 Ночной дозор', avatar: 'https://cdn-icons-png.flaticn.com/512/527/527497.png' },
+        { name: '🕶️ Свидетель улиц', avatar: 'https://cdn-icons-png.flaticn.com/512/3135/3135715.png' },
+        { name: '🦊 Городской лис', avatar: 'https://cdn-icons-png.flaticn.com/512/616/616430.png' },
+        { name: '⚡ Инкогнито', avatar: 'https://cdn-icons-png.flaticn.com/512/456/456212.png' }
+    ];
 
     function requestNotificationPermission() {
         if ("Notification" in window) {
@@ -852,7 +879,7 @@
     }
 
     function startPrivateChatWith(username) {
-        if (username === myUsername) return;
+        if (username === myUsername || username.includes('Ночной дозор') || username.includes('Инкогнито') || username.includes('Городской лис') || username.includes('Свидетель улиц')) return;
         switchChatMode('private', username);
         switchTab('chat', document.querySelectorAll('nav button')[1]);
     }
@@ -951,6 +978,9 @@
         }
         lastKnownMaxPostId = currentMaxId;
 
+        // Обновление индекса пульса города
+        updateCityPulseIndex(data.length);
+
         const { data: allComments } = await supabaseClient.from('comments').select('post_id');
         globalCommentsData = {};
         if (allComments) {
@@ -986,6 +1016,17 @@
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
 
         renderPostsList(globalPostsData);
+    }
+
+    function updateCityPulseIndex(postCount) {
+        const ticker = document.getElementById('cityPulseTicker');
+        if (postCount > 10) {
+            ticker.innerHTML = `🔥 Индекс пульса ${selectedCity}: Высокая активность! Город кипит новостями.`;
+        } else if (postCount > 3) {
+            ticker.innerHTML = `⚡ Индекс пульса ${selectedCity}: Умеренная активность, жители на связи.`;
+        } else {
+            ticker.innerHTML = `🌱 Индекс пульса ${selectedCity}: Спокойно. Станьте первыми, кто поделится новостью!`;
+        }
     }
 
     function renderPostsList(postsToRender) {
@@ -1235,14 +1276,24 @@
             publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
         }
 
+        // Логика анонимного автора
+        let finalAuthorName = myUsername;
+        let finalAuthorAvatar = myAvatar;
+
+        if (isAnonymousPost) {
+            const randomPersona = anonPersonas[Math.floor(Math.random() * anonPersonas.length)];
+            finalAuthorName = randomPersona.name;
+            finalAuthorAvatar = randomPersona.avatar;
+        }
+
         let postData = {
             city: selectedCity,
             category: 'general',
             title: title,
             content: text,
             media_url: publicMediaUrl,
-            author_username: myUsername,
-            author_avatar: myAvatar,
+            author_username: finalAuthorName,
+            author_avatar: finalAuthorAvatar,
             views: 1
         };
 
@@ -1272,6 +1323,11 @@
         document.getElementById('pollOpt2Input').value = '';
         document.getElementById('newsMediaInput').value = '';
         document.getElementById('newsMediaPreview').style.display = 'none';
+        
+        // Сброс анонимности
+        isAnonymousPost = false;
+        document.getElementById('anonToggle').classList.remove('active');
+
         selectedNewsFile = null;
         closeModal('newsModal');
         loadPostsFromCloud();
@@ -1514,7 +1570,7 @@
         setupRealtimeSubscriptions();
     }
 
-    // Фоновое обновление ленты и чата каждые 3 секунды без рывков и мерцания
+    // Фоновое обновление каждые 3 секунды для мгновенной синхронизации обоих телефонов
     setInterval(() => {
         if (myUsername) {
             loadPostsFromCloud();
