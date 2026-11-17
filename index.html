@@ -43,10 +43,18 @@
         .card p{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:16px}
         .news-media{width:100%;max-height:360px;border-radius:20px;object-fit:cover;margin-bottom:16px;display:block;background:#000;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.4)}
         
+        /* Блок опроса */
+        .poll-box{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;margin-bottom:16px}
+        .poll-question{font-weight:700;font-size:15px;margin-bottom:12px;color:#00f3ff}
+        .poll-option{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:12px 16px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+        .poll-option:hover{background:rgba(0,243,255,0.15);border-color:rgba(0,243,255,0.4)}
+
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;flex-wrap:wrap;gap:10px}
         .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
-        .action-btn:active{transform:scale(0.92)}
+        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform 0.15s ease, background 0.2s ease;}
+        .action-btn:active{transform:scale(0.85)}
+        .action-btn.pop{animation:popAnim 0.3s ease;}
+        @keyframes popAnim{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
         
         .views-badge{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:5px;font-weight:600}
 
@@ -300,13 +308,17 @@
     </div>
 </div>
 
-<!-- Модальное окно создания новости -->
+<!-- Модальное окно создания новости с опросом -->
 <div id="newsModal" class="modal" onclick="if(event.target===this)closeModal('newsModal')">
     <div class="modal-card">
         <h3>Новая публикация</h3>
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
         
+        <input type="text" id="pollQuestionInput" placeholder="Опрос (необязательно): Вопрос?">
+        <input type="text" id="pollOpt1Input" placeholder="Вариант ответа 1">
+        <input type="text" id="pollOpt2Input" placeholder="Вариант ответа 2">
+
         <div style="margin-bottom: 12px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
             <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#00f3ff;border-color:rgba(0,243,255,0.3)">📎 Прикрепить фото или видео</button>
@@ -374,14 +386,6 @@
 
     function playSystemSound(type = 'click') {
         if (type === 'click') return; 
-        if (!navigator.vibrate) navigator.vibrate = () => {};
-        
-        if (type === 'send') {
-            navigator.vibrate([60, 40, 60]);
-        } else if (type === 'receive') {
-            navigator.vibrate([100, 50, 100, 50, 100]);
-        }
-
         if (!soundEnabled) return;
         try {
             if (!audioCtx) {
@@ -398,13 +402,13 @@
             if (type === 'send') {
                 osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(987.77, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.15);
             } else if (type === 'receive') {
                 osc.frequency.setValueAtTime(440, audioCtx.currentTime);
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.22);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.22);
             }
@@ -922,6 +926,8 @@
 
         let viewedPosts = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
         let savedReactions = JSON.parse(localStorage.getItem('pulseCity_reactions_data') || '{}');
+        let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
+        let savedPollData = JSON.parse(localStorage.getItem('pulseCity_polls_data') || '{}');
 
         postsToRender.forEach(p => {
             if (!viewedPosts[p.id] && p.author_username !== myUsername) {
@@ -937,6 +943,38 @@
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
 
+            // Опросы (локальное сохранение состояния)
+            let pollHtml = '';
+            let postPoll = p.poll_question ? p : savedPollData[p.id];
+            if (postPoll && postPoll.poll_question && postPoll.poll_options) {
+                let options = postPoll.poll_options;
+                if (!postPoll.poll_votes) postPoll.poll_votes = { "0": 0, "1": 0 };
+                let votes = postPoll.poll_votes;
+                let totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+                let userVotedOpt = pollVotesStorage[p.id];
+
+                let optionsHtml = '';
+                options.forEach((optText, idx) => {
+                    let optVotes = votes[idx] || 0;
+                    let percent = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0;
+                    let isChosen = userVotedOpt === idx;
+
+                    optionsHtml += `
+                        <div class="poll-option" onclick="votePoll(${p.id}, ${idx})" style="${isChosen ? 'border-color:#00f3ff;background:rgba(0,243,255,0.15)' : ''}">
+                            <span>${isChosen ? '✓ ' : ''}${optText}</span>
+                            <span style="color:#00f3ff;font-weight:700;">${percent}% (${optVotes})</span>
+                        </div>
+                    `;
+                });
+
+                pollHtml = `
+                    <div class="poll-box">
+                        <div class="poll-question">📊 ${postPoll.poll_question}</div>
+                        ${optionsHtml}
+                    </div>
+                `;
+            }
+
             const authorAvatarHtml = p.author_avatar 
                 ? `<img src="${p.author_avatar}">` 
                 : (p.author_username ? p.author_username[1].toUpperCase() : 'U');
@@ -947,7 +985,7 @@
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
-            // Реакции (храним локально в памяти устройства для стабильности)
+            // Реакции с анимацией
             let postReactions = savedReactions[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
             let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
             let userReacted = myReactions[p.id] || null;
@@ -955,11 +993,10 @@
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
                 let count = postReactions[emo] || 0;
-                let activeStyle = userReacted === emo ? 'background:rgba(0,243,255,0.25);border-color:#00f3ff;transform:scale(1.05);' : '';
-                reactionsHtml += `<button class="action-btn" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
+                let activeStyle = userReacted === emo ? 'background:rgba(0,243,255,0.3);border-color:#00f3ff;' : '';
+                reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            // Просмотры (генерируем стабильные по ID для каждого поста)
             let viewsCount = 14 + (p.id * 7) % 85;
 
             const card = document.createElement('div');
@@ -978,6 +1015,7 @@
                 <h3>${p.title}</h3>
                 ${mediaTag}
                 <p>${p.content}</p>
+                ${pollHtml}
                 <div class="card-actions">
                     <div class="card-actions-left">
                         ${reactionsHtml}
@@ -990,6 +1028,29 @@
         });
 
         initVideoObserver();
+    }
+
+    function votePoll(postId, optIdx) {
+        let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
+        if (pollVotesStorage[postId] !== undefined) {
+            showPulseAlert('Вы уже проголосовали в этом опросе!');
+            return;
+        }
+
+        let savedPollData = JSON.parse(localStorage.getItem('pulseCity_polls_data') || '{}');
+        let post = globalPostsData.find(x => x.id === postId);
+        if (!post) return;
+
+        let pollObj = savedPollData[postId] || { poll_question: post.poll_question, poll_options: post.poll_options, poll_votes: { "0": 0, "1": 0 } };
+        pollObj.poll_votes[optIdx] = (pollObj.poll_votes[optIdx] || 0) + 1;
+
+        pollVotesStorage[postId] = optIdx;
+        localStorage.setItem('pulseCity_poll_votes', JSON.stringify(pollVotesStorage));
+        savedPollData[postId] = pollObj;
+        localStorage.setItem('pulseCity_polls_data', JSON.stringify(savedPollData));
+
+        renderPostsList(globalPostsData);
+        playSystemSound('send');
     }
 
     function reactPost(postId, emoji) {
@@ -1016,6 +1077,14 @@
         localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
         localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
         
+        // Запуск анимации увеличения кнопки (поп-анимация)
+        const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
+        if (btnEl) {
+            btnEl.classList.remove('pop');
+            void btnEl.offsetWidth; // сброс анимации
+            btnEl.classList.add('pop');
+        }
+
         playSystemSound('send');
         renderPostsList(globalPostsData);
     }
@@ -1091,6 +1160,9 @@
     async function publishNews() {
         let title = document.getElementById('newsTitleInput').value.trim();
         const text = document.getElementById('newsTextInput').value.trim();
+        const pollQ = document.getElementById('pollQuestionInput').value.trim();
+        const poll1 = document.getElementById('pollOpt1Input').value.trim();
+        const poll2 = document.getElementById('pollOpt2Input').value.trim();
         
         if (!text) { showPulseAlert('Введите текст новости!'); return; }
         if (!title) { title = 'Новость от ' + myUsername; }
@@ -1103,7 +1175,7 @@
             publicMediaUrl = await uploadFileToSupabase(selectedNewsFile);
         }
 
-        const { error } = await supabaseClient.from('posts').insert([{
+        let postData = {
             city: selectedCity,
             category: 'general',
             title: title,
@@ -1111,7 +1183,9 @@
             media_url: publicMediaUrl,
             author_username: myUsername,
             author_avatar: myAvatar
-        }]);
+        };
+
+        const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
 
         document.getElementById('loadingModal').classList.remove('open');
         if (error) {
@@ -1119,9 +1193,24 @@
             return;
         }
 
+        // Если есть опрос, сохраняем локально для этого поста
+        if (pollQ && poll1 && poll2 && data && data[0]) {
+            let newId = data[0].id;
+            let savedPollData = JSON.parse(localStorage.getItem('pulseCity_polls_data') || '{}');
+            savedPollData[newId] = {
+                poll_question: pollQ,
+                poll_options: [poll1, poll2],
+                poll_votes: { "0": 0, "1": 0 }
+            };
+            localStorage.setItem('pulseCity_polls_data', JSON.stringify(savedPollData));
+        }
+
         playSystemSound('send');
         document.getElementById('newsTitleInput').value = '';
         document.getElementById('newsTextInput').value = '';
+        document.getElementById('pollQuestionInput').value = '';
+        document.getElementById('pollOpt1Input').value = '';
+        document.getElementById('pollOpt2Input').value = '';
         document.getElementById('newsMediaInput').value = '';
         document.getElementById('newsMediaPreview').style.display = 'none';
         selectedNewsFile = null;
