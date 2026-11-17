@@ -19,7 +19,7 @@
         .content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         
-        .feed-sticky-header{position:sticky;top:0;background:linear-gradient(180deg,rgba(18,24,41,0.95),rgba(18,24,41,0.75));backdrop-filter:blur(15px);padding-top:4px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+        .feed-sticky-header{background:linear-gradient(180deg,rgba(18,24,41,0.95),rgba(18,24,41,0.75));backdrop-filter:blur(15px);padding-top:4px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
         
         .search-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:14px 18px;color:#fff;font-size:14px;outline:none;transition:.2s}
         .search-input:focus{border-color:#00f3ff;background:rgba(255,255,255,0.08);box-shadow:0 0 20px rgba(0,243,255,0.2)}
@@ -53,8 +53,8 @@
         .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
         .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform 0.15s ease, background 0.2s ease;}
         .action-btn:active{transform:scale(0.85)}
-        .action-btn.pop{animation:popAnim 0.3s ease;}
-        @keyframes popAnim{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+        .action-btn.pop{animation:popAnim 0.35s ease;}
+        @keyframes popAnim{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
         
         .views-badge{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:5px;font-weight:600}
 
@@ -884,8 +884,7 @@
         }
         
         let localReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-        let localViews = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
-        let newSignature = data.map(p => `${p.id}-${localViews[p.id] || 0}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${JSON.stringify(p.poll_votes || {})}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -909,6 +908,7 @@
         const searchInputEl = document.getElementById('feedSearchInput');
         const searchVal = searchInputEl ? searchInputEl.value : '';
 
+        // Гарантируем единственную шапку ленты
         list.innerHTML = `
             <div class="feed-sticky-header">
                 <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
@@ -924,17 +924,10 @@
             return;
         }
 
-        let viewedPosts = JSON.parse(localStorage.getItem('pulseCity_views') || '{}');
         let savedReactions = JSON.parse(localStorage.getItem('pulseCity_reactions_data') || '{}');
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
-        let savedPollData = JSON.parse(localStorage.getItem('pulseCity_polls_data') || '{}');
 
         postsToRender.forEach(p => {
-            if (!viewedPosts[p.id] && p.author_username !== myUsername) {
-                viewedPosts[p.id] = true;
-                localStorage.setItem('pulseCity_views', JSON.stringify(viewedPosts));
-            }
-
             let mediaTag = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
@@ -943,13 +936,11 @@
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
 
-            // Опросы (локальное сохранение состояния)
+            // Опросы (синхронизированные из базы данных)
             let pollHtml = '';
-            let postPoll = p.poll_question ? p : savedPollData[p.id];
-            if (postPoll && postPoll.poll_question && postPoll.poll_options) {
-                let options = postPoll.poll_options;
-                if (!postPoll.poll_votes) postPoll.poll_votes = { "0": 0, "1": 0 };
-                let votes = postPoll.poll_votes;
+            if (p.poll_question && p.poll_options) {
+                let options = p.poll_options;
+                let votes = p.poll_votes || { "0": 0, "1": 0 };
                 let totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
                 let userVotedOpt = pollVotesStorage[p.id];
 
@@ -969,7 +960,7 @@
 
                 pollHtml = `
                     <div class="poll-box">
-                        <div class="poll-question">📊 ${postPoll.poll_question}</div>
+                        <div class="poll-question">📊 ${p.poll_question}</div>
                         ${optionsHtml}
                     </div>
                 `;
@@ -985,7 +976,7 @@
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
-            // Реакции с анимацией
+            // Реакции
             let postReactions = savedReactions[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
             let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
             let userReacted = myReactions[p.id] || null;
@@ -997,7 +988,8 @@
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            let viewsCount = 14 + (p.id * 7) % 85;
+            // Стабильный счетчик просмотров по ID поста
+            let viewsCount = 24 + (p.id * 13) % 150;
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -1030,26 +1022,25 @@
         initVideoObserver();
     }
 
-    function votePoll(postId, optIdx) {
+    async function votePoll(postId, optIdx) {
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
         if (pollVotesStorage[postId] !== undefined) {
             showPulseAlert('Вы уже проголосовали в этом опросе!');
             return;
         }
 
-        let savedPollData = JSON.parse(localStorage.getItem('pulseCity_polls_data') || '{}');
         let post = globalPostsData.find(x => x.id === postId);
         if (!post) return;
 
-        let pollObj = savedPollData[postId] || { poll_question: post.poll_question, poll_options: post.poll_options, poll_votes: { "0": 0, "1": 0 } };
-        pollObj.poll_votes[optIdx] = (pollObj.poll_votes[optIdx] || 0) + 1;
+        let votes = post.poll_votes || { "0": 0, "1": 0 };
+        votes[optIdx] = (votes[optIdx] || 0) + 1;
 
         pollVotesStorage[postId] = optIdx;
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(pollVotesStorage));
-        savedPollData[postId] = pollObj;
-        localStorage.setItem('pulseCity_polls_data', JSON.stringify(savedPollData));
 
+        post.poll_votes = votes;
         renderPostsList(globalPostsData);
+        await supabaseClient.from('posts').update({ poll_votes: votes }).eq('id', postId);
         playSystemSound('send');
     }
 
@@ -1077,15 +1068,14 @@
         localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
         localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
         
-        // Запуск анимации увеличения кнопки (поп-анимация)
+        // Плавная анимация клика по эмодзи
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
         if (btnEl) {
             btnEl.classList.remove('pop');
-            void btnEl.offsetWidth; // сброс анимации
+            void btnEl.offsetWidth;
             btnEl.classList.add('pop');
         }
 
-        playSystemSound('send');
         renderPostsList(globalPostsData);
     }
 
@@ -1185,24 +1175,18 @@
             author_avatar: myAvatar
         };
 
-        const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
+        if (pollQ && poll1 && poll2) {
+            postData.poll_question = pollQ;
+            postData.poll_options = [poll1, poll2];
+            postData.poll_votes = { "0": 0, "1": 0 };
+        }
+
+        const { error } = await supabaseClient.from('posts').insert([postData]);
 
         document.getElementById('loadingModal').classList.remove('open');
         if (error) {
             showPulseAlert('Ошибка публикации: ' + error.message);
             return;
-        }
-
-        // Если есть опрос, сохраняем локально для этого поста
-        if (pollQ && poll1 && poll2 && data && data[0]) {
-            let newId = data[0].id;
-            let savedPollData = JSON.parse(localStorage.getItem('pulseCity_polls_data') || '{}');
-            savedPollData[newId] = {
-                poll_question: pollQ,
-                poll_options: [poll1, poll2],
-                poll_votes: { "0": 0, "1": 0 }
-            };
-            localStorage.setItem('pulseCity_polls_data', JSON.stringify(savedPollData));
         }
 
         playSystemSound('send');
