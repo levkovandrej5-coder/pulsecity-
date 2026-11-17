@@ -870,6 +870,8 @@
     let lastLoadedMaxPostId = null;
     let cachedPostsSignature = '';
     let globalPostsData = [];
+    let globalReactionsData = {};
+    let globalCommentsData = {};
 
     async function loadPostsFromCloud() {
         if (!supabaseClient || !myUsername) return;
@@ -878,16 +880,29 @@
 
         globalPostsData = data;
 
+        // Загружаем комментарии из облака
         const { data: allComments } = await supabaseClient.from('comments').select('post_id');
-        const commentCounts = {};
+        globalCommentsData = {};
         if (allComments) {
             allComments.forEach(c => {
-                commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1;
+                globalCommentsData[c.post_id] = (globalCommentsData[c.post_id] || 0) + 1;
+            });
+        }
+
+        // Загружаем реакции из облака Supabase для синхронизации на всех устройствах
+        const { data: allReactions } = await supabaseClient.from('post_reactions').select('*');
+        globalReactionsData = {};
+        if (allReactions) {
+            allReactions.forEach(r => {
+                if (!globalReactionsData[r.post_id]) globalReactionsData[r.post_id] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
+                globalReactionsData[r.post_id][r.emoji] = (globalReactionsData[r.post_id][r.emoji] || 0) + 1;
+                if (r.username === myUsername) {
+                    globalReactionsData[r.post_id].userReacted = r.emoji;
+                }
             });
         }
         
-        let localReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-        let newSignature = data.map(p => `${p.id}-${JSON.stringify(localReactions[p.id] || {})}-${commentCounts[p.id] || 0}`).join('|');
+        let newSignature = data.map(p => `${p.id}-${JSON.stringify(globalReactionsData[p.id] || {})}-${globalCommentsData[p.id] || 0}`).join('|');
         const currentMaxId = data.length > 0 ? data[0].id : 0;
         
         if (lastLoadedMaxPostId !== null && currentMaxId > lastLoadedMaxPostId) {
@@ -903,10 +918,10 @@
         cachedPostsSignature = newSignature;
         lastLoadedMaxPostId = currentMaxId;
 
-        renderPostsList(globalPostsData, commentCounts);
+        renderPostsList(globalPostsData);
     }
 
-    function renderPostsList(postsToRender, commentCounts = {}) {
+    function renderPostsList(postsToRender) {
         const container = document.getElementById('newsItemsContainer');
         container.innerHTML = '';
 
@@ -918,7 +933,6 @@
             return;
         }
 
-        let savedReactions = JSON.parse(localStorage.getItem('pulseCity_reactions_data') || '{}');
         let savedPollsStorage = JSON.parse(localStorage.getItem('pulseCity_saved_polls') || '{}');
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
 
@@ -967,18 +981,17 @@
 
             const authorName = p.author_username || 'Автор';
             const canDelete = (p.author_username === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
-            const cCount = commentCounts[p.id] || 0;
+            const cCount = globalCommentsData[p.id] || 0;
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
 
-            let postReactions = savedReactions[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
-            let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-            let userReacted = myReactions[p.id] || null;
+            // Реакции из облака Supabase
+            let postReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
 
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
-                let count = postReactions[emo] || 0;
-                let activeStyle = userReacted === emo ? 'background:rgba(0,243,255,0.3);border-color:#00f3ff;' : '';
+                let count = postReacts[emo] || 0;
+                let activeStyle = postReacts.userReacted === emo ? 'background:rgba(0,243,255,0.3);border-color:#00f3ff;' : '';
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
@@ -1015,6 +1028,35 @@
         initVideoObserver();
     }
 
+    async function reactPost(postId, emoji) {
+        if (!supabaseClient || !myUsername) return;
+        
+        let postReacts = globalReactionsData[postId] || { userReacted: null };
+        
+        // Если уже стояла реакция — удаляем старую из базы
+        if (postReacts.userReacted) {
+            await supabaseClient.from('post_reactions').delete().eq('post_id', postId).eq('username', myUsername);
+        }
+
+        // Если кликнули не на ту же самую — записываем новую реакцию в Supabase
+        if (postReacts.userReacted !== emoji) {
+            await supabaseClient.from('post_reactions').insert([{
+                post_id: postId,
+                username: myUsername,
+                emoji: emoji
+            }]);
+        }
+
+        const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
+        if (btnEl) {
+            btnEl.classList.remove('pop');
+            void btnEl.offsetWidth;
+            btnEl.classList.add('pop');
+        }
+
+        loadPostsFromCloud();
+    }
+
     function votePoll(postId, optIdx) {
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
         if (pollVotesStorage[postId] !== undefined) {
@@ -1035,40 +1077,6 @@
 
         renderPostsList(globalPostsData);
         playSystemSound('send');
-    }
-
-    function reactPost(postId, emoji) {
-        let myReactions = JSON.parse(localStorage.getItem('pulseCity_reactions') || '{}');
-        let savedReactions = JSON.parse(localStorage.getItem('pulseCity_reactions_data') || '{}');
-        let currentReact = myReactions[postId] || null;
-
-        if (!savedReactions[postId]) {
-            savedReactions[postId] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
-        }
-        let reactions = savedReactions[postId];
-
-        if (currentReact === emoji) {
-            reactions[emoji] = Math.max(0, (reactions[emoji] || 1) - 1);
-            myReactions[postId] = null;
-        } else {
-            if (currentReact) {
-                reactions[currentReact] = Math.max(0, (reactions[currentReact] || 1) - 1);
-            }
-            reactions[emoji] = (reactions[emoji] || 0) + 1;
-            myReactions[postId] = emoji;
-        }
-
-        localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
-        localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
-        
-        const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
-        if (btnEl) {
-            btnEl.classList.remove('pop');
-            void btnEl.offsetWidth;
-            btnEl.classList.add('pop');
-        }
-
-        renderPostsList(globalPostsData);
     }
 
     function filterFeedSearch() {
@@ -1412,7 +1420,7 @@
         const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i);
         playSystemSound('send');
 
-        const { error } = await supabaseClient.messages.insert([{
+        const { error } = await supabaseClient.from('messages').insert([{
             chat_type: chatMode,
             city: selectedCity,
             sender: myUsername,
