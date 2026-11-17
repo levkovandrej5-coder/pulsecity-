@@ -19,7 +19,8 @@
         .content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         
-        .feed-sticky-header{background:linear-gradient(180deg,rgba(18,24,41,0.95),rgba(18,24,41,0.75));backdrop-filter:blur(15px);padding-top:4px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+        /* Статичная шапка ленты — один раз в HTML, без дублирования JS */
+        .feed-sticky-header{position:sticky;top:0;background:linear-gradient(180deg,rgba(18,24,41,0.98),rgba(18,24,41,0.85));backdrop-filter:blur(15px);padding-top:6px;padding-bottom:14px;z-index:10;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
         
         .search-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:14px 18px;color:#fff;font-size:14px;outline:none;transition:.2s}
         .search-input:focus{border-color:#00f3ff;background:rgba(255,255,255,0.08);box-shadow:0 0 20px rgba(0,243,255,0.2)}
@@ -43,21 +44,26 @@
         .card p{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:16px}
         .news-media{width:100%;max-height:360px;border-radius:20px;object-fit:cover;margin-bottom:16px;display:block;background:#000;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.4)}
         
-        /* Блок опроса */
-        .poll-box{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;margin-bottom:16px}
+        /* Опросы */
+        .poll-box{background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;margin-bottom:16px}
         .poll-question{font-weight:700;font-size:15px;margin-bottom:12px;color:#00f3ff}
         .poll-option{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:12px 16px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;transition:.2s}
         .poll-option:hover{background:rgba(0,243,255,0.15);border-color:rgba(0,243,255,0.4)}
 
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;flex-wrap:wrap;gap:10px}
         .card-actions-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform 0.15s ease, background 0.2s ease;}
-        .action-btn:active{transform:scale(0.85)}
-        .action-btn.pop{animation:popAnim 0.35s ease;}
-        @keyframes popAnim{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+        
+        /* Плавная анимация эмодзи */
+        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transform-origin:center;transition:background 0.2s ease;}
+        .action-btn:active{transform:scale(0.9)}
+        .action-btn.pop{animation:popEffect 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+        @keyframes popEffect{
+            0%{transform:scale(1)}
+            50%{transform:scale(1.4)}
+            100%{transform:scale(1)}
+        }
         
         .views-badge{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:5px;font-weight:600}
-
         .delete-btn{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer}
         
         .btn-sec{background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px;transition:.2s}
@@ -127,12 +133,13 @@
 </header>
 
 <div class="container">
+    <!-- ЛЕНТА НОВОСТЕЙ: Шапка закреплена жестко в HTML, дублирование невозможно -->
     <div id="tab-feed" class="content active">
         <div class="feed-sticky-header">
             <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
             <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Поиск по премиум-ленте..." oninput="filterFeedSearch()">
         </div>
-        <div id="newsList"></div>
+        <div id="newsItemsContainer"></div>
     </div>
 
     <div id="tab-chat" class="content">
@@ -859,7 +866,7 @@
             });
         }, { threshold: 0.65 });
 
-        document.querySelectorAll('#newsList video').forEach(v => {
+        document.querySelectorAll('#newsItemsContainer video').forEach(v => {
             feedVideoObserver.observe(v);
         });
     }
@@ -894,7 +901,7 @@
             }
         }
 
-        if (newSignature === cachedPostsSignature && document.querySelectorAll('#newsList .card').length > 0) {
+        if (newSignature === cachedPostsSignature && document.querySelectorAll('#newsItemsContainer .card').length > 0) {
             return;
         }
         cachedPostsSignature = newSignature;
@@ -904,23 +911,14 @@
     }
 
     function renderPostsList(postsToRender, commentCounts = {}) {
-        const list = document.getElementById('newsList');
-        const searchInputEl = document.getElementById('feedSearchInput');
-        const searchVal = searchInputEl ? searchInputEl.value : '';
-
-        // Гарантируем единственную шапку ленты
-        list.innerHTML = `
-            <div class="feed-sticky-header">
-                <button class="btn-main" onclick="openModal('newsModal')">✨ Добавить новость</button>
-                <input type="text" id="feedSearchInput" class="search-input" value="${searchVal}" placeholder="🔍 Поиск по премиум-ленте..." oninput="filterFeedSearch()">
-            </div>
-        `;
+        const container = document.getElementById('newsItemsContainer');
+        container.innerHTML = ''; // Очищаем только список карточек, НЕ трогая статичную шапку в HTML
 
         if (postsToRender.length === 0) {
             const emptyCard = document.createElement('div');
             emptyCard.className = 'card';
             emptyCard.innerHTML = `<p style="margin:0;text-align:center;color:#94a3b8">В городе ${selectedCity} пока нет новостей. Станьте первыми!</p>`;
-            list.appendChild(emptyCard);
+            container.appendChild(emptyCard);
             return;
         }
 
@@ -936,7 +934,7 @@
                     : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openFullscreenMedia('${p.media_url}', false)">`;
             }
 
-            // Опросы (синхронизированные из базы данных)
+            // Опросы
             let pollHtml = '';
             if (p.poll_question && p.poll_options) {
                 let options = p.poll_options;
@@ -988,8 +986,8 @@
                 reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
-            // Стабильный счетчик просмотров по ID поста
-            let viewsCount = 24 + (p.id * 13) % 150;
+            // Стабильный счетчик просмотров на основе ID поста
+            let viewsCount = 42 + (p.id * 7) % 65;
 
             const card = document.createElement('div');
             card.className = 'card' + (isAdminPost ? ' admin-card' : '');
@@ -1016,7 +1014,7 @@
                     <div class="views-badge">👁️ ${viewsCount}</div>
                 </div>
             `;
-            list.appendChild(card);
+            container.appendChild(card);
         });
 
         initVideoObserver();
@@ -1068,7 +1066,7 @@
         localStorage.setItem('pulseCity_reactions', JSON.stringify(myReactions));
         localStorage.setItem('pulseCity_reactions_data', JSON.stringify(savedReactions));
         
-        // Плавная анимация клика по эмодзи
+        // Запуск плавной поп-анимации эмодзи без вибрации
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
         if (btnEl) {
             btnEl.classList.remove('pop');
