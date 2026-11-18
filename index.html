@@ -782,7 +782,7 @@
             document.getElementById('loadingModal').classList.remove('open');
             document.getElementById('authModal').classList.remove('open');
             updateProfileUI();
-            loadPostsFromCloud();
+            loadPostsFromCloud(true);
             loadPublicMessages();
             setupRealtimeSubscriptions();
             showPulseAlert('✓ Добро пожаловать в PulseCity!');
@@ -817,7 +817,7 @@
 
                 document.getElementById('authModal').classList.remove('open');
                 updateProfileUI();
-                loadPostsFromCloud();
+                loadPostsFromCloud(true);
                 loadPublicMessages();
                 setupRealtimeSubscriptions();
             }
@@ -1067,7 +1067,7 @@
             if (!res) return;
             await supabaseClient.from('posts').delete().eq('city', selectedCity);
             closeModal('adminModal');
-            loadPostsFromCloud();
+            loadPostsFromCloud(true);
         });
     }
 
@@ -1095,7 +1095,7 @@
             document.getElementById('adminFeedTitleInput').value = '';
             document.getElementById('adminFeedTextInput').value = '';
             closeModal('adminModal');
-            loadPostsFromCloud();
+            loadPostsFromCloud(true);
         }
     }
 
@@ -1146,7 +1146,7 @@
         showConfirm('Удаление новости', 'Вы уверены, что хотите удалить эту новость?', async (res) => {
             if (!res) return;
             await supabaseClient.from('posts').delete().eq('id', postId);
-            loadPostsFromCloud();
+            loadPostsFromCloud(true);
         });
     }
 
@@ -1171,7 +1171,7 @@
             if (!res) return;
             await supabaseClient.from('comments').delete().eq('id', commentId);
             loadComments(activePostIdForComments);
-            loadPostsFromCloud();
+            loadPostsFromCloud(true);
         });
     }
 
@@ -1333,7 +1333,7 @@
         }
         document.getElementById('profileCity').textContent = c;
         closeModal('cityModal');
-        loadPostsFromCloud();
+        loadPostsFromCloud(true);
         loadPublicMessages();
         loadPinnedMessage();
     }
@@ -1345,14 +1345,9 @@
         }
     }
 
-    // ПОЛНЫЙ КОНТРОЛЬ ВИДЕО БЕЗ МЕРЦАНИЯ:
-    // Автоматический observer полностью удален. Видео управляется только вручную по клику (Play/Pause),
-    // гарантируя, что одновременно воспроизводится строго одно видео.
     function initVideoManager() {
         document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
             v.loop = false;
-            
-            // При начале воспроизведения останавливаем все остальные видео на странице
             v.onplay = () => {
                 document.querySelectorAll('video').forEach(other => {
                     if (other !== v) {
@@ -1360,8 +1355,6 @@
                     }
                 });
             };
-
-            // При окончании останавливаем и сбрасываем в начало
             v.onended = () => {
                 v.pause();
                 v.currentTime = 0;
@@ -1396,13 +1389,16 @@
     let globalPollVotesData = {};
     let lastKnownMaxPostId = 0;
 
-    async function loadPostsFromCloud() {
+    // ЗАЩИТА ОТ МЕРЦАНИЯ: перерисовываем ленту только если изменилось количество постов или принудительно (forced=true)
+    async function loadPostsFromCloud(forced = false) {
         if (!supabaseClient || !myUsername) return;
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
 
-        globalPostsData = data;
         const currentMaxId = data.length > 0 ? data[0].id : 0;
+        const isLengthChanged = globalPostsData.length !== data.length;
+
+        globalPostsData = data;
 
         if (lastKnownMaxPostId !== 0 && currentMaxId > lastKnownMaxPostId) {
             const latest = data[0];
@@ -1448,7 +1444,10 @@
         }
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
 
-        renderPostsList(globalPostsData);
+        // Рендерим ленту целиком только если это первый запуск, сменился город или появился новый пост
+        if (forced || isLengthChanged || document.getElementById('newsItemsContainer').children.length === 0) {
+            renderPostsList(globalPostsData);
+        }
     }
 
     function updateCityPulseIndex(postCount) {
@@ -1606,7 +1605,7 @@
             btnEl.classList.add('pop');
         }
 
-        loadPostsFromCloud();
+        loadPostsFromCloud(true);
     }
 
     async function votePoll(postId, optIdx) {
@@ -1633,7 +1632,7 @@
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(pollVotesStorage));
 
         playSystemSound('send');
-        loadPostsFromCloud();
+        loadPostsFromCloud(true);
     }
 
     function filterFeedSearch() {
@@ -1700,7 +1699,7 @@
         }]);
         input.value = '';
         loadComments(activePostIdForComments);
-        loadPostsFromCloud();
+        loadPostsFromCloud(true);
     }
 
     async function publishNews() {
@@ -1773,7 +1772,7 @@
 
         selectedNewsFile = null;
         closeModal('newsModal');
-        loadPostsFromCloud();
+        loadPostsFromCloud(true);
     }
 
     let globalMessagesData = [];
@@ -2019,7 +2018,7 @@
     }
 
     if (myUsername) {
-        loadPostsFromCloud();
+        loadPostsFromCloud(true);
         loadPublicMessages();
         loadPinnedMessage();
         setupRealtimeSubscriptions();
@@ -2027,7 +2026,7 @@
 
     setInterval(() => {
         if (myUsername) {
-            loadPostsFromCloud();
+            loadPostsFromCloud(false);
             loadPublicMessages();
         }
     }, 3000);
