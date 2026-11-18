@@ -1346,7 +1346,7 @@
         }
     }
 
-    // Жесткий контроль воспроизведения видео: строго одно видео и без зацикливания
+    // Жесткий контроль: строго одно видео воспроизводится одновременно
     let feedVideoObserver = null;
     function initVideoObserver() {
         if (feedVideoObserver) feedVideoObserver.disconnect();
@@ -1355,18 +1355,16 @@
             entries.forEach(entry => {
                 const video = entry.target;
                 if (entry.isIntersecting) {
-                    // Ставим на паузу все остальные видео на странице перед включением этого
+                    // Паузим все остальные видео на странице
                     document.querySelectorAll('video').forEach(v => {
-                        if (v !== video) {
-                            v.pause();
-                        }
+                        if (v !== video) v.pause();
                     });
                     video.play().catch(() => {});
                 } else {
                     video.pause();
                 }
             });
-        }, { threshold: 0.75 });
+        }, { threshold: 0.8 });
 
         document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
             feedVideoObserver.observe(v);
@@ -1488,7 +1486,7 @@
             let downloadBar = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
-                // Видео без loop, со встроенным обработчиком окончания (чтобы точно не зацикливалось)
+                // Видео без зацикливания: при окончании останавливается и сбрасывается
                 mediaTag = isVid
                     ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata" onended="this.pause();this.currentTime=0;"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
