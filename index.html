@@ -51,9 +51,12 @@
         .news-media-wrap{position:relative;margin-bottom:12px;border-radius:20px;overflow:hidden;background:#000;box-shadow:0 8px 25px rgba(0,0,0,0.4)}
         .news-media{width:100%;max-height:360px;object-fit:cover;display:block;background:#000}
         
-        .media-download-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
-        .media-download-bar span{font-size:13px;color:#9ca3af;font-weight:600}
-        .download-quick-btn{background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.4);color:#ff9500;padding:6px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s}
+        .media-download-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08);position:relative;overflow:hidden}
+        .media-download-bar span{font-size:13px;color:#9ca3af;font-weight:600;z-index:2;position:relative}
+        
+        .download-progress-fill{position:absolute;top:0;left:0;bottom:0;background:rgba(255,107,0,0.25);width:0%;z-index:1;transition:width 0.1s linear}
+        
+        .download-quick-btn{background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.4);color:#ff9500;padding:6px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s;z-index:2;position:relative}
         .download-quick-btn:active{transform:scale(0.95)}
 
         .poll-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,107,0,0.2);border-radius:20px;padding:18px;margin-bottom:16px}
@@ -972,16 +975,77 @@
         return publicUrl;
     }
 
-    function downloadMediaDirectly(url) {
+    // ИДЕАЛЬНОЕ СОХРАНЕНИЕ КАК В TELEGRAM / WHATSAPP С ПРОГРЕСС-БАРОМ
+    async function downloadMediaWithProgress(url, btnElementId, fillElementId) {
         if (!url) return;
-        showPulseAlert('📥 Загрузка файла...');
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.download = '';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        const btn = document.getElementById(btnElementId);
+        const fill = document.getElementById(fillElementId);
+        
+        if (btn) btn.textContent = '⏳ Загрузка...';
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const contentLength = response.headers.get('content-length');
+            const total = contentLength ? parseInt(contentLength, 10) : 0;
+            let loaded = 0;
+
+            const reader = response.body.getReader();
+            const chunks = [];
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                loaded += value.length;
+
+                if (total && fill) {
+                    let percent = Math.round((loaded / total) * 100);
+                    fill.style.width = percent + '%';
+                }
+            }
+
+            const blob = new Blob(chunks);
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const filename = url.split('/').pop().split('?')[0] || 'media_file';
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+
+            if (fill) fill.style.width = '100%';
+            if (btn) {
+                btn.textContent = '✓ Сохранено';
+                setTimeout(() => {
+                    btn.textContent = '📥 Сохранить';
+                    if (fill) fill.style.width = '0%';
+                }, 2500);
+            }
+        } catch (e) {
+            // Фолбек, если CORS заблокировал поток: скачиваем стандартным безопасным способом через blob-ссылку
+            try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = url.split('/').pop() || 'download';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                if (btn) btn.textContent = '✓ Готово';
+            } catch(err) {
+                showPulseAlert('Не удалось сохранить файл. Попробуйте открыть его в новой вкладке.');
+                if (btn) btn.textContent = '📥 Сохранить';
+            }
+            if (fill) fill.style.width = '0%';
+        }
     }
 
     async function logoutUser() {
@@ -1389,7 +1453,6 @@
     let globalPollVotesData = {};
     let lastKnownMaxPostId = 0;
 
-    // ЗАЩИТА ОТ МЕРЦАНИЯ: перерисовываем ленту только если изменилось количество постов или принудительно (forced=true)
     async function loadPostsFromCloud(forced = false) {
         if (!supabaseClient || !myUsername) return;
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
@@ -1444,7 +1507,6 @@
         }
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
 
-        // Рендерим ленту целиком только если это первый запуск, сменился город или появился новый пост
         if (forced || isLengthChanged || document.getElementById('newsItemsContainer').children.length === 0) {
             renderPostsList(globalPostsData);
         }
@@ -1488,9 +1550,10 @@
                     : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
                 
                 downloadBar = `
-                    <div class="media-download-bar">
+                    <div class="media-download-bar" id="download-bar-${p.id}">
+                        <div class="download-progress-fill" id="download-fill-${p.id}"></div>
                         <span>📎 Медиафайл публикации</span>
-                        <button class="download-quick-btn" onclick="downloadMediaDirectly('${p.media_url}')">📥 Сохранить</button>
+                        <button class="download-quick-btn" id="download-btn-${p.id}" onclick="downloadMediaWithProgress('${p.media_url}', 'download-btn-${p.id}', 'download-fill-${p.id}')">📥 Сохранить</button>
                     </div>
                 `;
             }
@@ -1836,12 +1899,20 @@
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
                     ? `
-                      <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata"></video>
-                      <button class="download-quick-btn" style="margin-top:6px;" onclick="downloadMediaDirectly('${m.media_url}')">📥 Сохранить файл</button>
+                      <div class="media-download-bar" id="download-bar-msg-${m.id}" style="margin-top:8px;">
+                          <div class="download-progress-fill" id="download-fill-msg-${m.id}"></div>
+                          <span>📎 Видеофайл</span>
+                          <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
+                      </div>
+                      <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata" style="margin-top:6px;"></video>
                     `
                     : `
-                      <img src="${m.media_url}" class="msg-media" loading="lazy">
-                      <button class="download-quick-btn" style="margin-top:6px;" onclick="downloadMediaDirectly('${m.media_url}')">📥 Сохранить фото</button>
+                      <div class="media-download-bar" id="download-bar-msg-${m.id}" style="margin-top:8px;">
+                          <div class="download-progress-fill" id="download-fill-msg-${m.id}"></div>
+                          <span>📎 Фотография</span>
+                          <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
+                      </div>
+                      <img src="${m.media_url}" class="msg-media" loading="lazy" style="margin-top:6px;">
                     `;
             }
 
