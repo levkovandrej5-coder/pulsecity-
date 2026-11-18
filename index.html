@@ -972,7 +972,6 @@
         return publicUrl;
     }
 
-    // Мгновенное скачивание в один клик
     function downloadMediaDirectly(url) {
         if (!url) return;
         showPulseAlert('📥 Загрузка файла...');
@@ -1346,50 +1345,27 @@
         }
     }
 
-    // Жесткий контроль: одно видео в эфире, без бесконечного дребезга и зацикливания
-    let feedVideoObserver = null;
-    function initVideoObserver() {
-        if (feedVideoObserver) feedVideoObserver.disconnect();
-        
-        feedVideoObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const video = entry.target;
-                
-                if (entry.isIntersecting) {
-                    if (video.paused && !video.dataset.playedOnce) {
-                        // Паузим все остальные видео
-                        document.querySelectorAll('video').forEach(v => {
-                            if (v !== video) {
-                                v.pause();
-                                v.currentTime = 0;
-                                delete v.dataset.playedOnce;
-                            }
-                        });
-                        
-                        video.play().then(() => {
-                            video.dataset.playedOnce = "true";
-                        }).catch(() => {});
-                    }
-                } else {
-                    video.pause();
-                    video.currentTime = 0;
-                    delete video.dataset.playedOnce;
-                }
-            });
-        }, { 
-            threshold: 0.85 
-        });
-
+    // ПОЛНЫЙ КОНТРОЛЬ ВИДЕО БЕЗ МЕРЦАНИЯ:
+    // Автоматический observer полностью удален. Видео управляется только вручную по клику (Play/Pause),
+    // гарантируя, что одновременно воспроизводится строго одно видео.
+    function initVideoManager() {
         document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
             v.loop = false;
             
+            // При начале воспроизведения останавливаем все остальные видео на странице
+            v.onplay = () => {
+                document.querySelectorAll('video').forEach(other => {
+                    if (other !== v) {
+                        other.pause();
+                    }
+                });
+            };
+
+            // При окончании останавливаем и сбрасываем в начало
             v.onended = () => {
                 v.pause();
                 v.currentTime = 0;
-                delete v.dataset.playedOnce;
             };
-
-            feedVideoObserver.observe(v);
         });
     }
 
@@ -1603,7 +1579,7 @@
             container.appendChild(card);
         });
 
-        initVideoObserver();
+        initVideoManager();
     }
 
     async function reactPost(postId, emoji) {
@@ -1898,7 +1874,7 @@
             box.appendChild(row);
         });
 
-        initVideoObserver();
+        initVideoManager();
     }
 
     function filterChatSearch() {
