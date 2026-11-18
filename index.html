@@ -34,18 +34,18 @@
         .btn-main{width:100%;background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border:none;border-radius:20px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(255,107,0,0.35);display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s}
         .btn-main:active{transform:scale(0.98)}
         
-        /* Подняли плюсик выше, чтобы не перекрывался навигацией */
         #fabAddNews{position:fixed;bottom:112px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border:1px solid rgba(255,255,255,0.25);box-shadow:0 10px 28px rgba(255,107,0,0.55);font-size:28px;font-weight:400;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:950;transition:.2s}
         #fabAddNews:active{transform:scale(0.92)}
 
         #scrollTopBtn{position:fixed;bottom:180px;right:24px;background:rgba(30,22,16,0.9);border:1px solid rgba(255,107,0,0.4);color:#ff9500;width:42px;height:42px;border-radius:50%;box-shadow:0 6px 20px rgba(0,0,0,0.6);font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:900;transition:.2s}
         #scrollTopBtn:active{transform:scale(0.9)}
 
-        .challenge-pinned-card{background:linear-gradient(145deg,rgba(255,107,0,0.16),rgba(255,51,0,0.06));border:1px solid rgba(255,149,0,0.45);border-radius:24px;padding:18px 20px;margin-bottom:18px;box-shadow:0 12px 30px rgba(255,107,0,0.12);position:relative}
-        .challenge-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,0,0.25);color:#ffa200;font-size:11px;font-weight:800;padding:4px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
-        .challenge-pinned-card h4{font-size:16px;font-weight:700;color:#fff;line-height:1.45;margin-bottom:14px}
-        .challenge-join-btn{width:100%;background:rgba(255,107,0,0.2);border:1px solid rgba(255,149,0,0.5);color:#fff;padding:11px 16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
-        .challenge-join-btn:active{transform:scale(0.98);background:rgba(255,107,0,0.35)}
+        /* Закрепленный Вызов дня (всегда сверху в ленте при скролле) */
+        .challenge-pinned-card{background:linear-gradient(145deg,rgba(255,107,0,0.2),rgba(255,51,0,0.08));backdrop-filter:blur(20px);border:1px solid rgba(255,149,0,0.5);border-radius:22px;padding:16px 18px;margin-bottom:16px;box-shadow:0 12px 30px rgba(255,107,0,0.18);position:sticky;top:0;z-index:15}
+        .challenge-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,0,0.3);color:#ffa200;font-size:11px;font-weight:800;padding:4px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+        .challenge-pinned-card h4{font-size:15px;font-weight:700;color:#fff;line-height:1.4;margin-bottom:12px}
+        .challenge-join-btn{width:100%;background:rgba(255,107,0,0.25);border:1px solid rgba(255,149,0,0.5);color:#fff;padding:10px 14px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+        .challenge-join-btn:active{transform:scale(0.98);background:rgba(255,107,0,0.4)}
 
         .card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:28px;padding:22px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 40px rgba(0,0,0,0.6);position:relative;overflow:hidden}
         .card.admin-card{border:1px solid rgba(255,149,0,0.5);background:linear-gradient(145deg,rgba(255,107,0,0.12),rgba(255,51,0,0.04));}
@@ -177,6 +177,7 @@
     <button id="fabAddNews" onclick="openModal('newsModal')" title="Добавить новость">+</button>
 
     <div id="tab-feed" class="content active">
+        <!-- Закрепленный Вызов дня (остается на месте сверху при прокрутке ленты) -->
         <div class="challenge-pinned-card" id="pinnedChallengeCard">
             <div class="challenge-badge">🎯 Вызов дня • Закреплено</div>
             <h4 id="pinnedChallengeText">Загрузка задания...</h4>
@@ -463,7 +464,6 @@
     </div>
 </div>
 
-<!-- Модальное окно комментариев -->
 <div id="commentsModal" class="modal" onclick="if(event.target===this)closeModal('commentsModal')">
     <div class="modal-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -595,14 +595,12 @@
         return challengesList[todayIdx];
     }
 
-    // Для Вызова дня создаем и автоматически регистрируем системный пост в базе данных, чтобы комментарии привязывались без ошибок
     async function getOrCreateChallengePostId() {
         const todayStr = new Date().toISOString().split('T')[0];
         const challengeTitle = `🎯 Вызов дня: ${todayStr} (${selectedCity})`;
         
         if (!supabaseClient) return 1;
 
-        // Ищем, есть ли уже такой пост в базе
         const { data: existing } = await supabaseClient
             .from('posts')
             .select('id')
@@ -614,7 +612,6 @@
             return existing.id;
         }
 
-        // Если нет — создаем автоматически
         const { data: inserted, error } = await supabaseClient
             .from('posts')
             .insert([{
@@ -630,7 +627,7 @@
             .single();
 
         if (error || !inserted) {
-            return 999999; // Фолбек ID
+            return 999999;
         }
         return inserted.id;
     }
@@ -1562,7 +1559,6 @@
             });
         }
 
-        // Обновляем счетчик комментариев закрепленного Вызова дня (ищем пост-вызов)
         const challengePost = globalPostsData.find(p => p.category === 'challenge');
         const challengeBadge = document.getElementById('challengeCommentsBadge');
         if (challengeBadge && challengePost) {
@@ -1616,7 +1612,6 @@
         const container = document.getElementById('newsItemsContainer');
         container.innerHTML = '';
 
-        // Не показываем системный пост вызова в общей ленте (он закреплен сверху)
         const regularPosts = postsToRender.filter(p => p.category !== 'challenge');
 
         if (regularPosts.length === 0) {
