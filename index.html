@@ -453,10 +453,11 @@
     </div>
 </div>
 
-<!-- Просмотр медиа (без проблемной кнопки скачивания) -->
-<div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;">
+<!-- Просмотр медиа с кнопкой «Сохранить файл» -->
+<div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;padding:16px;">
     <button class="btn-sec" style="position:absolute;top:20px;right:20px;width:auto;padding:8px 16px;z-index:3000;" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
-    <div id="fullscreenContent" style="max-width:95%;max-height:85vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
+    <div id="fullscreenContent" style="max-width:95%;max-height:72vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
+    <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:15px auto 5px;text-decoration:none;text-align:center;">📥 Сохранить файл</a>
 </div>
 
 <!-- Комментарии -->
@@ -921,7 +922,6 @@
         playSystemSound('send');
     }
 
-    // Сохранение четкого качества картинок (без сильного сжатия)
     async function compressImage(file) {
         return new Promise((resolve) => {
             if (!file.type.startsWith('image/') || file.size <= 3 * 1024 * 1024) {
@@ -1345,9 +1345,10 @@
     function openFullscreenMedia(url, isVideo) {
         const content = document.getElementById('fullscreenContent');
         content.innerHTML = isVideo 
-            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:85vh;border-radius:16px;"></video>`
-            : `<img src="${url}" style="max-width:100%;max-height:85vh;border-radius:16px;object-fit:contain;">`;
+            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:72vh;border-radius:16px;"></video>`
+            : `<img src="${url}" style="max-width:100%;max-height:72vh;border-radius:16px;object-fit:contain;">`;
         
+        document.getElementById('downloadMediaBtn').href = url;
         openModal('fullscreenModal');
     }
 
@@ -1362,6 +1363,7 @@
                     video.play().catch(() => {});
                 } else {
                     video.pause();
+                    video.currentTime = 0; // Сбрасываем в начало, чтобы не мерцало и не циклилось
                 }
             });
         }, { threshold: 0.65 });
