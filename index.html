@@ -453,11 +453,16 @@
     </div>
 </div>
 
-<!-- Просмотр медиа с кнопкой «Сохранить файл» без перенаправления -->
-<div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;padding:16px;">
-    <button class="btn-sec" style="position:absolute;top:20px;right:20px;width:auto;padding:8px 16px;z-index:3000;" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
-    <div id="fullscreenContent" style="max-width:95%;max-height:72vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
-    <button id="downloadMediaBtn" class="btn-main" style="max-width:280px;margin:15px auto 5px;" onclick="downloadCurrentMedia()">📥 Сохранить файл</button>
+<!-- Полноэкранный плеер без плашек и с кнопкой Назад -->
+<div id="fullscreenModal" class="modal" style="background:rgba(0,0,0,0.95);flex-direction:column;justify-content:space-between;align-items:center;padding:16px;z-index:3000;">
+    <div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:4px 8px;">
+        <button class="btn-sec" style="width:auto;margin:0;padding:10px 18px;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);" onclick="closeModal('fullscreenModal')">← Назад</button>
+        <button class="btn-sec" style="width:auto;margin:0;padding:10px 18px;background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
+    </div>
+    
+    <div id="fullscreenContent" style="width:100%;flex:1;display:flex;align-items:center;justify-content:center;margin:10px 0;max-height:75vh;"></div>
+    
+    <button id="downloadMediaBtn" class="btn-main" style="max-width:320px;margin:0 auto 10px;" onclick="downloadCurrentMedia()">📥 Сохранить файл</button>
 </div>
 
 <!-- Комментарии -->
@@ -974,6 +979,7 @@
         return publicUrl;
     }
 
+    // Надежное скачивание через fetch Blob без перехода по ссылкам
     async function downloadCurrentMedia() {
         if (!currentFullscreenUrl) return;
         showPulseAlert('📥 Загрузка файла...');
@@ -990,6 +996,7 @@
             a.click();
             window.URL.revokeObjectURL(blobUrl);
             a.remove();
+            showPulseAlert('✓ Файл успешно сохранен!');
         } catch(e) {
             window.open(currentFullscreenUrl, '_blank');
         }
@@ -1368,8 +1375,8 @@
         currentFullscreenUrl = url;
         const content = document.getElementById('fullscreenContent');
         content.innerHTML = isVideo 
-            ? `<video src="${url}" controls playsinline style="max-width:100%;max-height:72vh;border-radius:16px;"></video>`
-            : `<img src="${url}" style="max-width:100%;max-height:72vh;border-radius:16px;object-fit:contain;">`;
+            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:75vh;border-radius:16px;object-fit:contain;background:#000;box-shadow:0 10px 30px rgba(0,0,0,0.8);"></video>`
+            : `<img src="${url}" style="max-width:100%;max-height:75vh;border-radius:16px;object-fit:contain;box-shadow:0 10px 30px rgba(0,0,0,0.8);">`;
         
         openModal('fullscreenModal');
     }
@@ -1385,7 +1392,7 @@
                     video.play().catch(() => {});
                 } else {
                     video.pause();
-                    video.currentTime = 0; // Сбрасываем, чтобы исключить мерцание и зацикливание
+                    video.currentTime = 0;
                 }
             });
         }, { threshold: 0.65 });
