@@ -972,7 +972,7 @@
         return publicUrl;
     }
 
-    // Суперудобное скачивание в один клик без перехода на другие экраны
+    // Мгновенное скачивание в один клик
     function downloadMediaDirectly(url) {
         if (!url) return;
         showPulseAlert('📥 Загрузка файла...');
@@ -1346,6 +1346,7 @@
         }
     }
 
+    // Жесткий контроль воспроизведения видео: строго одно видео и без зацикливания
     let feedVideoObserver = null;
     function initVideoObserver() {
         if (feedVideoObserver) feedVideoObserver.disconnect();
@@ -1354,13 +1355,18 @@
             entries.forEach(entry => {
                 const video = entry.target;
                 if (entry.isIntersecting) {
+                    // Ставим на паузу все остальные видео на странице перед включением этого
+                    document.querySelectorAll('video').forEach(v => {
+                        if (v !== video) {
+                            v.pause();
+                        }
+                    });
                     video.play().catch(() => {});
                 } else {
                     video.pause();
-                    video.currentTime = 0;
                 }
             });
-        }, { threshold: 0.65 });
+        }, { threshold: 0.75 });
 
         document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
             feedVideoObserver.observe(v);
@@ -1482,9 +1488,9 @@
             let downloadBar = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
-                // Видео теперь со стандартными элементами управления (полоска длительности, громкость, пауза), БЕЗ loop (не зациклено)
+                // Видео без loop, со встроенным обработчиком окончания (чтобы точно не зацикливалось)
                 mediaTag = isVid
-                    ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata"></video>`
+                    ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata" onended="this.pause();this.currentTime=0;"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
                 
                 downloadBar = `
@@ -1836,7 +1842,7 @@
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
                     ? `
-                      <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata"></video>
+                      <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata" onended="this.pause();this.currentTime=0;"></video>
                       <button class="download-quick-btn" style="margin-top:6px;" onclick="downloadMediaDirectly('${m.media_url}')">📥 Сохранить файл</button>
                     `
                     : `
@@ -1860,7 +1866,7 @@
             row.innerHTML = `
                 <div class="msg-avatar" onclick="startPrivateChatWith('${m.sender}')" title="Написать личное сообщение">${avatarHtml}</div>
                 <div class="msg-bubble">
-                    <div class="msg-user-info" style="justify-content:space-between;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span class="msg-author" onclick="startPrivateChatWith('${m.sender}')">${m.sender}</span>
                         <div style="display:flex;gap:4px;">
                             ${canPin ? `<button class="delete-btn" style="padding:1px 5px;font-size:9px;background:rgba(255,107,0,0.25);color:#ff9500;" onclick="pinMessage(${m.id}, '${m.text.replace(/'/g, "")}')">📌</button>` : ''}
