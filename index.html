@@ -1346,7 +1346,7 @@
         }
     }
 
-    // Жесткий контроль: строго одно видео воспроизводится одновременно
+    // Жесткий контроль: одно видео в эфире, без бесконечного дребезга и зацикливания
     let feedVideoObserver = null;
     function initVideoObserver() {
         if (feedVideoObserver) feedVideoObserver.disconnect();
@@ -1354,19 +1354,41 @@
         feedVideoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const video = entry.target;
+                
                 if (entry.isIntersecting) {
-                    // Паузим все остальные видео на странице
-                    document.querySelectorAll('video').forEach(v => {
-                        if (v !== video) v.pause();
-                    });
-                    video.play().catch(() => {});
+                    if (video.paused && !video.dataset.playedOnce) {
+                        // Паузим все остальные видео
+                        document.querySelectorAll('video').forEach(v => {
+                            if (v !== video) {
+                                v.pause();
+                                v.currentTime = 0;
+                                delete v.dataset.playedOnce;
+                            }
+                        });
+                        
+                        video.play().then(() => {
+                            video.dataset.playedOnce = "true";
+                        }).catch(() => {});
+                    }
                 } else {
                     video.pause();
+                    video.currentTime = 0;
+                    delete video.dataset.playedOnce;
                 }
             });
-        }, { threshold: 0.8 });
+        }, { 
+            threshold: 0.85 
+        });
 
         document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
+            v.loop = false;
+            
+            v.onended = () => {
+                v.pause();
+                v.currentTime = 0;
+                delete v.dataset.playedOnce;
+            };
+
             feedVideoObserver.observe(v);
         });
     }
@@ -1486,9 +1508,8 @@
             let downloadBar = '';
             if (p.media_url) {
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
-                // Видео без зацикливания: при окончании останавливается и сбрасывается
                 mediaTag = isVid
-                    ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata" onended="this.pause();this.currentTime=0;"></video>`
+                    ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata"></video>`
                     : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
                 
                 downloadBar = `
@@ -1840,7 +1861,7 @@
                 const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
                 mediaTag = isVid 
                     ? `
-                      <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata" onended="this.pause();this.currentTime=0;"></video>
+                      <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata"></video>
                       <button class="download-quick-btn" style="margin-top:6px;" onclick="downloadMediaDirectly('${m.media_url}')">📥 Сохранить файл</button>
                     `
                     : `
