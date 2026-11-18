@@ -181,10 +181,9 @@
             <div id="privateSectionContainer" style="display:none;margin-bottom:10px;">
                 <div id="conversationsList" style="display:flex;flex-direction:column;gap:8px;max-height:35vh;overflow-y:auto;"></div>
                 
-                <!-- Заметная и крупная кнопка возврата к списку чатов -->
                 <div id="activeDmHeader" style="display:none;margin-bottom:12px;">
                     <button class="btn-main" onclick="backToConversationsList()" style="padding:12px 18px;font-size:14px;background:linear-gradient(135deg,#ff9500,#ff6b00);box-shadow:0 6px 20px rgba(255,107,0,0.3);">
-                        ← Назад к списком чатов (<span id="activeDmUser" style="color:#fff">диалог</span>)
+                        ← Назад к списку чатов (<span id="activeDmUser" style="color:#fff">диалог</span>)
                     </button>
                 </div>
             </div>
@@ -454,11 +453,10 @@
     </div>
 </div>
 
-<!-- Просмотр медиа -->
+<!-- Просмотр медиа (без проблемной кнопки скачивания) -->
 <div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;">
     <button class="btn-sec" style="position:absolute;top:20px;right:20px;width:auto;padding:8px 16px;z-index:3000;" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
-    <div id="fullscreenContent" style="max-width:95%;max-height:75vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
-    <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:20px auto 10px;text-decoration:none;text-align:center;">📥 Скачать файл</a>
+    <div id="fullscreenContent" style="max-width:95%;max-height:85vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
 </div>
 
 <!-- Комментарии -->
@@ -923,9 +921,13 @@
         playSystemSound('send');
     }
 
+    // Сохранение четкого качества картинок (без сильного сжатия)
     async function compressImage(file) {
         return new Promise((resolve) => {
-            if (!file.type.startsWith('image/')) { resolve(file); return; }
+            if (!file.type.startsWith('image/') || file.size <= 3 * 1024 * 1024) {
+                resolve(file);
+                return;
+            }
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (event) => {
@@ -934,7 +936,7 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let width = img.width, height = img.height;
-                    const MAX_SIZE = 512;
+                    const MAX_SIZE = 1920;
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
                     else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                     canvas.width = width; canvas.height = height;
@@ -942,7 +944,7 @@
                     ctx.drawImage(img, 0, 0, width, height);
                     canvas.toBlob((blob) => {
                         resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
-                    }, 'image/jpeg', 0.8);
+                    }, 'image/jpeg', 0.92);
                 };
             };
         });
@@ -1209,7 +1211,6 @@
                 document.getElementById('activeDmUser').textContent = targetUser;
                 document.getElementById('chatTitle').textContent = 'Личный чат с ' + targetUser;
 
-                // Отмечаем сообщения как прочитанные в локальном хранилище
                 let readMap = JSON.parse(localStorage.getItem('pulseCity_read_dms') || '{}');
                 readMap[targetUser] = Date.now();
                 localStorage.setItem('pulseCity_read_dms', JSON.stringify(readMap));
@@ -1344,10 +1345,9 @@
     function openFullscreenMedia(url, isVideo) {
         const content = document.getElementById('fullscreenContent');
         content.innerHTML = isVideo 
-            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:75vh;border-radius:16px;"></video>`
-            : `<img src="${url}" style="max-width:100%;max-height:75vh;border-radius:16px;object-fit:contain;">`;
+            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:85vh;border-radius:16px;"></video>`
+            : `<img src="${url}" style="max-width:100%;max-height:85vh;border-radius:16px;object-fit:contain;">`;
         
-        document.getElementById('downloadMediaBtn').href = url;
         openModal('fullscreenModal');
     }
 
