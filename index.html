@@ -453,11 +453,11 @@
     </div>
 </div>
 
-<!-- Просмотр медиа с кнопкой «Сохранить файл» -->
+<!-- Просмотр медиа с кнопкой «Сохранить файл» без перенаправления -->
 <div id="fullscreenModal" class="modal" onclick="if(event.target===this)closeModal('fullscreenModal')" style="background:rgba(0,0,0,0.96);flex-direction:column;justify-content:center;align-items:center;padding:16px;">
     <button class="btn-sec" style="position:absolute;top:20px;right:20px;width:auto;padding:8px 16px;z-index:3000;" onclick="closeModal('fullscreenModal')">✕ Закрыть</button>
     <div id="fullscreenContent" style="max-width:95%;max-height:72vh;display:flex;align-items:center;justify-content:center;margin:auto;"></div>
-    <a id="downloadMediaBtn" href="#" target="_blank" download class="btn-main" style="max-width:280px;margin:15px auto 5px;text-decoration:none;text-align:center;">📥 Сохранить файл</a>
+    <button id="downloadMediaBtn" class="btn-main" style="max-width:280px;margin:15px auto 5px;" onclick="downloadCurrentMedia()">📥 Сохранить файл</button>
 </div>
 
 <!-- Комментарии -->
@@ -640,6 +640,7 @@
     let selectedRegAvatarFile = null;
     let selectedEditAvatarFile = null;
     let activePostIdForComments = null;
+    let currentFullscreenUrl = '';
 
     let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
     if (bannedList.includes(myUsername)) {
@@ -971,6 +972,27 @@
         }
         const { data: { publicUrl } } = supabaseClient.storage.from('media').getPublicUrl(fileName);
         return publicUrl;
+    }
+
+    async function downloadCurrentMedia() {
+        if (!currentFullscreenUrl) return;
+        showPulseAlert('📥 Загрузка файла...');
+        try {
+            const response = await fetch(currentFullscreenUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            const fileName = currentFullscreenUrl.split('/').pop().split('?')[0] || 'pulsecity_media';
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(blobUrl);
+            a.remove();
+        } catch(e) {
+            window.open(currentFullscreenUrl, '_blank');
+        }
     }
 
     async function logoutUser() {
@@ -1343,12 +1365,12 @@
     }
 
     function openFullscreenMedia(url, isVideo) {
+        currentFullscreenUrl = url;
         const content = document.getElementById('fullscreenContent');
         content.innerHTML = isVideo 
-            ? `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:72vh;border-radius:16px;"></video>`
+            ? `<video src="${url}" controls playsinline style="max-width:100%;max-height:72vh;border-radius:16px;"></video>`
             : `<img src="${url}" style="max-width:100%;max-height:72vh;border-radius:16px;object-fit:contain;">`;
         
-        document.getElementById('downloadMediaBtn').href = url;
         openModal('fullscreenModal');
     }
 
@@ -1363,12 +1385,12 @@
                     video.play().catch(() => {});
                 } else {
                     video.pause();
-                    video.currentTime = 0; // Сбрасываем в начало, чтобы не мерцало и не циклилось
+                    video.currentTime = 0; // Сбрасываем, чтобы исключить мерцание и зацикливание
                 }
             });
         }, { threshold: 0.65 });
 
-        document.querySelectorAll('#newsItemsContainer video').forEach(v => {
+        document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
             feedVideoObserver.observe(v);
         });
     }
@@ -1860,6 +1882,8 @@
                 </div>`;
             box.appendChild(row);
         });
+
+        initVideoObserver();
     }
 
     function filterChatSearch() {
