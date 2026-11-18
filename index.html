@@ -2034,13 +2034,16 @@
                 (m.sender === myUsername && m.recipient === privateRecipient) ||
                 (m.sender === privateRecipient && m.recipient === myUsername)
             );
+            
+            // 🔥 ВАЖНО: Для личных сообщений разворачиваем порядок, чтобы новые были внизу!
+            filteredData.reverse();
         }
         
         globalMessagesData = filteredData;
-        const currentMaxMsgId = filteredData.length > 0 ? filteredData[0].id : 0;
+        const currentMaxMsgId = filteredData.length > 0 ? filteredData[filteredData.length - 1].id : 0;
 
         if (lastKnownMaxMsgId !== 0 && currentMaxMsgId > lastKnownMaxMsgId) {
-            const latestMsg = filteredData[0];
+            const latestMsg = filteredData[filteredData.length - 1];
             if (latestMsg && latestMsg.sender !== myUsername) {
                 playSystemSound('receive');
             }
@@ -2048,6 +2051,13 @@
         lastKnownMaxMsgId = currentMaxMsgId;
 
         renderMessagesList(globalMessagesData);
+
+        // Автоматически прокручиваем личный чат вниз при открытии или новом сообщении
+        if (chatMode === 'private' && privateRecipient) {
+            const chatBoxEl = document.getElementById('chatMessages');
+            chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+        }
+
         if (chatMode === 'private' && !privateRecipient) {
             loadConversationsList();
         }
