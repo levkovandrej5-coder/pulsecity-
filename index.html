@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>ПулсСити</title>
+    <title>PulseCity</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -284,13 +284,13 @@
 <div id="inAppToast" onclick="handleToastClick()">
     <div class="toast-icon" id="toastIcon">🔔</div>
     <div class="toast-body">
-        <div class="toast-title" id="toastTitle">ПулсСити</div>
+        <div class="toast-title" id="toastTitle">PulseCity</div>
         <div class="toast-text" id="toastText">Новое уведомление</div>
     </div>
 </div>
 
 <header>
-    <div class="logo">⚡ ПулсСити</div>
+    <div class="logo">⚡ PulseCity</div>
     <div class="header-actions">
         <button class="top-mini-btn" id="toggleSearchBtn" onclick="toggleHeaderSearch()" title="Поиск по ленте">🔍</button>
         <button class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
@@ -397,7 +397,7 @@
             <div id="userBadge" style="display:inline-block;background:rgba(255,106,0,0.16);color:#ff8c1a;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,106,0,0.45)">⭐ Местный эксперт</div>
             
             <button class="btn-main" onclick="openEditProfileModal()" style="margin-bottom:10px;">✏️ Настроить профиль</button>
-            <button class="btn-sec" onclick="openModal('contactModal')" style="color:#ff8c1a;border-color:rgba(255,106,0,0.45);">✉️ Связь с ПулсСити</button>
+            <button class="btn-sec" onclick="openModal('contactModal')" style="color:#ff8c1a;border-color:rgba(255,106,0,0.45);">✉️ Связь с PulseCity</button>
             <p style="margin:12px 0;font-size:15px">Текущий город: <strong id="profileCity" style="color:#ff8c1a">Иркутск</strong></p>
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
@@ -426,7 +426,7 @@
 <div id="contactModal" class="modal" onclick="if(event.target===this)closeModal('contactModal')">
     <div class="modal-card" style="max-width:390px;text-align:center;">
         <div style="font-size:36px;margin-bottom:6px">✉️</div>
-        <h3 style="margin-bottom:10px;">Связь с ПулсСити</h3>
+        <h3 style="margin-bottom:10px;">Связь с PulseCity</h3>
 
         <div class="contact-inapp-box">
             <p style="color:#ff8c1a;font-size:13px;font-weight:800;margin-bottom:8px;">💬 Написать прямо в приложении</p>
@@ -445,7 +445,7 @@
             <div class="contact-email-box" id="supportEmailText">pulsecity1@gmail.com</div>
             <button type="button" onclick="copySupportEmail()" style="background:rgba(255,106,0,0.16);border:1px solid rgba(255,106,0,0.45);color:#ff8c1a;padding:11px 12px;border-radius:14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">📋 Копия</button>
         </div>
-        <a href="mailto:pulsecity1@gmail.com?subject=ПулсСити%20—%20обратная%20связь" style="text-decoration:none;display:block;">
+        <a href="mailto:pulsecity1@gmail.com?subject=PulseCity%20—%20обратная%20связь" style="text-decoration:none;display:block;">
             <button class="btn-sec" type="button" style="color:#ff8c1a;border-color:rgba(255,106,0,0.45);padding:11px 14px;font-size:13px;">📨 Открыть почтовый клиент</button>
         </a>
         <button class="btn-sec" onclick="closeModal('contactModal')" style="margin-bottom:0;padding:11px 14px;font-size:13px;">Закрыть</button>
@@ -455,7 +455,7 @@
 <div id="authModal" class="modal">
     <div class="modal-card" style="max-width:360px;text-align:center;margin:auto;">
         <div style="font-size:40px;margin-bottom:8px">⚡</div>
-        <h3 id="authModalTitle">Регистрация в ПулсСити</h3>
+        <h3 id="authModalTitle">Регистрация в PulseCity</h3>
 
         <div id="authStepCredentials">
             <p style="color:#d1d5db;font-size:12px;margin-bottom:12px">Используйте российскую почту (Яндекс, Mail.ru, VK и др.)</p>
@@ -515,7 +515,7 @@
 
         <div id="authStepNewPassword" style="display:none;">
             <p style="color:#d1d5db;font-size:13px;line-height:1.45;margin-bottom:12px;">
-                Ссылка подтверждена. Придумайте новый пароль для входа в <strong style="color:#ff8c1a;">ПулсСити</strong>:
+                Ссылка подтверждена. Придумайте новый пароль для входа в <strong style="color:#ff8c1a;">PulseCity</strong>:
             </p>
             <input type="password" id="recoveryPasswordInput" placeholder="Новый пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px;">
             <button class="btn-main" style="margin:0;" onclick="applyRecoveryPassword()">✓ Сохранить пароль и войти</button>
@@ -590,7 +590,7 @@
         </div>
         
         <div style="background:rgba(255,106,0,0.08);padding:14px;border-radius:16px;margin-bottom:14px;">
-            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#ff8c1a">✨ Опубликовать от ПулсСити в ленту</p>
+            <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#ff8c1a">✨ Опубликовать от PulseCity в ленту</p>
             <input type="text" id="adminFeedTitleInput" placeholder="Заголовок..." style="margin-bottom:8px;">
             <textarea id="adminFeedTextInput" placeholder="Текст официальной новости..." style="height:70px;margin-bottom:8px;"></textarea>
             <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="publishAdminFeedPost()">Опубликовать в ленту</button>
@@ -619,14 +619,14 @@
     <div class="modal-card" style="max-width:280px;text-align:center;align-items:center;">
         <div class="loader-spinner"></div>
         <h3 id="loadingTitle" style="font-size:18px;margin-bottom:6px;">Загрузка...</h3>
-        <p style="color:#ff8c1a;font-size:13px;">⚡ ПулсСити обрабатывает запрос</p>
+        <p style="color:#ff8c1a;font-size:13px;">⚡ PulseCity обрабатывает запрос</p>
     </div>
 </div>
 
 <div id="alertModal" class="modal" onclick="if(event.target===this)closeModal('alertModal')">
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:36px;margin-bottom:10px">⚡</div>
-        <h3 id="alertTitle" style="font-size:18px;margin-bottom:8px;">ПулсСити</h3>
+        <h3 id="alertTitle" style="font-size:18px;margin-bottom:8px;">PulseCity</h3>
         <p id="alertText" style="color:#d1d5db;font-size:14px;margin-bottom:20px;"></p>
         <button class="btn-main" onclick="closeModal('alertModal')" style="margin:0;">ОК</button>
     </div>
@@ -745,7 +745,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v2_pulssiti';
+    const THEME_REVISION = 'orange_v3_pulsecity';
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
@@ -753,8 +753,8 @@
     let pendingToastAction = null;
 
     function forceFreshAssetsOnce() {
-        if (sessionStorage.getItem('pulssiti_cache_cleared') === THEME_REVISION) return;
-        sessionStorage.setItem('pulssiti_cache_cleared', THEME_REVISION);
+        if (sessionStorage.getItem('pulsecity_cache_cleared') === THEME_REVISION) return;
+        sessionStorage.setItem('pulsecity_cache_cleared', THEME_REVISION);
         if ('caches' in window) {
             caches.keys().then(keys => {
                 keys.forEach(k => caches.delete(k));
@@ -968,7 +968,7 @@
         msgInput.value = '';
         playSystemSound('send');
         closeModal('contactModal');
-        showPulseAlert('✓ Обращение отправлено разработчикам ПулсСити!');
+        showPulseAlert('✓ Обращение отправлено разработчикам PulseCity!');
     }
 
     async function loadSupportTickets() {
@@ -1235,7 +1235,7 @@
                 category: 'challenge',
                 title: challengeTitle,
                 content: getCurrentChallengeText(),
-                author_username: '⚡ ПулсСити',
+                author_username: '⚡ PulseCity',
                 author_avatar: 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png',
                 views: 1
             }])
@@ -1309,7 +1309,7 @@
             return;
         }
         if (Notification.permission === "denied") {
-            if (showFeedback) showPulseAlert("Системные уведомления отключены в настройках устройства — включите их для ПулсСити, чтобы видеть пуши на экране блокировки.");
+            if (showFeedback) showPulseAlert("Системные уведомления отключены в настройках устройства — включите их для PulseCity, чтобы видеть пуши на экране блокировки.");
             return;
         }
         Notification.requestPermission().then(permission => {
@@ -1375,7 +1375,7 @@
         if (isFounderAccount()) {
             isAdmin = true;
             document.getElementById('adminPanelBtn').style.display = 'block';
-            document.getElementById('userBadge').textContent = '👑 Основатель ПулсСити';
+            document.getElementById('userBadge').textContent = '👑 Основатель PulseCity';
         } else {
             isAdmin = false;
             document.getElementById('adminPanelBtn').style.display = 'none';
@@ -1484,13 +1484,13 @@
         document.getElementById('btnModeLogin').classList.toggle('active', mode === 'login');
         
         if (mode === 'register') {
-            document.getElementById('authModalTitle').textContent = 'Регистрация в ПулсСити';
+            document.getElementById('authModalTitle').textContent = 'Регистрация в PulseCity';
             document.getElementById('regOnlyFields').style.display = 'block';
             document.getElementById('privacyAgreeRow').style.display = 'flex';
             document.getElementById('forgotPasswordRow').style.display = 'none';
             document.getElementById('authSubmitBtn').textContent = 'Создать аккаунт';
         } else {
-            document.getElementById('authModalTitle').textContent = 'Вход в ПулсСити';
+            document.getElementById('authModalTitle').textContent = 'Вход в PulseCity';
             document.getElementById('regOnlyFields').style.display = 'none';
             document.getElementById('privacyAgreeRow').style.display = 'none';
             document.getElementById('forgotPasswordRow').style.display = 'block';
@@ -1797,7 +1797,7 @@
         loadPublicMessages();
         setupRealtimeSubscriptions();
         playSystemSound('send');
-        showPulseAlert('✓ Добро пожаловать в ПулсСити!');
+        showPulseAlert('✓ Добро пожаловать в PulseCity!');
     }
 
     function deleteAccountCompletely() {
@@ -2037,7 +2037,7 @@
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     function openAdminModal() {
         if (!isFounderAccount()) {
-            showPulseAlert('Доступ к кабинету разработчика есть только у создателя ПулсСити.');
+            showPulseAlert('Доступ к кабинету разработчика есть только у создателя PulseCity.');
             return;
         }
         openModal('adminModal');
@@ -2131,16 +2131,16 @@
         const text = document.getElementById('adminFeedTextInput').value.trim();
         if (!text) { showPulseAlert('Введите текст объявления!'); return; }
 
-        document.getElementById('loadingTitle').textContent = 'Публикация от ⚡ ПулсСити...';
+        document.getElementById('loadingTitle').textContent = 'Публикация от ⚡ PulseCity...';
         document.getElementById('loadingModal').classList.add('open');
 
         const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
             category: 'general',
-            title: title || '⚡ ПулсСити • Официально',
+            title: title || '⚡ PulseCity • Официально',
             content: text,
             media_url: null,
-            author_username: '⚡ ПулсСити',
+            author_username: '⚡ PulseCity',
             author_avatar: 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png',
             views: 1
         }]);
@@ -2164,7 +2164,7 @@
         await supabaseClient.from('messages').insert([{
             chat_type: chatMode,
             city: selectedCity,
-            sender: '⚡ ПулсСити',
+            sender: '⚡ PulseCity',
             recipient: chatMode === 'private' ? privateRecipient : 'public',
             text: '📢 ОБЪЯВЛЕНИЕ:\n' + text,
             avatar_url: 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png'
@@ -2623,7 +2623,7 @@
         if (!username) return false;
         const clean = username.trim();
         if (!clean || clean === myUsername) return false;
-        if (clean === '⚡ ПулсСити' || clean === '⚡ PulseCity') return false;
+        if (clean === '⚡ PulseCity') return false;
         const blockedLabels = ['Ночной дозор', 'Свидетель улиц', 'Городской лис', 'Инкогнито', 'Автор', 'Гость'];
         if (blockedLabels.some(label => clean.includes(label))) return false;
         return true;
@@ -2896,7 +2896,7 @@
             const safeAuthor = authorName.replace(/'/g, "\\'");
             const canDelete = (p.author_username === myUsername) || isFounderAccount();
             const cCount = globalCommentsData[p.id] || 0;
-            const isAdminPost = authorName === '⚡ ПулсСити' || authorName === '⚡ PulseCity';
+            const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = isAdminPost || authorName.toLowerCase() === '@andrey';
             const formattedTime = formatNiceTime(p.created_at);
 
