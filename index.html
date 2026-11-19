@@ -158,6 +158,9 @@
         .btn-sec{background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px 18px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px;transition:.2s}
         .btn-sec:hover{background:rgba(255,255,255,0.1)}
 
+        .link-reset-btn{background:none;border:none;color:#ff9500;font-size:13px;font-weight:700;cursor:pointer;padding:6px 4px;margin-bottom:10px;display:inline-block;text-decoration:underline}
+        .link-reset-btn:active{opacity:0.75}
+
         .chat-tabs{display:flex;gap:10px;margin-bottom:14px}
         .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;padding:12px;border-radius:16px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;position:relative}
         .chat-tab-btn.active{background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(255,107,0,0.35)}
@@ -404,7 +407,11 @@
             </div>
 
             <input type="email" id="authEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:8px">
-            <input type="password" id="authPasswordInput" placeholder="Пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px">
+            <input type="password" id="authPasswordInput" placeholder="Пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:8px">
+
+            <div id="forgotPasswordRow" style="display:none;text-align:right;margin-bottom:6px;">
+                <button type="button" class="link-reset-btn" onclick="openForgotPasswordStep()">🔑 Забыли пароль?</button>
+            </div>
 
             <div id="privacyAgreeRow" style="font-size:11px;color:#9ca3af;margin-bottom:14px;text-align:left;padding:0 4px;display:flex;align-items:flex-start;gap:8px;">
                 <input type="checkbox" id="privacyAgreeCheck" checked style="width:auto;margin-top:2px;">
@@ -423,6 +430,31 @@
             <button class="btn-main" style="margin-bottom:10px;" onclick="verifySignupCode()">Подтвердить код</button>
             <button class="btn-sec" id="resendOtpBtn" onclick="resendSignupCode()" style="font-size:13px;padding:11px;">🔄 Отправить код повторно</button>
             <button class="btn-sec" onclick="backToAuthCredentials()" style="font-size:13px;padding:11px;margin-bottom:0;color:#9ca3af;">← Изменить почту</button>
+        </div>
+
+        <div id="authStepReset" style="display:none;">
+            <p style="color:#d1d5db;font-size:12px;line-height:1.45;margin-bottom:12px;">
+                Укажите почту аккаунта — отправим код или ссылку для сброса пароля.
+            </p>
+            <input type="email" id="resetEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:10px;">
+            <button class="btn-main" id="sendResetBtn" style="margin-bottom:12px;" onclick="sendPasswordResetRequest()">📨 Отправить письмо сброса</button>
+
+            <div id="resetVerifyBlock" style="display:none;background:rgba(255,107,0,0.08);border:1px solid rgba(255,149,0,0.3);border-radius:16px;padding:12px;margin-bottom:10px;">
+                <p style="color:#ff9500;font-size:12px;font-weight:700;margin-bottom:8px;">Если в письме пришёл код — введите его и новый пароль:</p>
+                <input type="text" id="resetOtpInput" class="otp-input" inputmode="numeric" maxlength="8" placeholder="Код из письма" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="margin-bottom:8px;padding:10px !important;font-size:18px !important;">
+                <input type="password" id="resetNewPasswordInput" placeholder="Новый пароль (от 6 символов)..." style="text-align:center;margin-bottom:8px;">
+                <button class="btn-main" style="padding:12px;font-size:14px;margin:0;" onclick="confirmResetWithCode()">Сохранить новый пароль</button>
+            </div>
+
+            <button class="btn-sec" onclick="backToAuthCredentials()" style="font-size:13px;padding:11px;margin-bottom:0;color:#9ca3af;">← Назад ко входу</button>
+        </div>
+
+        <div id="authStepNewPassword" style="display:none;">
+            <p style="color:#d1d5db;font-size:13px;line-height:1.45;margin-bottom:12px;">
+                Придумайте новый пароль для входа в <strong style="color:#ff9500;">PulseCity</strong>:
+            </p>
+            <input type="password" id="recoveryPasswordInput" placeholder="Новый пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px;">
+            <button class="btn-main" style="margin:0;" onclick="applyRecoveryPassword()">✓ Обновить пароль и войти</button>
         </div>
     </div>
 </div>
@@ -1288,6 +1320,11 @@
 
     function switchAuthMode(mode) {
         currentAuthMode = mode;
+        document.getElementById('authStepOtp').style.display = 'none';
+        document.getElementById('authStepReset').style.display = 'none';
+        document.getElementById('authStepNewPassword').style.display = 'none';
+        document.getElementById('authStepCredentials').style.display = 'block';
+
         document.getElementById('btnModeReg').classList.toggle('active', mode === 'register');
         document.getElementById('btnModeLogin').classList.toggle('active', mode === 'login');
         
@@ -1295,13 +1332,172 @@
             document.getElementById('authModalTitle').textContent = 'Регистрация в PulseCity';
             document.getElementById('regOnlyFields').style.display = 'block';
             document.getElementById('privacyAgreeRow').style.display = 'flex';
+            document.getElementById('forgotPasswordRow').style.display = 'none';
             document.getElementById('authSubmitBtn').textContent = 'Создать аккаунт';
         } else {
             document.getElementById('authModalTitle').textContent = 'Вход в PulseCity';
             document.getElementById('regOnlyFields').style.display = 'none';
             document.getElementById('privacyAgreeRow').style.display = 'none';
+            document.getElementById('forgotPasswordRow').style.display = 'block';
             document.getElementById('authSubmitBtn').textContent = 'Войти';
         }
+    }
+
+    function openForgotPasswordStep() {
+        const typedEmail = document.getElementById('authEmailInput').value.trim();
+        document.getElementById('authModalTitle').textContent = 'Восстановление пароля';
+        document.getElementById('resetEmailInput').value = typedEmail || myEmail || '';
+        document.getElementById('resetOtpInput').value = '';
+        document.getElementById('resetNewPasswordInput').value = '';
+        document.getElementById('resetVerifyBlock').style.display = 'none';
+
+        document.getElementById('authStepCredentials').style.display = 'none';
+        document.getElementById('authStepOtp').style.display = 'none';
+        document.getElementById('authStepNewPassword').style.display = 'none';
+        document.getElementById('authStepReset').style.display = 'block';
+        setTimeout(() => document.getElementById('resetEmailInput').focus(), 150);
+    }
+
+    function openNewPasswordStep() {
+        document.getElementById('authModalTitle').textContent = 'Новый пароль';
+        document.getElementById('recoveryPasswordInput').value = '';
+        document.getElementById('authStepCredentials').style.display = 'none';
+        document.getElementById('authStepOtp').style.display = 'none';
+        document.getElementById('authStepReset').style.display = 'none';
+        document.getElementById('authStepNewPassword').style.display = 'block';
+        document.getElementById('authModal').classList.add('open');
+        setTimeout(() => document.getElementById('recoveryPasswordInput').focus(), 150);
+    }
+
+    async function sendPasswordResetRequest() {
+        const email = document.getElementById('resetEmailInput').value.trim();
+        if (!email || !email.includes('@')) {
+            showPulseAlert('Введите корректный адрес электронной почты!');
+            return;
+        }
+        if (!isAllowedRussianEmail(email)) {
+            showPulseAlert('Используйте российскую почту (@yandex.ru, @mail.ru, @vk.com, @rambler.ru и т. д.).');
+            return;
+        }
+        if (!supabaseClient) {
+            showPulseAlert('Нет подключения к серверу.');
+            return;
+        }
+
+        const btn = document.getElementById('sendResetBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Отправка письма...';
+
+        const redirectTo = window.location.href.split('#')[0];
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectTo
+        });
+
+        btn.disabled = false;
+        btn.textContent = '📨 Отправить письмо сброса';
+
+        if (error) {
+            showPulseAlert('Не удалось отправить письмо сброса: ' + error.message);
+            return;
+        }
+
+        pendingRegData.email = email;
+        document.getElementById('resetVerifyBlock').style.display = 'block';
+        showPulseAlert('✓ Письмо для сброса пароля отправлено на ' + email + '. Перейдите по ссылке из письма или введите код ниже.');
+    }
+
+    async function confirmResetWithCode() {
+        const email = (document.getElementById('resetEmailInput').value.trim() || pendingRegData.email || '').trim();
+        const code = document.getElementById('resetOtpInput').value.trim();
+        const newPassword = document.getElementById('resetNewPasswordInput').value.trim();
+
+        if (!email || !email.includes('@')) {
+            showPulseAlert('Укажите почту аккаунта.');
+            return;
+        }
+        if (!code || code.length < 6) {
+            showPulseAlert('Введите код из письма.');
+            return;
+        }
+        if (newPassword.length < 6) {
+            showPulseAlert('Новый пароль должен содержать минимум 6 символов.');
+            return;
+        }
+        if (!supabaseClient) return;
+
+        document.getElementById('loadingTitle').textContent = 'Обновление пароля...';
+        document.getElementById('loadingModal').classList.add('open');
+
+        const { data: verifyData, error: verifyErr } = await supabaseClient.auth.verifyOtp({
+            email: email,
+            token: code,
+            type: 'recovery'
+        });
+
+        if (verifyErr) {
+            document.getElementById('loadingModal').classList.remove('open');
+            showPulseAlert('Неверный или просроченный код: ' + verifyErr.message);
+            return;
+        }
+
+        const { data: updData, error: updErr } = await supabaseClient.auth.updateUser({
+            password: newPassword
+        });
+
+        document.getElementById('loadingModal').classList.remove('open');
+
+        if (updErr) {
+            showPulseAlert('Не удалось сохранить новый пароль: ' + updErr.message);
+            return;
+        }
+
+        const userObj = updData?.user || verifyData?.user;
+        const meta = userObj?.user_metadata || {};
+        const finalName = meta.full_name || myName || email.split('@')[0];
+        const finalUname = meta.username || myUsername || ('@' + email.split('@')[0]);
+        const finalAvatar = meta.avatar_url || myAvatar || '';
+
+        finalizeUserLogin(email, finalName, finalUname, finalAvatar);
+    }
+
+    async function applyRecoveryPassword() {
+        const newPassword = document.getElementById('recoveryPasswordInput').value.trim();
+        if (newPassword.length < 6) {
+            showPulseAlert('Новый пароль должен содержать минимум 6 символов.');
+            return;
+        }
+        if (!supabaseClient) return;
+
+        document.getElementById('loadingTitle').textContent = 'Сохранение нового пароля...';
+        document.getElementById('loadingModal').classList.add('open');
+
+        const { data, error } = await supabaseClient.auth.updateUser({
+            password: newPassword
+        });
+
+        document.getElementById('loadingModal').classList.remove('open');
+
+        if (error) {
+            showPulseAlert('Ошибка обновления пароля: ' + error.message);
+            return;
+        }
+
+        const userObj = data?.user;
+        const email = userObj?.email || pendingRegData.email || myEmail || '';
+        const meta = userObj?.user_metadata || {};
+        const finalName = meta.full_name || myName || (email ? email.split('@')[0] : 'Пользователь');
+        const finalUname = meta.username || myUsername || (email ? '@' + email.split('@')[0] : '@user');
+        const finalAvatar = meta.avatar_url || myAvatar || '';
+
+        finalizeUserLogin(email, finalName, finalUname, finalAvatar);
+    }
+
+    if (supabaseClient && supabaseClient.auth && supabaseClient.auth.onAuthStateChange) {
+        supabaseClient.auth.onAuthStateChange((event) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                openNewPasswordStep();
+            }
+        });
     }
 
     function showOtpStep(email) {
@@ -1309,12 +1505,16 @@
         document.getElementById('otpTargetEmail').textContent = email;
         document.getElementById('otpCodeInput').value = '';
         document.getElementById('authStepCredentials').style.display = 'none';
+        document.getElementById('authStepReset').style.display = 'none';
+        document.getElementById('authStepNewPassword').style.display = 'none';
         document.getElementById('authStepOtp').style.display = 'block';
         setTimeout(() => document.getElementById('otpCodeInput').focus(), 150);
     }
 
     function backToAuthCredentials() {
         document.getElementById('authStepOtp').style.display = 'none';
+        document.getElementById('authStepReset').style.display = 'none';
+        document.getElementById('authStepNewPassword').style.display = 'none';
         document.getElementById('authStepCredentials').style.display = 'block';
         switchAuthMode(currentAuthMode);
     }
@@ -1425,7 +1625,7 @@
                         showPulseAlert('Почта ещё не подтверждена. Мы отправили новый код на ' + email);
                         return;
                     }
-                    showPulseAlert('Неверная почта или пароль: ' + error.message);
+                    showPulseAlert('Неверная почта или пароль. Нажмите «Забыли пароль?», чтобы сбросить пароль по почте.');
                     return;
                 }
 
