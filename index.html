@@ -376,8 +376,8 @@
             <div id="profileAvatarPreview" style="width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;border:3px solid rgba(255,149,0,0.6);box-shadow:0 8px 25px rgba(255,107,0,0.3)">
                 👤
             </div>
-            <h3 id="displayProfileName" onclick="secretAdminTap()" style="margin-bottom:2px;font-size:20px;cursor:pointer;">Пользователь</h3>
-            <p style="margin-bottom:4px;font-size:14px;color:#ff9500;cursor:pointer;" onclick="secretAdminTap()" id="displayUsername">@username</p>
+            <h3 id="displayProfileName" style="margin-bottom:2px;font-size:20px;">Пользователь</h3>
+            <p style="margin-bottom:4px;font-size:14px;color:#ff9500;" id="displayUsername">@username</p>
             <p style="margin-bottom:8px;font-size:12px;color:#9ca3af;" id="displayEmail">email@yandex.ru</p>
             <p id="displayBio" style="font-size:13px;color:#d1d5db;margin-bottom:14px;font-style:italic;">О себе пока ничего не написано...</p>
             
@@ -730,6 +730,7 @@
 <script>
     const SUPPORT_EMAIL = 'pulsecity1@gmail.com';
     const SUPPORT_RECIPIENT = '@andrey';
+    const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru'];
     const VAPID_PUBLIC_KEY = '';
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
@@ -989,7 +990,7 @@
                                 source: 'messages',
                                 sender: m.sender || 'Гость',
                                 city: m.city || '',
-                                topic: topicMatch ? topicMatch[1] : 'Обратная связь',
+                                topic: topicMatch ? topicMatch[1] : 'Обращение',
                                 message: bodyText,
                                 created_at: m.created_at
                             });
@@ -1081,18 +1082,15 @@
         document.getElementById('alertModal').classList.add('open');
     }
 
-    let isAdmin = localStorage.getItem('pulseCity_is_admin') === 'true';
-    let adminTapCount = 0;
+    let isAdmin = false;
+    localStorage.removeItem('pulseCity_is_admin');
 
-    function secretAdminTap() {
-        adminTapCount++;
-        if (adminTapCount >= 5) {
-            isAdmin = true;
-            localStorage.setItem('pulseCity_is_admin', 'true');
-            checkAdminAccess();
-            showPulseAlert('👑 Режим разработчика активирован!');
-            adminTapCount = 0;
-        }
+    function isFounderAccount() {
+        const normalizedEmail = (myEmail || '').toLowerCase().trim();
+        const normalizedNick = (myUsername || '').toLowerCase().trim();
+        const emailMatch = normalizedEmail && FOUNDER_EMAILS.includes(normalizedEmail);
+        const nickMatch = normalizedNick === '@andrey';
+        return Boolean(emailMatch || nickMatch);
     }
 
     let soundEnabled = localStorage.getItem('pulseCity_sound') !== 'false';
@@ -1344,11 +1342,14 @@
     registerServiceWorkerAndPush();
 
     function checkAdminAccess() {
-        if (isAdmin || myUsername.toLowerCase() === '@andrey') {
+        if (isFounderAccount()) {
+            isAdmin = true;
             document.getElementById('adminPanelBtn').style.display = 'block';
             document.getElementById('userBadge').textContent = '👑 Основатель PulseCity';
         } else {
+            isAdmin = false;
             document.getElementById('adminPanelBtn').style.display = 'none';
+            document.getElementById('userBadge').textContent = '⭐ Местный эксперт';
         }
     }
 
@@ -2005,6 +2006,10 @@
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     function openAdminModal() {
+        if (!isFounderAccount()) {
+            showPulseAlert('Доступ к кабинету разработчика есть только у создателя PulseCity.');
+            return;
+        }
         openModal('adminModal');
         loadSupportTickets();
     }
@@ -2071,6 +2076,7 @@
     }
 
     async function adminClearChat() {
+        if (!isFounderAccount()) return;
         showConfirm('Очистка чата', 'Вы уверены, что хотите полностью очистить городской чат?', async (res) => {
             if (!res) return;
             await supabaseClient.from('messages').delete().eq('city', selectedCity);
@@ -2080,6 +2086,7 @@
     }
 
     async function adminClearPosts() {
+        if (!isFounderAccount()) return;
         showConfirm('Удаление новостей', 'Вы уверены, что хотите удалить все новости в этом городе?', async (res) => {
             if (!res) return;
             await supabaseClient.from('posts').delete().eq('city', selectedCity);
@@ -2089,6 +2096,7 @@
     }
 
     async function publishAdminFeedPost() {
+        if (!isFounderAccount()) return;
         const title = document.getElementById('adminFeedTitleInput').value.trim();
         const text = document.getElementById('adminFeedTextInput').value.trim();
         if (!text) { showPulseAlert('Введите текст объявления!'); return; }
@@ -2117,6 +2125,7 @@
     }
 
     async function sendAdminBroadcast() {
+        if (!isFounderAccount()) return;
         const input = document.getElementById('adminBroadcastInput');
         const text = input.value.trim();
         if (!text) return;
@@ -2137,6 +2146,7 @@
     }
 
     function banUser() {
+        if (!isFounderAccount()) return;
         const input = document.getElementById('adminBanInput');
         let target = input.value.trim();
         if (!target) return;
@@ -2156,7 +2166,7 @@
     }
 
     async function deletePost(postId, authorUsername) {
-        if (myUsername !== authorUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
+        if (myUsername !== authorUsername && !isFounderAccount()) {
             showPulseAlert('Вы можете удалять только свои новости!');
             return;
         }
@@ -2168,7 +2178,7 @@
     }
 
     async function deleteMessage(msgId, senderUsername) {
-        if (myUsername !== senderUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
+        if (myUsername !== senderUsername && !isFounderAccount()) {
             showPulseAlert('Вы можете удалять только свои сообщения!');
             return;
         }
@@ -2180,7 +2190,7 @@
     }
 
     async function deleteComment(commentId, senderUsername) {
-        if (myUsername !== senderUsername && !isAdmin && myUsername.toLowerCase() !== '@andrey') {
+        if (myUsername !== senderUsername && !isFounderAccount()) {
             showPulseAlert('Вы можете удалять только свои комментарии!');
             return;
         }
@@ -2854,7 +2864,7 @@
             const authorName = p.author_username || 'Автор';
             const canMessageAuthor = canDirectMessageUser(authorName);
             const safeAuthor = authorName.replace(/'/g, "\\'");
-            const canDelete = (p.author_username === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
+            const canDelete = (p.author_username === myUsername) || isFounderAccount();
             const cCount = globalCommentsData[p.id] || 0;
             const isAdminPost = authorName === '⚡ PulseCity';
             const isFounder = authorName === '⚡ PulseCity' || authorName.toLowerCase() === '@andrey';
@@ -3007,7 +3017,7 @@
                 ? `<img src="${c.avatar_url}">` 
                 : (c.sender ? c.sender[1].toUpperCase() : 'U');
 
-            const canDeleteComment = (c.sender === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
+            const canDeleteComment = (c.sender === myUsername) || isFounderAccount();
             const parsed = extractMediaFromCommentText(c.text);
             const mediaUrl = c.media_url || parsed.url;
             const displayText = parsed.cleanText;
@@ -3329,8 +3339,8 @@
                 : (m.sender && m.sender[1] ? m.sender[1].toUpperCase() : 'U');
 
             const isMine = m.sender === myUsername;
-            const canDeleteMsg = (m.sender === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
-            const canPin = isAdmin || (myUsername.toLowerCase() === '@andrey');
+            const canDeleteMsg = (m.sender === myUsername) || isFounderAccount();
+            const canPin = isFounderAccount();
             const msgTimeFormatted = formatNiceTime(m.created_at);
 
             const msgReacts = messageReactionsMap[String(m.id)] || {};
@@ -3390,12 +3400,14 @@
     }
 
     async function pinMessage(msgId, text) {
+        if (!isFounderAccount()) return;
         await supabaseClient.from('pins').upsert([{ city: selectedCity, message_id: msgId, text: text }]);
         loadPinnedMessage();
         showPulseAlert('📌 Сообщение закреплено!');
     }
 
     async function unpinMessage() {
+        if (!isFounderAccount()) return;
         await supabaseClient.from('pins').delete().eq('city', selectedCity);
         document.getElementById('pinnedMsgContainer').style.display = 'none';
     }
@@ -3409,7 +3421,7 @@
         if (data) {
             txt.textContent = data.text;
             box.style.display = 'flex';
-            if (isAdmin || myUsername.toLowerCase() === '@andrey') {
+            if (isFounderAccount()) {
                 btn.style.display = 'block';
             }
         } else {
