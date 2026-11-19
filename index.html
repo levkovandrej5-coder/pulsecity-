@@ -174,6 +174,7 @@
 
         .chat-input-area{display:flex;gap:10px;align-items:center;margin-bottom:10px}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff9500;width:48px;height:48px;border-radius:16px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+        .attach-btn.has-file{background:rgba(255,107,0,0.25);border-color:#ff9500;color:#fff}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:14px;color:#fff;font-size:15px;outline:none;min-width:0}
         .send-btn{background:linear-gradient(135deg,#ff6b00,#ff3300);color:#fff;border:none;border-radius:16px;height:48px;padding:0 22px;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0}
         
@@ -566,9 +567,15 @@
             <button class="btn-sec" style="width:auto;padding:6px 12px;margin:0;font-size:13px;background:rgba(255,255,255,0.06);" onclick="closeModal('commentsModal')">✕</button>
         </div>
         <p id="commentsChallengePrompt" style="display:none;font-size:13px;color:#ff9500;background:rgba(255,107,0,0.1);padding:10px 12px;border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,107,0,0.25);"></p>
-        <div class="chat-input-area">
+        <div class="chat-input-area" style="margin-bottom:6px;">
+            <input type="file" id="commentMediaInput" accept="image/*,video/*" style="display:none" onchange="previewCommentMedia(this)">
+            <button type="button" class="attach-btn" id="commentAttachBtn" onclick="document.getElementById('commentMediaInput').click()" title="Прикрепить фото или видео">📎</button>
             <input type="text" id="commentInput" placeholder="Написать комментарий..." onkeydown="if(event.key==='Enter')sendComment()">
-            <button class="send-btn" onclick="sendComment()">➤</button>
+            <button type="button" class="send-btn" onclick="sendComment()">➤</button>
+        </div>
+        <div id="commentMediaPreview" style="display:none;justify-content:space-between;align-items:center;background:rgba(255,107,0,0.12);border:1px solid rgba(255,149,0,0.35);padding:8px 12px;border-radius:12px;margin-bottom:10px;font-size:12px;color:#ff9500;">
+            <span id="commentMediaName">✓ Фото выбрано</span>
+            <button type="button" onclick="clearCommentMedia()" style="background:none;border:none;color:#ef4444;font-weight:700;cursor:pointer;font-size:13px;">✕ Убрать</button>
         </div>
         <div class="chat-box" id="commentsList" style="max-height:38vh;"></div>
     </div>
@@ -776,7 +783,8 @@
         const promptEl = document.getElementById('commentsChallengePrompt');
         promptEl.textContent = getCurrentChallengeText();
         promptEl.style.display = 'block';
-        document.getElementById('commentInput').placeholder = 'Напишите ваш ответ на вызов...';
+        document.getElementById('commentInput').placeholder = 'Ответ или фото к вызову...';
+        clearCommentMedia();
         openModal('commentsModal');
         loadComments(challengeId);
     }
@@ -831,6 +839,7 @@
     let chatMode = 'public';
     let privateRecipient = '';
     let selectedNewsFile = null;
+    let selectedCommentFile = null;
     let selectedRegAvatarFile = null;
     let selectedEditAvatarFile = null;
     let activePostIdForComments = null;
@@ -1721,8 +1730,27 @@
         }
     }
 
+    function previewCommentMedia(input) {
+        if (input.files && input.files[0]) {
+            selectedCommentFile = input.files[0];
+            document.getElementById('commentAttachBtn').classList.add('has-file');
+            document.getElementById('commentMediaName').textContent = '✓ ' + selectedCommentFile.name;
+            document.getElementById('commentMediaPreview').style.display = 'flex';
+        }
+    }
+
+    function clearCommentMedia() {
+        selectedCommentFile = null;
+        const inp = document.getElementById('commentMediaInput');
+        if (inp) inp.value = '';
+        const btn = document.getElementById('commentAttachBtn');
+        if (btn) btn.classList.remove('has-file');
+        const prev = document.getElementById('commentMediaPreview');
+        if (prev) prev.style.display = 'none';
+    }
+
     function initVideoManager() {
-        document.querySelectorAll('#newsItemsContainer video, #chatMessages video').forEach(v => {
+        document.querySelectorAll('#newsItemsContainer video, #chatMessages video, #commentsList video').forEach(v => {
             v.loop = false;
             v.onplay = () => {
                 document.querySelectorAll('video').forEach(other => {
@@ -2040,9 +2068,18 @@
         activePostIdForComments = postId;
         document.getElementById('commentsModalTitle').textContent = 'Комментарии';
         document.getElementById('commentsChallengePrompt').style.display = 'none';
-        document.getElementById('commentInput').placeholder = 'Написать комментарий...';
+        document.getElementById('commentInput').placeholder = 'Комментарий или фото...';
+        clearCommentMedia();
         openModal('commentsModal');
         loadComments(postId);
+    }
+
+    function extractMediaFromCommentText(text) {
+        if (!text) return { cleanText: '', url: null };
+        const match = text.match(/\[media:(https?:\/\/[^\s\]]+)\]/i);
+        if (!match) return { cleanText: text, url: null };
+        const cleanText = text.replace(match[0], '').trim();
+        return { cleanText, url: match[1] };
     }
 
     async function loadComments(postId) {
@@ -2059,35 +2096,80 @@
                 : (c.sender ? c.sender[1].toUpperCase() : 'U');
 
             const canDeleteComment = (c.sender === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
+            const parsed = extractMediaFromCommentText(c.text);
+            const mediaUrl = c.media_url || parsed.url;
+            const displayText = parsed.cleanText;
+
+            let mediaHtml = '';
+            if (mediaUrl) {
+                const isVid = mediaUrl.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || mediaUrl.includes('video');
+                mediaHtml = isVid
+                    ? `<video src="${mediaUrl}" class="msg-media" controls playsinline preload="metadata"></video>`
+                    : `<img src="${mediaUrl}" class="msg-media" loading="lazy">`;
+            }
 
             const row = document.createElement('div');
             row.className = 'msg-row';
             row.innerHTML = `
                 <div class="msg-avatar">${avatarHtml}</div>
                 <div class="msg-bubble" style="flex:1;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                         <div class="msg-author">${c.sender}</div>
                         ${canDeleteComment ? `<button class="delete-btn" style="padding:2px 6px;font-size:10px;" onclick="deleteComment(${c.id}, '${c.sender}')">Удалить</button>` : ''}
                     </div>
-                    ${c.text}
+                    ${displayText ? `<div style="margin-top:4px;">${displayText}</div>` : ''}
+                    ${mediaHtml}
                 </div>`;
             list.appendChild(row);
         });
+        initVideoManager();
     }
 
     async function sendComment() {
         const input = document.getElementById('commentInput');
         const text = input.value.trim();
-        if (!text || !activePostIdForComments) return;
+        if ((!text && !selectedCommentFile) || !activePostIdForComments) return;
+
+        let mediaUrl = null;
+        if (selectedCommentFile) {
+            document.getElementById('loadingTitle').textContent = '⚡ Загрузка фото в комментарий...';
+            document.getElementById('loadingModal').classList.add('open');
+            mediaUrl = await uploadFileToSupabase(selectedCommentFile);
+            document.getElementById('loadingModal').classList.remove('open');
+            if (!mediaUrl) return;
+        }
 
         playSystemSound('send');
-        await supabaseClient.from('comments').insert([{
+
+        const isVideo = selectedCommentFile && (selectedCommentFile.type.startsWith('video/') || selectedCommentFile.name.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i));
+        const fallbackLabel = isVideo ? '🎥 Видео' : '🖼️ Фото';
+        const finalText = mediaUrl
+            ? `${text || fallbackLabel} [media:${mediaUrl}]`
+            : text;
+
+        const payload = {
             post_id: activePostIdForComments,
             sender: myUsername,
-            text: text,
+            text: finalText,
             avatar_url: myAvatar
-        }]);
+        };
+
+        let { error } = await supabaseClient.from('comments').insert([
+            mediaUrl ? { ...payload, media_url: mediaUrl } : payload
+        ]);
+
+        if (error && error.message && error.message.toLowerCase().includes('media_url')) {
+            const res = await supabaseClient.from('comments').insert([payload]);
+            error = res.error;
+        }
+
+        if (error) {
+            showPulseAlert('Не удалось отправить комментарий: ' + error.message);
+            return;
+        }
+
         input.value = '';
+        clearCommentMedia();
         loadComments(activePostIdForComments);
         loadPostsFromCloud(true);
     }
