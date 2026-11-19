@@ -200,6 +200,8 @@
         .otp-input{font-size:24px !important;font-weight:900 !important;letter-spacing:5px !important;text-align:center !important;color:#ff9500 !important;border:1px solid rgba(255,107,0,0.5) !important;background:rgba(255,107,0,0.08) !important}
         .otp-input:focus{border-color:#ff6b00 !important;box-shadow:0 0 20px rgba(255,107,0,0.25)}
 
+        .contact-email-box{background:rgba(255,107,0,0.1);border:1px solid rgba(255,149,0,0.4);border-radius:16px;padding:14px;margin-bottom:16px;font-size:15px;font-weight:800;color:#ff9500;word-break:break-all;text-align:center}
+
         .nav-wrapper{position:fixed;bottom:16px;left:16px;right:16px;z-index:1000}
         nav{background:linear-gradient(180deg,rgba(22,15,11,0.96),rgba(10,7,5,0.99));backdrop-filter:blur(30px);border:1px solid rgba(255,107,0,0.25);border-radius:32px;display:flex;padding:8px;box-shadow:0 25px 50px rgba(0,0,0,0.9);gap:8px}
         nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:26px;padding:12px 8px;color:#9ca3af;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.2s}
@@ -311,6 +313,7 @@
             <div id="userBadge" style="display:inline-block;background:rgba(255,107,0,0.15);color:#ff9500;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,107,0,0.35)">⭐ Местный эксперт</div>
             
             <button class="btn-main" onclick="openEditProfileModal()" style="margin-bottom:10px;">✏️ Настроить профиль</button>
+            <button class="btn-sec" onclick="openModal('contactModal')" style="color:#ff9500;border-color:rgba(255,107,0,0.35);">✉️ Связь с PulseCity</button>
             <p style="margin:12px 0;font-size:15px">Текущий город: <strong id="profileCity" style="color:#ff9500">Иркутск</strong></p>
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
@@ -320,6 +323,22 @@
             
             <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти из аккаунта</button>
         </div>
+    </div>
+</div>
+
+<div id="contactModal" class="modal" onclick="if(event.target===this)closeModal('contactModal')">
+    <div class="modal-card" style="max-width:360px;text-align:center;">
+        <div style="font-size:38px;margin-bottom:8px">✉️</div>
+        <h3>Связь с PulseCity</h3>
+        <p style="color:#d1d5db;font-size:13px;line-height:1.45;margin-bottom:14px;">
+            По вопросам работы приложения, предложений или модерации напишите нам на почту:
+        </p>
+        <div class="contact-email-box" id="supportEmailText">pulsecity1@gmail.com</div>
+        <button class="btn-main" onclick="copySupportEmail()" style="margin-bottom:10px;">📋 Скопировать адрес</button>
+        <a href="mailto:pulsecity1@gmail.com?subject=PulseCity%20—%20обратная%20связь" style="text-decoration:none;display:block;">
+            <button class="btn-sec" type="button" style="color:#ff9500;border-color:rgba(255,107,0,0.35);">📨 Открыть почту</button>
+        </a>
+        <button class="btn-sec" onclick="closeModal('contactModal')" style="margin-bottom:0;">Закрыть</button>
     </div>
 </div>
 
@@ -569,6 +588,34 @@
 </div>
 
 <script>
+    const SUPPORT_EMAIL = 'pulsecity1@gmail.com';[span_3](start_span)[span_3](end_span)
+
+    function copySupportEmail() {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(SUPPORT_EMAIL).then(() => {
+                showPulseAlert('✓ Адрес ' + SUPPORT_EMAIL + ' скопирован!');
+            }).catch(() => {
+                fallbackCopyText(SUPPORT_EMAIL);
+            });
+        } else {
+            fallbackCopyText(SUPPORT_EMAIL);
+        }
+    }
+
+    function fallbackCopyText(text) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+            document.execCommand('copy');
+            showPulseAlert('✓ Адрес ' + text + ' скопирован!');
+        } catch (e) {
+            showPulseAlert('Почта для связи: ' + text);
+        }
+        document.body.removeChild(temp);
+    }
+
     function showPulseAlert(text) {
         document.getElementById('alertText').textContent = text;
         document.getElementById('alertModal').classList.add('open');
