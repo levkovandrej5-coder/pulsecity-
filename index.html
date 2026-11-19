@@ -272,7 +272,6 @@
         .support-ticket-topic{display:inline-block;background:rgba(230,92,0,0.2) !important;color:#ff7a14 !important;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px}
         .support-ticket-msg{font-size:12px;color:#f3f4f6;line-height:1.4;white-space:pre-line;word-break:break-word;margin-bottom:6px}
 
-        /* Компактный нижний навигационный бар */
         .nav-wrapper{position:fixed;bottom:8px;left:12px;right:12px;z-index:1000}
         nav{background:linear-gradient(180deg,rgba(20,14,10,0.97),rgba(10,7,5,0.99)) !important;backdrop-filter:blur(24px);border:1px solid rgba(230,92,0,0.28) !important;border-radius:22px;display:flex;padding:4px;box-shadow:0 12px 28px rgba(0,0,0,0.85);gap:5px}
         nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:17px;padding:6px 4px;color:#9ca3af;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:.2s;min-height:46px}
@@ -633,11 +632,11 @@
     </div>
 </div>
 
-<div id="alertModal" class="modal" onclick="if(event.target===this)closeModal('alertModal')">
+<div id="alertModal" class="modal" style="z-index:3600;" onclick="if(event.target===this)closeModal('alertModal')">
     <div class="modal-card" style="max-width:320px;text-align:center;">
         <div style="font-size:34px;margin-bottom:8px">⚡</div>
         <h3 id="alertTitle" style="font-size:17px;margin-bottom:8px;">PulseCity</h3>
-        <p id="alertText" style="color:#d1d5db;font-size:13px;margin-bottom:18px;"></p>
+        <p id="alertText" style="color:#d1d5db;font-size:13px;margin-bottom:18px;line-height:1.45;"></p>
         <button class="btn-main" onclick="closeModal('alertModal')" style="margin:0;">ОК</button>
     </div>
 </div>
@@ -755,7 +754,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v5_pulsecity';
+    const THEME_REVISION = 'orange_v6_pulsecity';
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
@@ -790,6 +789,8 @@
         syncPushToggleUI();
         if (pushNotificationsEnabled) {
             requestNotificationPermission(true);
+        } else {
+            showPulseAlert('🔕 Push-уведомления выключены.');
         }
     }
 
@@ -836,7 +837,7 @@
     }
 
     async function registerServiceWorkerAndPush() {
-        if (!('serviceWorker' in navigator)) return;
+        if (!('serviceWorker' in navigator)) return false;
         try {
             const reg = await navigator.serviceWorker.register('sw.js?v=' + THEME_REVISION);
             navigator.serviceWorker.addEventListener('message', (event) => {
@@ -867,7 +868,10 @@
                     }], { onConflict: 'username' }).catch(() => {});
                 }
             }
-        } catch (e) {}
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
     function dispatchSmartNotification(eventKey, title, body, icon = '🔔', onClick = null) {
@@ -1306,30 +1310,58 @@
         document.getElementById('toggleSearchBtn').classList.remove('active');
     }
 
-    function requestNotificationPermission(showFeedback = false) {
+    async function requestNotificationPermission(showFeedback = false) {
+        if (!pushNotificationsEnabled) {
+            pushNotificationsEnabled = true;
+            localStorage.setItem('pulseCity_push_enabled', 'true');
+            syncPushToggleUI();
+        }
+
+        const swOk = await registerServiceWorkerAndPush();
+
         if (!("Notification" in window)) {
             if (showFeedback) {
-                showPulseAlert("✓ Уведомления в приложении включены! Для доставки при полностью выключенном экране подключите push-сервер или нативный SDK (например, RuStore Push).");
+                showPulseAlert(
+                    "🔔 В этом браузере системные уведомления не поддерживаются, но уведомления внутри открытого PulseCity работают!" +
+                    (swOk ? "\nService Worker активен." : "")
+                );
             }
             return;
         }
+
         if (Notification.permission === "granted") {
-            registerServiceWorkerAndPush();
-            if (showFeedback) showPulseAlert("✓ Push-уведомления разрешены! Подключение фонового обработчика проверено.");
-            return;
-        }
-        if (Notification.permission === "denied") {
-            if (showFeedback) showPulseAlert("Системные уведомления отключены в настройках устройства — включите их для PulseCity, чтобы видеть пуши на экране блокировки.");
-            return;
-        }
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                registerServiceWorkerAndPush();
-                if (showFeedback) showPulseAlert("✓ Push-уведомления включены!");
-            } else if (showFeedback) {
-                showPulseAlert("Разрешение не выдано — будут работать только уведомления внутри открытого приложения.");
+            if (showFeedback) {
+                showPulseAlert("✅ Системные уведомления разрешены и готовы к работе! Уведомления о новых постах и сообщениях будут приходить.");
             }
-        }).catch(() => {});
+            return;
+        }
+
+        if (Notification.permission === "denied") {
+            if (showFeedback) {
+                showPulseAlert("🚫 Уведомления заблокированы в настройках браузера или телефона. Откройте настройки сайта/приложения и разрешите уведомления для PulseCity.");
+            }
+            return;
+        }
+
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                await registerServiceWorkerAndPush();
+                if (showFeedback) {
+                    showPulseAlert("✅ Push-уведомления успешно включены!");
+                }
+            } else if (permission === "denied") {
+                if (showFeedback) {
+                    showPulseAlert("🚫 Разрешение не выдано. Включить его можно позже в настройках браузера или устройства.");
+                }
+            } else if (showFeedback) {
+                showPulseAlert("ℹ️ Запрос уведомлений закрыт. Пока активны уведомления внутри открытого приложения.");
+            }
+        } catch (e) {
+            if (showFeedback) {
+                showPulseAlert("ℹ️ Не удалось вызвать системный запрос уведомлений. Проверьте разрешения браузера/устройства для PulseCity.");
+            }
+        }
     }
 
     let supabaseClient = null;
@@ -2037,10 +2069,41 @@
         location.reload();
     }
 
-    function clearLocalCache() {
-        localStorage.clear();
-        showPulseAlert('Кэш очищен! Перезагрузка...');
-        setTimeout(() => location.reload(), 1000);
+    async function clearLocalCache() {
+        const cacheKeysToRemove = [
+            'pulseCity_notified_keys',
+            'pulseCity_viewed_posts',
+            'pulseCity_msg_reactions',
+            'pulseCity_poll_votes',
+            'pulseCity_local_support'
+        ];
+        cacheKeysToRemove.forEach(k => localStorage.removeItem(k));
+        sessionStorage.clear();
+
+        if ('caches' in window) {
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            } catch (e) {}
+        }
+
+        if ('serviceWorker' in navigator) {
+            try {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.update().catch(() => {})));
+            } catch (e) {}
+        }
+
+        notifiedEventKeys = new Set();
+        viewedPostsSet = new Set();
+        messageReactionsMap = {};
+
+        closeModal('settingsModal');
+        showPulseAlert('🧹 Локальный кэш очищен! Аккаунт и город сохранены.');
+        if (myUsername) {
+            loadPostsFromCloud(true);
+            loadPublicMessages();
+        }
     }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
