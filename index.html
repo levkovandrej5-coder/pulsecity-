@@ -23,6 +23,13 @@
         #headerSearchDrop.open{display:block}
         @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 
+        #inAppToast{position:fixed;top:68px;left:14px;right:14px;z-index:3500;background:linear-gradient(135deg,rgba(32,20,12,0.98),rgba(18,11,7,0.98));border:1px solid rgba(255,149,0,0.65);border-radius:20px;padding:12px 14px;box-shadow:0 14px 32px rgba(0,0,0,0.85);display:none;align-items:center;gap:12px;cursor:pointer;animation:slideDown .22s ease}
+        #inAppToast.open{display:flex}
+        .toast-icon{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .toast-body{flex:1;min-width:0}
+        .toast-title{font-size:13px;font-weight:800;color:#ff9500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .toast-text{font-size:12px;color:#f3f4f6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
         .container{flex:1;overflow-y:auto;padding:12px 16px;padding-bottom:140px;position:relative}
         .content{display:none;animation:fadeIn .25s ease}
         .content.active{display:block}
@@ -188,7 +195,7 @@
         .city-option:hover{background:rgba(255,107,0,0.15);border-color:#ff9500}
         
         .setting-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:16px;border-radius:16px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)}
-        .toggle-switch{width:48px;height:26px;background:rgba(255,255,255,0.2);border-radius:16px;position:relative;cursor:pointer;transition:.2s}
+        .toggle-switch{width:48px;height:26px;background:rgba(255,255,255,0.2);border-radius:16px;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
         .toggle-switch.active{background:#ff6b00}
         .toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
         .toggle-switch.active::after{left:25px}
@@ -210,6 +217,14 @@
     </style>
 </head>
 <body>
+
+<div id="inAppToast" onclick="handleToastClick()">
+    <div class="toast-icon" id="toastIcon">🔔</div>
+    <div class="toast-body">
+        <div class="toast-title" id="toastTitle">PulseCity</div>
+        <div class="toast-text" id="toastText">Новое уведомление</div>
+    </div>
+</div>
 
 <header>
     <div class="logo">⚡ PulseCity</div>
@@ -518,6 +533,14 @@
 <div id="settingsModal" class="modal" onclick="if(event.target===this)closeModal('settingsModal')">
     <div class="modal-card">
         <h3>Безопасность и настройки</h3>
+
+        <div class="setting-row">
+            <div>
+                <p style="font-weight:700;font-size:15px">Push-уведомления</p>
+                <p style="font-size:12px;color:#9ca3af">Новости ленты, общий чат и личные сообщения</p>
+            </div>
+            <div id="pushToggle" class="toggle-switch active" onclick="togglePushNotificationsSetting()"></div>
+        </div>
         
         <div class="setting-row">
             <div>
@@ -527,7 +550,7 @@
             <div id="soundToggle" class="toggle-switch active" onclick="toggleSystemSound()"></div>
         </div>
 
-        <button class="btn-sec" onclick="requestNotificationPermission()" style="margin-top:10px;background:rgba(255,107,0,0.15);color:#ff9500;border-color:rgba(255,107,0,0.35)">🔔 Включить push-уведомления</button>
+        <button class="btn-sec" onclick="requestNotificationPermission(true)" style="margin-top:10px;background:rgba(255,107,0,0.15);color:#ff9500;border-color:rgba(255,107,0,0.35)">🔔 Проверить / включить push-уведомления</button>
         <button class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
         <button class="btn-sec" onclick="deleteAccountCompletely()" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.3);margin-top:10px;">🗑️ Удалить аккаунт и данные</button>
         <button class="btn-sec" onclick="closeModal('settingsModal')">Закрыть</button>
@@ -606,6 +629,84 @@
 <script>
     const SUPPORT_EMAIL = 'pulsecity1@gmail.com';
     const SUPPORT_RECIPIENT = '@andrey';
+
+    let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
+    let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
+    let toastTimer = null;
+    let pendingToastAction = null;
+
+    function syncPushToggleUI() {
+        const el = document.getElementById('pushToggle');
+        if (el) el.classList.toggle('active', pushNotificationsEnabled);
+    }
+    syncPushToggleUI();
+
+    function togglePushNotificationsSetting() {
+        pushNotificationsEnabled = !pushNotificationsEnabled;
+        localStorage.setItem('pulseCity_push_enabled', pushNotificationsEnabled);
+        syncPushToggleUI();
+        if (pushNotificationsEnabled) {
+            requestNotificationPermission(true);
+        }
+    }
+
+    function markEventNotified(key) {
+        notifiedEventKeys.add(key);
+        if (notifiedEventKeys.size > 400) {
+            const arr = [...notifiedEventKeys].slice(-250);
+            notifiedEventKeys = new Set(arr);
+        }
+        localStorage.setItem('pulseCity_notified_keys', JSON.stringify([...notifiedEventKeys]));
+    }
+
+    function showInAppToast(title, text, icon = '🔔', onClick = null) {
+        const toast = document.getElementById('inAppToast');
+        if (!toast) return;
+        document.getElementById('toastTitle').textContent = title;
+        document.getElementById('toastText').textContent = text;
+        document.getElementById('toastIcon').textContent = icon;
+        pendingToastAction = onClick;
+        toast.classList.add('open');
+
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('open');
+        }, 4500);
+    }
+
+    function handleToastClick() {
+        document.getElementById('inAppToast').classList.remove('open');
+        if (typeof pendingToastAction === 'function') {
+            pendingToastAction();
+        }
+    }
+
+    function dispatchSmartNotification(eventKey, title, body, icon = '🔔', onClick = null) {
+        if (!pushNotificationsEnabled || !myUsername) return;
+        if (notifiedEventKeys.has(eventKey)) return;
+        markEventNotified(eventKey);
+
+        playSystemSound('receive');
+        if (navigator.vibrate) {
+            try { navigator.vibrate([80, 40, 80]); } catch (e) {}
+        }
+
+        showInAppToast(title, body, icon, onClick);
+
+        if ("Notification" in window && Notification.permission === "granted") {
+            try {
+                const n = new Notification(title, {
+                    body: body,
+                    tag: eventKey,
+                    renotify: false
+                });
+                n.onclick = () => {
+                    window.focus();
+                    if (typeof onClick === 'function') onClick();
+                };
+            } catch (e) {}
+        }
+    }
 
     async function sendInAppSupportMessage() {
         const topic = document.getElementById('contactTopicSelect').value;
@@ -869,14 +970,28 @@
         document.getElementById('toggleSearchBtn').classList.remove('active');
     }
 
-    function requestNotificationPermission() {
-        if ("Notification" in window) {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    showPulseAlert("✓ Уведомления включены!");
-                }
-            });
+    function requestNotificationPermission(showFeedback = false) {
+        if (!("Notification" in window)) {
+            if (showFeedback) {
+                showPulseAlert("✓ Уведомления в приложении включены! Вы будете получать мгновенные баннеры о новых постах и сообщениях.");
+            }
+            return;
         }
+        if (Notification.permission === "granted") {
+            if (showFeedback) showPulseAlert("✓ Системные push-уведомления уже активны!");
+            return;
+        }
+        if (Notification.permission === "denied") {
+            if (showFeedback) showPulseAlert("Push-уведомления заблокированы в настройках браузера/телефона, но внутриигровые уведомления PulseCity работают.");
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                if (showFeedback) showPulseAlert("✓ Push-уведомления включены!");
+            } else if (showFeedback) {
+                showPulseAlert("Разрешение не выдано — будут работать внутриигровые уведомления PulseCity.");
+            }
+        }).catch(() => {});
     }
 
     let supabaseClient = null;
@@ -1179,6 +1294,7 @@
 
         document.getElementById('authModal').classList.remove('open');
         updateProfileUI();
+        requestNotificationPermission(false);
         loadPostsFromCloud(true);
         loadPublicMessages();
         setupRealtimeSubscriptions();
@@ -1610,7 +1726,7 @@
         document.querySelectorAll('.content').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
         document.getElementById('tab-' + t).classList.add('active');
-        btn.classList.add('active');
+        if (btn) btn.classList.add('active');
 
         const fab = document.getElementById('fabAddNews');
         const searchBtn = document.getElementById('toggleSearchBtn');
@@ -1626,6 +1742,24 @@
         if (t === 'chat' && chatMode === 'private' && !privateRecipient) {
             loadConversationsList();
         }
+    }
+
+    function jumpToFeedTab() {
+        const feedBtn = document.querySelectorAll('nav button')[0];
+        switchTab('feed', feedBtn);
+        scrollToTop();
+    }
+
+    function jumpToPublicChat() {
+        const chatBtn = document.querySelectorAll('nav button')[1];
+        switchTab('chat', chatBtn);
+        switchChatMode('public');
+    }
+
+    function jumpToPrivateChat(partnerUsername) {
+        const chatBtn = document.querySelectorAll('nav button')[1];
+        switchTab('chat', chatBtn);
+        switchChatMode('private', partnerUsername);
     }
 
     function switchChatMode(mode, targetUser = '') {
@@ -1775,6 +1909,8 @@
             document.getElementById('chatTitle').textContent = 'Городской чат • ' + c;
         }
         document.getElementById('profileCity').textContent = c;
+        lastKnownMaxPostId = 0;
+        lastKnownMaxMsgId = 0;
         initPinnedChallengeCard();
         closeModal('cityModal');
         loadPostsFromCloud(true);
@@ -1857,18 +1993,27 @@
         const { data, error } = await supabaseClient.from('posts').select('*').eq('city', selectedCity).order('id', { ascending: false });
         if (error || !data) return;
 
-        const currentMaxId = data.length > 0 ? data[0].id : 0;
+        const regularPosts = data.filter(p => p.category !== 'challenge');
+        const currentMaxId = regularPosts.length > 0 ? regularPosts[0].id : 0;
         const isLengthChanged = globalPostsData.length !== data.length;
 
         globalPostsData = data;
 
         if (lastKnownMaxPostId !== 0 && currentMaxId > lastKnownMaxPostId) {
-            const latest = data[0];
-            if (latest && latest.author_username !== myUsername) {
-                playSystemSound('receive');
-            }
+            const newPosts = regularPosts.filter(p => p.id > lastKnownMaxPostId && p.author_username !== myUsername);
+            newPosts.slice(0, 2).forEach(p => {
+                dispatchSmartNotification(
+                    `post_${p.id}`,
+                    `📰 Новая новость • ${selectedCity}`,
+                    `${p.title || 'Без заголовка'} (${p.author_username || 'Горожанин'})`,
+                    '📰',
+                    jumpToFeedTab
+                );
+            });
         }
-        lastKnownMaxPostId = currentMaxId;
+        if (currentMaxId > lastKnownMaxPostId) {
+            lastKnownMaxPostId = currentMaxId;
+        }
 
         updateCityPulseIndex(data.length);
 
@@ -2287,6 +2432,8 @@
         if (data && data[0]) {
             viewedPostsSet.add(data[0].id);
             localStorage.setItem('pulseCity_viewed_posts', JSON.stringify([...viewedPostsSet]));
+            markEventNotified(`post_${data[0].id}`);
+            if (data[0].id > lastKnownMaxPostId) lastKnownMaxPostId = data[0].id;
         }
 
         playSystemSound('send');
@@ -2304,6 +2451,61 @@
         selectedNewsFile = null;
         closeModal('newsModal');
         loadPostsFromCloud(true);
+    }
+
+    function processIncomingMessagesForNotifications(allCityAndDmMsgs) {
+        if (!myUsername || !Array.isArray(allCityAndDmMsgs)) return;
+
+        const chatTabActive = document.getElementById('tab-chat')?.classList.contains('active');
+
+        allCityAndDmMsgs.forEach(m => {
+            if (!m || !m.id || m.sender === myUsername) return;
+
+            if (m.chat_type === 'private' && m.recipient === myUsername) {
+                const isViewingThisDm = chatTabActive && chatMode === 'private' && privateRecipient === m.sender;
+                if (!isViewingThisDm) {
+                    dispatchSmartNotification(
+                        `dm_${m.id}`,
+                        `💬 Личное сообщение от ${m.sender}`,
+                        m.text || 'Вложение',
+                        '💬',
+                        () => jumpToPrivateChat(m.sender)
+                    );
+                } else {
+                    markEventNotified(`dm_${m.id}`);
+                }
+            } else if (m.chat_type === 'public' && m.city === selectedCity) {
+                const isViewingPublicChat = chatTabActive && chatMode === 'public';
+                if (!isViewingPublicChat) {
+                    dispatchSmartNotification(
+                        `pub_${m.id}`,
+                        `🌍 Общий чат • ${selectedCity}`,
+                        `${m.sender}: ${m.text || 'Вложение'}`,
+                        '🌍',
+                        jumpToPublicChat
+                    );
+                } else {
+                    markEventNotified(`pub_${m.id}`);
+                }
+            }
+        });
+    }
+
+    async function pollBackgroundNotifications() {
+        if (!supabaseClient || !myUsername) return;
+        const { data } = await supabaseClient
+            .from('messages')
+            .select('*')
+            .or(`and(chat_type.eq.public,city.eq.${selectedCity}),and(chat_type.eq.private,recipient.eq.${myUsername})`)
+            .order('id', { ascending: false })
+            .limit(20);
+
+        if (data && data.length > 0) {
+            processIncomingMessagesForNotifications(data);
+            if (document.getElementById('tab-chat')?.classList.contains('active') && chatMode === 'private' && !privateRecipient) {
+                loadConversationsList();
+            }
+        }
     }
 
     let globalMessagesData = [];
@@ -2347,7 +2549,9 @@
                 playSystemSound('receive');
             }
         }
-        lastKnownMaxMsgId = currentMaxMsgId;
+        if (currentMaxMsgId > lastKnownMaxMsgId) {
+            lastKnownMaxMsgId = currentMaxMsgId;
+        }
 
         renderMessagesList(globalMessagesData);
 
@@ -2472,8 +2676,24 @@
         
         supabaseClient
             .channel('public:db_changes')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+                if (payload?.new) {
+                    processIncomingMessagesForNotifications([payload.new]);
+                }
                 loadPublicMessages();
+            })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, (payload) => {
+                const post = payload?.new;
+                if (post && post.city === selectedCity && post.category !== 'challenge' && post.author_username !== myUsername) {
+                    dispatchSmartNotification(
+                        `post_${post.id}`,
+                        `📰 Новая новость • ${selectedCity}`,
+                        `${post.title || 'Без заголовка'} (${post.author_username || 'Горожанин'})`,
+                        '📰',
+                        jumpToFeedTab
+                    );
+                }
+                loadPostsFromCloud(true);
             })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, () => {
                 loadPinnedMessage();
@@ -2518,8 +2738,13 @@
             avatar_url: myAvatar
         };
 
-        const { error } = await supabaseClient.from('messages').insert([msgData]);
+        const { data, error } = await supabaseClient.from('messages').insert([msgData]).select();
         if (error) return;
+
+        if (data && data[0]) {
+            const prefix = msgData.chat_type === 'private' ? 'dm_' : 'pub_';
+            markEventNotified(`${prefix}${data[0].id}`);
+        }
 
         input.value = '';
         loadPublicMessages();
@@ -2546,7 +2771,7 @@
         const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i);
         playSystemSound('send');
 
-        const { error } = await supabaseClient.from('messages').insert([{
+        const { data, error } = await supabaseClient.from('messages').insert([{
             chat_type: chatMode,
             city: selectedCity,
             sender: myUsername,
@@ -2554,11 +2779,15 @@
             text: isVideo ? '🎥 Видео' : '🖼️ Фото',
             media_url: publicUrl,
             avatar_url: myAvatar
-        }]);
+        }]).select();
 
         document.getElementById('loadingModal').classList.remove('open');
 
         if (!error) {
+            if (data && data[0]) {
+                const prefix = chatMode === 'private' ? 'dm_' : 'pub_';
+                markEventNotified(`${prefix}${data[0].id}`);
+            }
             loadPublicMessages();
         }
         input.value = '';
@@ -2567,6 +2796,7 @@
     if (myUsername) {
         loadPostsFromCloud(true);
         loadPublicMessages();
+        pollBackgroundNotifications();
         loadPinnedMessage();
         setupRealtimeSubscriptions();
     }
@@ -2575,6 +2805,7 @@
         if (myUsername) {
             loadPostsFromCloud(false);
             loadPublicMessages();
+            pollBackgroundNotifications();
         }
     }, 3000);
 </script>
