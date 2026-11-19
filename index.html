@@ -197,6 +197,9 @@
         .loader-spinner{width:48px;height:48px;border:4px solid rgba(255,107,0,0.2);border-top-color:#ff6b00;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
         @keyframes spin{to{transform:rotate(360deg)}}
 
+        .otp-input{font-size:28px !important;font-weight:900 !important;letter-spacing:8px !important;text-align:center !important;color:#ff9500 !important;border:1px solid rgba(255,107,0,0.5) !important;background:rgba(255,107,0,0.08) !important}
+        .otp-input:focus{border-color:#ff6b00 !important;box-shadow:0 0 20px rgba(255,107,0,0.25)}
+
         .nav-wrapper{position:fixed;bottom:16px;left:16px;right:16px;z-index:1000}
         nav{background:linear-gradient(180deg,rgba(22,15,11,0.96),rgba(10,7,5,0.99));backdrop-filter:blur(30px);border:1px solid rgba(255,107,0,0.25);border-radius:32px;display:flex;padding:8px;box-shadow:0 25px 50px rgba(0,0,0,0.9);gap:8px}
         nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:26px;padding:12px 8px;color:#9ca3af;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.2s}
@@ -324,35 +327,51 @@
     <div class="modal-card" style="max-width:360px;text-align:center;margin:auto;">
         <div style="font-size:40px;margin-bottom:8px">⚡</div>
         <h3 id="authModalTitle">Регистрация в PulseCity</h3>
-        <p style="color:#d1d5db;font-size:12px;margin-bottom:12px">Используйте российскую почту (Яндекс, Mail.ru, VK и др.)</p>
 
-        <div class="chat-tabs" style="margin-bottom:14px;">
-            <button class="chat-tab-btn active" id="btnModeReg" onclick="switchAuthMode('register')">Регистрация</button>
-            <button class="chat-tab-btn" id="btnModeLogin" onclick="switchAuthMode('login')">Вход</button>
-        </div>
-        
-        <div id="regOnlyFields">
-            <div style="margin-bottom:12px;">
-                <input type="file" id="regAvatarFile" accept="image/*" style="display:none" onchange="previewRegAvatar(this)">
-                <div id="regAvatarBox" onclick="document.getElementById('regAvatarFile').click()" style="width:66px;height:66px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;border:2px dashed rgba(255,107,0,0.5);overflow:hidden;">
-                    📷
+        <!-- Шаг 1: Форма регистрации / входа -->
+        <div id="authStepCredentials">
+            <p style="color:#d1d5db;font-size:12px;margin-bottom:12px">Используйте российскую почту (Яндекс, Mail.ru, VK и др.)</p>
+
+            <div class="chat-tabs" style="margin-bottom:14px;">
+                <button class="chat-tab-btn active" id="btnModeReg" onclick="switchAuthMode('register')">Регистрация</button>
+                <button class="chat-tab-btn" id="btnModeLogin" onclick="switchAuthMode('login')">Вход</button>
+            </div>
+            
+            <div id="regOnlyFields">
+                <div style="margin-bottom:12px;">
+                    <input type="file" id="regAvatarFile" accept="image/*" style="display:none" onchange="previewRegAvatar(this)">
+                    <div id="regAvatarBox" onclick="document.getElementById('regAvatarFile').click()" style="width:66px;height:66px;border-radius:50%;margin:0 auto;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;border:2px dashed rgba(255,107,0,0.5);overflow:hidden;">
+                        📷
+                    </div>
+                    <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Выбрать фото профиля</span>
                 </div>
-                <span style="font-size:11px;color:#ff9500;display:block;margin-top:4px;">Выбрать фото профиля</span>
+
+                <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:600;margin-bottom:8px">
+                <input type="text" id="regUsernameInput" placeholder="@уникальный_ник" style="text-align:center;font-weight:600;margin-bottom:8px">
             </div>
 
-            <input type="text" id="regNameInput" placeholder="Ваше имя..." style="text-align:center;font-weight:600;margin-bottom:8px">
-            <input type="text" id="regUsernameInput" placeholder="@уникальный_ник" style="text-align:center;font-weight:600;margin-bottom:8px">
+            <input type="email" id="authEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:8px">
+            <input type="password" id="authPasswordInput" placeholder="Пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px">
+
+            <div id="privacyAgreeRow" style="font-size:11px;color:#9ca3af;margin-bottom:14px;text-align:left;padding:0 4px;display:flex;align-items:flex-start;gap:8px;">
+                <input type="checkbox" id="privacyAgreeCheck" checked style="width:auto;margin-top:2px;">
+                <span>Согласен с <span style="color:#ff9500;text-decoration:underline;cursor:pointer;" onclick="showPulseAlert('Приложение обрабатывает только указанные вами данные для работы городского чата и ленты новостей.')">Политикой конфиденциальности</span></span>
+            </div>
+
+            <button class="btn-main" id="authSubmitBtn" style="margin:0" onclick="handleAuthSubmit()">Создать аккаунт</button>
         </div>
 
-        <input type="email" id="authEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:8px">
-        <input type="password" id="authPasswordInput" placeholder="Пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px">
-
-        <div id="privacyAgreeRow" style="font-size:11px;color:#9ca3af;margin-bottom:14px;text-align:left;padding:0 4px;display:flex;align-items:flex-start;gap:8px;">
-            <input type="checkbox" id="privacyAgreeCheck" checked style="width:auto;margin-top:2px;">
-            <span>Согласен с <span style="color:#ff9500;text-decoration:underline;cursor:pointer;" onclick="showPulseAlert('Приложение обрабатывает только указанные вами данные для работы городского чата и ленты новостей.')">Политикой конфиденциальности</span></span>
+        <!-- Шаг 2: Ввод 6-значного кода подтверждения из письма -->
+        <div id="authStepOtp" style="display:none;">
+            <p style="color:#d1d5db;font-size:13px;line-height:1.45;margin-bottom:14px;">
+                Мы отправили 6-значный код подтверждения на почту:<br>
+                <strong id="otpTargetEmail" style="color:#ff9500;"></strong>
+            </p>
+            <input type="text" id="otpCodeInput" class="otp-input" inputmode="numeric" maxlength="6" placeholder="000000" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')verifySignupCode()">
+            <button class="btn-main" style="margin-bottom:10px;" onclick="verifySignupCode()">Подтвердить код</button>
+            <button class="btn-sec" id="resendOtpBtn" onclick="resendSignupCode()" style="font-size:13px;padding:11px;">🔄 Отправить код повторно</button>
+            <button class="btn-sec" onclick="backToAuthCredentials()" style="font-size:13px;padding:11px;margin-bottom:0;color:#9ca3af;">← Изменить почту</button>
         </div>
-
-        <button class="btn-main" id="authSubmitBtn" style="margin:0" onclick="handleAuthSubmit()">Создать аккаунт</button>
     </div>
 </div>
 
@@ -774,6 +793,14 @@
     let selectedEditAvatarFile = null;
     let activePostIdForComments = null;
 
+    // Временные данные до подтверждения 6-значного кода
+    let pendingRegData = {
+        email: '',
+        name: '',
+        username: '',
+        avatarUrl: ''
+    };
+
     let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
     if (bannedList.includes(myUsername)) {
         showPulseAlert('Ваш аккаунт заблокирован администратором.');
@@ -835,6 +862,21 @@
         }
     }
 
+    function showOtpStep(email) {
+        document.getElementById('authModalTitle').textContent = 'Подтверждение почты';
+        document.getElementById('otpTargetEmail').textContent = email;
+        document.getElementById('otpCodeInput').value = '';
+        document.getElementById('authStepCredentials').style.display = 'none';
+        document.getElementById('authStepOtp').style.display = 'block';
+        setTimeout(() => document.getElementById('otpCodeInput').focus(), 150);
+    }
+
+    function backToAuthCredentials() {
+        document.getElementById('authStepOtp').style.display = 'none';
+        document.getElementById('authStepCredentials').style.display = 'block';
+        switchAuthMode(currentAuthMode);
+    }
+
     function isAllowedRussianEmail(email) {
         const lower = email.toLowerCase().trim();
         const blockedDomains = ['gmail.com', 'googlemail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'me.com'];
@@ -876,7 +918,7 @@
             }
             if (!uname.startsWith('@')) uname = '@' + uname;
 
-            document.getElementById('loadingTitle').textContent = 'Создание профиля...';
+            document.getElementById('loadingTitle').textContent = 'Отправка кода на почту...';
             document.getElementById('loadingModal').classList.add('open');
 
             let avatarUrl = '';
@@ -897,30 +939,31 @@
                     }
                 });
 
+                document.getElementById('loadingModal').classList.remove('open');
+
                 if (error) {
-                    document.getElementById('loadingModal').classList.remove('open');
                     showPulseAlert('Ошибка регистрации: ' + error.message);
                     return;
                 }
+
+                // Сохраняем данные до подтверждения кода из письма
+                pendingRegData = {
+                    email: email,
+                    name: name,
+                    username: uname,
+                    avatarUrl: avatarUrl || ''
+                };
+
+                // Если сессия сразу не создана — значит требуется подтверждение кодом из письма
+                if (!data.session) {
+                    showOtpStep(email);
+                    return;
+                }
+            } else {
+                document.getElementById('loadingModal').classList.remove('open');
             }
 
-            myName = name;
-            myUsername = uname;
-            myEmail = email;
-            myAvatar = avatarUrl || '';
-
-            localStorage.setItem('pulseCity_v4_name', myName);
-            localStorage.setItem('pulseCity_v4_username', myUsername);
-            localStorage.setItem('pulseCity_v4_email', myEmail);
-            localStorage.setItem('pulseCity_v4_avatar', myAvatar);
-
-            document.getElementById('loadingModal').classList.remove('open');
-            document.getElementById('authModal').classList.remove('open');
-            updateProfileUI();
-            loadPostsFromCloud(true);
-            loadPublicMessages();
-            setupRealtimeSubscriptions();
-            showPulseAlert('✓ Добро пожаловать в PulseCity!');
+            finalizeUserLogin(email, name, uname, avatarUrl || '');
 
         } else {
             document.getElementById('loadingTitle').textContent = 'Вход в аккаунт...';
@@ -935,28 +978,105 @@
                 document.getElementById('loadingModal').classList.remove('open');
 
                 if (error) {
+                    if (error.message && error.message.toLowerCase().includes('email not confirmed')) {
+                        pendingRegData.email = email;
+                        await supabaseClient.auth.resend({ type: 'signup', email: email });
+                        showOtpStep(email);
+                        showPulseAlert('Почта ещё не подтверждена. Мы отправили новый 6-значный код на ' + email);
+                        return;
+                    }
                     showPulseAlert('Неверная почта или пароль: ' + error.message);
                     return;
                 }
 
                 const meta = data.user?.user_metadata || {};
-                myName = meta.full_name || email.split('@')[0];
-                myUsername = meta.username || ('@' + email.split('@')[0]);
-                myEmail = email;
-                myAvatar = meta.avatar_url || '';
+                const loadedName = meta.full_name || email.split('@')[0];
+                const loadedUname = meta.username || ('@' + email.split('@')[0]);
+                const loadedAvatar = meta.avatar_url || '';
 
-                localStorage.setItem('pulseCity_v4_name', myName);
-                localStorage.setItem('pulseCity_v4_username', myUsername);
-                localStorage.setItem('pulseCity_v4_email', myEmail);
-                localStorage.setItem('pulseCity_v4_avatar', myAvatar);
-
-                document.getElementById('authModal').classList.remove('open');
-                updateProfileUI();
-                loadPostsFromCloud(true);
-                loadPublicMessages();
-                setupRealtimeSubscriptions();
+                finalizeUserLogin(email, loadedName, loadedUname, loadedAvatar);
             }
         }
+    }
+
+    async function verifySignupCode() {
+        const code = document.getElementById('otpCodeInput').value.trim();
+        const email = pendingRegData.email || document.getElementById('authEmailInput').value.trim();
+
+        if (!code || code.length !== 6) {
+            showPulseAlert('Введите 6-значный код из письма!');
+            return;
+        }
+
+        document.getElementById('loadingTitle').textContent = 'Проверка кода...';
+        document.getElementById('loadingModal').classList.add('open');
+
+        if (supabaseClient) {
+            const { data, error } = await supabaseClient.auth.verifyOtp({
+                email: email,
+                token: code,
+                type: 'signup'
+            });
+
+            document.getElementById('loadingModal').classList.remove('open');
+
+            if (error) {
+                showPulseAlert('Неверный или просроченный код: ' + error.message);
+                return;
+            }
+
+            const meta = data?.user?.user_metadata || {};
+            const finalName = pendingRegData.name || meta.full_name || email.split('@')[0];
+            const finalUname = pendingRegData.username || meta.username || ('@' + email.split('@')[0]);
+            const finalAvatar = pendingRegData.avatarUrl || meta.avatar_url || '';
+
+            finalizeUserLogin(email, finalName, finalUname, finalAvatar);
+        }
+    }
+
+    async function resendSignupCode() {
+        const email = pendingRegData.email || document.getElementById('authEmailInput').value.trim();
+        if (!email || !supabaseClient) return;
+
+        const btn = document.getElementById('resendOtpBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Отправка...';
+
+        const { error } = await supabaseClient.auth.resend({
+            type: 'signup',
+            email: email
+        });
+
+        if (error) {
+            showPulseAlert('Не удалось отправить код: ' + error.message);
+        } else {
+            showPulseAlert('✓ Новый 6-значный код отправлен на ' + email);
+        }
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = '🔄 Отправить код повторно';
+        }, 15000);
+    }
+
+    function finalizeUserLogin(email, name, uname, avatarUrl) {
+        myName = name;
+        myUsername = uname;
+        myEmail = email;
+        myAvatar = avatarUrl || '';
+
+        localStorage.setItem('pulseCity_v4_name', myName);
+        localStorage.setItem('pulseCity_v4_username', myUsername);
+        localStorage.setItem('pulseCity_v4_email', myEmail);
+        localStorage.setItem('pulseCity_v4_avatar', myAvatar);
+
+        document.getElementById('authModal').classList.remove('open');
+        updateProfileUI();
+        loadPostsFromCloud(true);
+        loadPublicMessages();
+        setupRealtimeSubscriptions();
+        playSystemSound('send');
+        showPulseAlert('✓ Добро пожаловать в PulseCity!');
     }
 
     function deleteAccountCompletely() {
@@ -2035,7 +2155,6 @@
                 (m.sender === privateRecipient && m.recipient === myUsername)
             );
             
-            // 🔥 ВАЖНО: Для личных сообщений разворачиваем порядок, чтобы новые были внизу!
             filteredData.reverse();
         }
         
@@ -2052,7 +2171,6 @@
 
         renderMessagesList(globalMessagesData);
 
-        // Автоматически прокручиваем личный чат вниз при открытии или новом сообщении
         if (chatMode === 'private' && privateRecipient) {
             const chatBoxEl = document.getElementById('chatMessages');
             chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
