@@ -224,6 +224,23 @@
         .msg-row.mine .msg-time{color:rgba(255,255,255,0.85)}
         .msg-media{max-width:100%;max-height:200px;border-radius:12px;margin-top:6px;display:block;object-fit:cover;background:#000}
 
+        .challenge-entry{max-width:100% !important;align-items:flex-start !important;flex-direction:row !important;}
+        .challenge-entry.leader-entry .msg-bubble{border:1px solid rgba(250,204,21,0.55) !important;background:linear-gradient(145deg,rgba(230,92,0,0.16),rgba(250,204,21,0.07)) !important;}
+        .leader-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(250,204,21,0.18);color:#fde047;border:1px solid rgba(250,204,21,0.45);font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:6px;}
+        .challenge-react-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:6px;}
+        .challenge-react-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:10px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.15s;}
+        .challenge-react-btn.active{background:rgba(230,92,0,0.3) !important;border-color:#e65c00 !important;color:#ff9440 !important;}
+        .challenge-react-btn:active{transform:scale(0.92);}
+        .challenge-photo-zoomable{cursor:zoom-in;max-height:230px;width:100%;object-fit:cover;}
+        .challenge-leader-banner{background:rgba(250,204,21,0.09);border:1px solid rgba(250,204,21,0.35);border-radius:12px;padding:8px 11px;margin-bottom:10px;font-size:12px;color:#fef08a;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+        .challenge-prize-note{font-size:11px;color:#d1d5db;background:rgba(230,92,0,0.1);border:1px solid rgba(230,92,0,0.28);border-radius:11px;padding:8px 10px;margin-bottom:10px;line-height:1.4;}
+        .publish-leader-btn{background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff;border:none;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer;}
+
+        #lightboxModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);z-index:4200;align-items:center;justify-content:center;padding:14px;flex-direction:column;gap:12px;}
+        #lightboxModal.open{display:flex;}
+        #lightboxImg{max-width:100%;max-height:78vh;border-radius:14px;object-fit:contain;box-shadow:0 18px 45px rgba(0,0,0,0.9);}
+        .lightbox-actions{display:flex;gap:10px;width:100%;max-width:360px;}
+
         .reply-composer-bar{display:none;align-items:center;justify-content:space-between;gap:8px;background:rgba(230,92,0,0.14) !important;border:1px solid rgba(230,92,0,0.45) !important;border-left:3px solid #e65c00 !important;border-radius:11px;padding:6px 10px;margin-bottom:6px;font-size:12px}
         .reply-composer-bar.open{display:flex}
         .reply-composer-info{min-width:0;flex:1}
@@ -290,6 +307,14 @@
 </head>
 <body>
 
+<div id="lightboxModal" onclick="if(event.target===this)closeLightbox()">
+    <img id="lightboxImg" src="" alt="Просмотр фото">
+    <div class="lightbox-actions">
+        <button type="button" class="btn-sec" style="margin:0;color:#ff7a14;border-color:rgba(230,92,0,0.45);" onclick="downloadLightboxPhoto()">📥 Сохранить</button>
+        <button type="button" class="btn-main" style="margin:0;" onclick="closeLightbox()">✕ Закрыть</button>
+    </div>
+</div>
+
 <div id="inAppToast" onclick="handleToastClick()">
     <div class="toast-icon" id="toastIcon">🔔</div>
     <div class="toast-body">
@@ -322,11 +347,11 @@
         <div class="challenge-pinned-card" id="pinnedChallengeCard" onclick="openDailyChallengeComments()">
             <div class="challenge-content-wrap">
                 <div class="challenge-top-row">
-                    <div class="challenge-badge">🎯 Вызов дня</div>
+                    <div class="challenge-badge">🎯 Вызов дня • 🏆 Приз лидеру</div>
                 </div>
                 <h4 id="pinnedChallengeText" style="font-size:13px;font-weight:700;color:#fff;line-height:1.35;margin:6px 0 8px;">Загрузка задания...</h4>
                 <button class="challenge-join-btn" type="button">
-                    💬 Участвовать в комментариях <span id="challengeCommentsBadge" style="background:rgba(230,92,0,0.35);padding:2px 7px;border-radius:8px;font-size:11px;">0</span>
+                    💬 Участвовать и голосовать <span id="challengeCommentsBadge" style="background:rgba(230,92,0,0.35);padding:2px 7px;border-radius:8px;font-size:11px;">0</span>
                 </button>
             </div>
             <div class="challenge-mini-row">
@@ -726,7 +751,11 @@
             <h3 id="commentsModalTitle" style="margin:0;font-size:18px;">Комментарии</h3>
             <button class="btn-sec" style="width:auto;padding:5px 11px;margin:0;font-size:12px;background:rgba(255,255,255,0.06);" onclick="closeModal('commentsModal')">✕</button>
         </div>
-        <p id="commentsChallengePrompt" style="display:none;font-size:12px;color:#ff7a14;background:rgba(230,92,0,0.1);padding:9px 11px;border-radius:12px;margin-bottom:10px;border:1px solid rgba(230,92,0,0.28);"></p>
+        <p id="commentsChallengePrompt" style="display:none;font-size:12px;color:#ff7a14;background:rgba(230,92,0,0.1);padding:9px 11px;border-radius:12px;margin-bottom:8px;border:1px solid rgba(230,92,0,0.28);"></p>
+        <div id="challengePrizeNote" class="challenge-prize-note" style="display:none;">
+            🏆 <strong>Приз лидеру дня:</strong> ответ с максимумом реакций получает статус <strong>Герой дня</strong> и шанс попасть в ленту города от <strong>⚡ PulseCity</strong>. Нажмите на фото, чтобы открыть на весь экран.
+        </div>
+        <div id="challengeLeaderBanner" class="challenge-leader-banner" style="display:none;"></div>
         <div class="chat-input-area" style="margin-bottom:6px;">
             <input type="file" id="commentMediaInput" accept="image/*,video/*" style="display:none" onchange="previewCommentMedia(this)">
             <button type="button" class="attach-btn" id="commentAttachBtn" onclick="document.getElementById('commentMediaInput').click()" title="Прикрепить фото или видео">📎</button>
@@ -737,7 +766,7 @@
             <span id="commentMediaName">✓ Фото выбрано</span>
             <button type="button" onclick="clearCommentMedia()" style="background:none;border:none;color:#ef4444;font-weight:700;cursor:pointer;font-size:12px;">✕ Убрать</button>
         </div>
-        <div class="chat-box" id="commentsList" style="max-height:38vh;"></div>
+        <div class="chat-box" id="commentsList" style="max-height:42vh;"></div>
     </div>
 </div>
 
@@ -754,12 +783,122 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v6_pulsecity';
+    const THEME_REVISION = 'orange_v7_pulsecity';
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
     let toastTimer = null;
     let pendingToastAction = null;
+    let isChallengeMode = false;
+    let challengeReactsMap = JSON.parse(localStorage.getItem('pulseCity_challenge_reacts') || '{}');
+    let currentCommentsRows = [];
+    let lightboxPhotoUrl = '';
+
+    function openLightbox(url) {
+        if (!url) return;
+        lightboxPhotoUrl = url;
+        document.getElementById('lightboxImg').src = url;
+        document.getElementById('lightboxModal').classList.add('open');
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightboxModal').classList.remove('open');
+        lightboxPhotoUrl = '';
+    }
+
+    function downloadLightboxPhoto() {
+        if (!lightboxPhotoUrl) return;
+        downloadMediaWithProgress(lightboxPhotoUrl, null, null);
+    }
+
+    function saveChallengeReactsLocal() {
+        localStorage.setItem('pulseCity_challenge_reacts', JSON.stringify(challengeReactsMap));
+    }
+
+    function getChallengeCommentReacts(commentObj) {
+        const key = String(commentObj.id);
+        const embedded = parseReactionsFromMessageText(commentObj.text || '');
+        if (embedded) {
+            challengeReactsMap[key] = embedded;
+            saveChallengeReactsLocal();
+            return embedded;
+        }
+        return challengeReactsMap[key] || {};
+    }
+
+    function getCommentTotalReactions(commentObj) {
+        const reacts = getChallengeCommentReacts(commentObj);
+        let total = 0;
+        Object.keys(reacts).forEach(emo => {
+            const arr = Array.isArray(reacts[emo]) ? [...new Set(reacts[emo])] : [];
+            total += arr.length;
+        });
+        return total;
+    }
+
+    async function toggleChallengeCommentReaction(commentId, emoji) {
+        if (!myUsername || !commentId || !supabaseClient) return;
+        const target = currentCommentsRows.find(c => String(c.id) === String(commentId));
+        if (!target) return;
+
+        const key = String(commentId);
+        const currentEmojis = { ...getChallengeCommentReacts(target) };
+        const users = Array.isArray(currentEmojis[emoji]) ? [...currentEmojis[emoji]] : [];
+        const already = users.includes(myUsername);
+
+        if (already) {
+            const nextUsers = users.filter(u => u !== myUsername);
+            if (nextUsers.length > 0) currentEmojis[emoji] = nextUsers;
+            else delete currentEmojis[emoji];
+        } else {
+            currentEmojis[emoji] = [...users, myUsername];
+        }
+
+        challengeReactsMap[key] = currentEmojis;
+        saveChallengeReactsLocal();
+
+        const updatedText = attachReactionsMarkerToText(target.text || '', currentEmojis);
+        target.text = updatedText;
+        renderCommentsRows(currentCommentsRows);
+
+        await supabaseClient
+            .from('comments')
+            .update({ text: updatedText })
+            .eq('id', Number(commentId));
+    }
+
+    async function publishChallengeLeaderToFeed(commentId) {
+        if (!supabaseClient) return;
+        const winner = currentCommentsRows.find(c => String(c.id) === String(commentId));
+        if (!winner) return;
+
+        const parsed = extractMediaFromCommentText(winner.text || '');
+        const cleanBody = stripReactionsMarker(parsed.cleanText) || 'Лучший ответ дня';
+        const mediaUrl = winner.media_url || parsed.url || null;
+
+        document.getElementById('loadingTitle').textContent = '⚡ Публикация победителя дня...';
+        document.getElementById('loadingModal').classList.add('open');
+
+        const { error } = await supabaseClient.from('posts').insert([{
+            city: selectedCity,
+            category: 'general',
+            title: `🏆 Победитель вызова дня: ${winner.sender || 'Участник'}`,
+            content: `${cleanBody}\n\n✨ Награда «Герой дня» от PulseCity за лучший кадр/ответ!`,
+            media_url: mediaUrl,
+            author_username: '⚡ PulseCity',
+            author_avatar: 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png',
+            views: 1
+        }]);
+
+        document.getElementById('loadingModal').classList.remove('open');
+        if (error) {
+            showPulseAlert('Не удалось опубликовать победителя: ' + error.message);
+            return;
+        }
+        closeModal('commentsModal');
+        loadPostsFromCloud(true);
+        showPulseAlert('🏆 Пост победителя вызова дня опубликован в ленте!');
+    }
 
     function forceFreshAssetsOnce() {
         if (sessionStorage.getItem('pulsecity_cache_cleared') === THEME_REVISION) return;
@@ -1276,6 +1415,7 @@
 
         const challengeId = await getOrCreateChallengePostId();
         activePostIdForComments = challengeId;
+        isChallengeMode = true;
 
         document.getElementById('loadingModal').classList.remove('open');
 
@@ -1283,6 +1423,7 @@
         const promptEl = document.getElementById('commentsChallengePrompt');
         promptEl.textContent = getCurrentChallengeText();
         promptEl.style.display = 'block';
+        document.getElementById('challengePrizeNote').style.display = 'block';
         document.getElementById('commentInput').placeholder = 'Ответ или фото к вызову...';
         clearCommentMedia();
         openModal('commentsModal');
@@ -1992,8 +2133,8 @@
 
     async function downloadMediaWithProgress(url, btnElementId, fillElementId) {
         if (!url) return;
-        const btn = document.getElementById(btnElementId);
-        const fill = document.getElementById(fillElementId);
+        const btn = btnElementId ? document.getElementById(btnElementId) : null;
+        const fill = fillElementId ? document.getElementById(fillElementId) : null;
         
         if (btn) btn.textContent = '⏳ Загрузка...';
 
@@ -2040,6 +2181,8 @@
                     btn.textContent = '📥 Сохранить';
                     if (fill) fill.style.width = '0%';
                 }, 2500);
+            } else {
+                showPulseAlert('✓ Фото сохранено!');
             }
         } catch (e) {
             try {
@@ -2053,6 +2196,7 @@
                 a.click();
                 a.remove();
                 if (btn) btn.textContent = '✓ Готово';
+                else showPulseAlert('✓ Фото сохранено!');
             } catch(err) {
                 showPulseAlert('Не удалось сохранить файл. Попробуйте открыть его в новой вкладке.');
                 if (btn) btn.textContent = '📥 Сохранить';
@@ -2075,7 +2219,8 @@
             'pulseCity_viewed_posts',
             'pulseCity_msg_reactions',
             'pulseCity_poll_votes',
-            'pulseCity_local_support'
+            'pulseCity_local_support',
+            'pulseCity_challenge_reacts'
         ];
         cacheKeysToRemove.forEach(k => localStorage.removeItem(k));
         sessionStorage.clear();
@@ -2097,6 +2242,7 @@
         notifiedEventKeys = new Set();
         viewedPostsSet = new Set();
         messageReactionsMap = {};
+        challengeReactsMap = {};
 
         closeModal('settingsModal');
         showPulseAlert('🧹 Локальный кэш очищен! Аккаунт и город сохранены.');
@@ -2107,7 +2253,14 @@
     }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeModal(id) {
+        if (id === 'commentsModal') {
+            isChallengeMode = false;
+            document.getElementById('challengePrizeNote').style.display = 'none';
+            document.getElementById('challengeLeaderBanner').style.display = 'none';
+        }
+        document.getElementById(id).classList.remove('open');
+    }
     function openAdminModal() {
         if (!isFounderAccount()) {
             showPulseAlert('Доступ к кабинету разработчика есть только у создателя PulseCity.');
@@ -2919,7 +3072,7 @@
                 const isVid = p.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || p.media_url.includes('video');
                 mediaTag = isVid
                     ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata"></video>`
-                    : `<img src="${p.media_url}" class="news-media" loading="lazy">`;
+                    : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openLightbox('${p.media_url}')" style="cursor:zoom-in;">`;
                 
                 downloadBar = `
                     <div class="media-download-bar" id="download-bar-${p.id}">
@@ -3091,8 +3244,11 @@
 
     function openComments(postId) {
         activePostIdForComments = postId;
+        isChallengeMode = false;
         document.getElementById('commentsModalTitle').textContent = 'Комментарии';
         document.getElementById('commentsChallengePrompt').style.display = 'none';
+        document.getElementById('challengePrizeNote').style.display = 'none';
+        document.getElementById('challengeLeaderBanner').style.display = 'none';
         document.getElementById('commentInput').placeholder = 'Комментарий или фото...';
         clearCommentMedia();
         openModal('commentsModal');
@@ -3107,15 +3263,48 @@
         return { cleanText, url: match[1] };
     }
 
-    async function loadComments(postId) {
-        const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: false });
+    function renderCommentsRows(rows) {
         const list = document.getElementById('commentsList');
+        const bannerEl = document.getElementById('challengeLeaderBanner');
         list.innerHTML = '';
-        if (!data || data.length === 0) {
+
+        if (!rows || rows.length === 0) {
+            if (bannerEl) bannerEl.style.display = 'none';
             list.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:14px;margin:10px 0;">Пока нет ответов. Станьте первым!</p>';
             return;
         }
-        data.forEach(c => {
+
+        let leaderId = null;
+        let maxScore = 0;
+
+        if (isChallengeMode) {
+            rows.forEach(c => {
+                const score = getCommentTotalReactions(c);
+                if (score > maxScore) {
+                    maxScore = score;
+                    leaderId = String(c.id);
+                }
+            });
+
+            if (bannerEl) {
+                if (leaderId && maxScore > 0) {
+                    const winner = rows.find(c => String(c.id) === leaderId);
+                    const canPublish = isFounderAccount() || (winner && winner.sender === myUsername);
+                    bannerEl.style.display = 'flex';
+                    bannerEl.innerHTML = `
+                        <div>🏆 Лидер дня: <strong>${winner ? winner.sender : ''}</strong> (${maxScore} реакций)</div>
+                        ${canPublish ? `<button type="button" class="publish-leader-btn" onclick="publishChallengeLeaderToFeed('${leaderId}')">📤 В ленту</button>` : ''}
+                    `;
+                } else {
+                    bannerEl.style.display = 'flex';
+                    bannerEl.innerHTML = `<div>🏆 Лидер дня ещё не выбран — ставьте <strong>🔥 ❤️ 👏</strong> ответам участников!</div>`;
+                }
+            }
+        } else if (bannerEl) {
+            bannerEl.style.display = 'none';
+        }
+
+        rows.forEach(c => {
             const avatarHtml = c.avatar_url 
                 ? `<img src="${c.avatar_url}">` 
                 : (c.sender ? c.sender[1].toUpperCase() : 'U');
@@ -3123,31 +3312,51 @@
             const canDeleteComment = (c.sender === myUsername) || isFounderAccount();
             const parsed = extractMediaFromCommentText(c.text);
             const mediaUrl = c.media_url || parsed.url;
-            const displayText = parsed.cleanText;
+            const displayText = stripReactionsMarker(parsed.cleanText);
+            const isLeader = isChallengeMode && leaderId && String(c.id) === leaderId;
 
             let mediaHtml = '';
             if (mediaUrl) {
                 const isVid = mediaUrl.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || mediaUrl.includes('video');
                 mediaHtml = isVid
                     ? `<video src="${mediaUrl}" class="msg-media" controls playsinline preload="metadata"></video>`
-                    : `<img src="${mediaUrl}" class="msg-media" loading="lazy">`;
+                    : `<img src="${mediaUrl}" class="msg-media ${isChallengeMode ? 'challenge-photo-zoomable' : ''}" loading="lazy" onclick="openLightbox('${mediaUrl}')" title="Нажмите, чтобы открыть на весь экран">`;
+            }
+
+            let challengeReactsHtml = '';
+            if (isChallengeMode) {
+                const reactsObj = getChallengeCommentReacts(c);
+                const btns = ['🔥', '❤️', '👏'].map(emo => {
+                    const users = Array.isArray(reactsObj[emo]) ? [...new Set(reactsObj[emo])] : [];
+                    const cnt = users.length;
+                    const active = users.includes(myUsername);
+                    return `<button type="button" class="challenge-react-btn ${active ? 'active' : ''}" onclick="toggleChallengeCommentReaction('${c.id}', '${emo}')">${emo} <span>${cnt}</span></button>`;
+                }).join('');
+                challengeReactsHtml = `<div class="challenge-react-bar">${btns}</div>`;
             }
 
             const row = document.createElement('div');
-            row.className = 'msg-row';
+            row.className = 'msg-row' + (isChallengeMode ? ' challenge-entry' : '') + (isLeader ? ' leader-entry' : '');
             row.innerHTML = `
                 <div class="msg-avatar">${avatarHtml}</div>
                 <div class="msg-bubble" style="flex:1;">
                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                        <div class="msg-author">${c.sender}</div>
+                        <div class="msg-author">${c.sender}${isLeader ? '<span class="leader-badge">🏆 Лидер дня</span>' : ''}</div>
                         ${canDeleteComment ? `<button class="delete-btn" style="padding:2px 6px;font-size:10px;" onclick="deleteComment(${c.id}, '${c.sender}')">Удалить</button>` : ''}
                     </div>
                     ${displayText ? `<div style="margin-top:4px;">${displayText}</div>` : ''}
                     ${mediaHtml}
+                    ${challengeReactsHtml}
                 </div>`;
             list.appendChild(row);
         });
         initVideoManager();
+    }
+
+    async function loadComments(postId) {
+        const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: false });
+        currentCommentsRows = Array.isArray(data) ? data : [];
+        renderCommentsRows(currentCommentsRows);
     }
 
     async function sendComment() {
@@ -3433,7 +3642,7 @@
                           <span>📎 Фотография</span>
                           <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
                       </div>
-                      <img src="${m.media_url}" class="msg-media" loading="lazy" style="margin-top:6px;">
+                      <img src="${m.media_url}" class="msg-media" loading="lazy" onclick="openLightbox('${m.media_url}')" style="margin-top:6px;cursor:zoom-in;">
                     `;
             }
 
