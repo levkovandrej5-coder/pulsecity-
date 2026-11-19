@@ -189,7 +189,7 @@
 
         .pinned-msg-box{background:rgba(230,92,0,0.12) !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:12px;padding:8px 11px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
         
-        .chat-box{display:flex;flex-direction:column;gap:10px;margin:6px 0 6px;max-height:45vh;overflow-y:auto;padding-right:4px}
+        .chat-box{display:flex;flex-direction:column;gap:10px;margin:6px 0 6px;max-height:42vh;overflow-y:auto;padding-right:4px}
         .msg-row{display:flex;align-items:flex-end;gap:8px;max-width:92%;position:relative}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
         
@@ -233,7 +233,9 @@
         .challenge-react-btn:active{transform:scale(0.92);}
         .challenge-photo-zoomable{cursor:zoom-in;max-height:230px;width:100%;object-fit:cover;}
         .challenge-leader-banner{background:rgba(250,204,21,0.09);border:1px solid rgba(250,204,21,0.35);border-radius:12px;padding:8px 11px;margin-bottom:10px;font-size:12px;color:#fef08a;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-        .challenge-prize-note{font-size:11px;color:#d1d5db;background:rgba(230,92,0,0.1);border:1px solid rgba(230,92,0,0.28);border-radius:11px;padding:8px 10px;margin-bottom:10px;line-height:1.4;}
+        .challenge-yesterday-card{background:rgba(255,255,255,0.04);border:1px solid rgba(230,92,0,0.28);border-radius:12px;padding:8px 11px;margin-bottom:10px;font-size:11px;color:#d1d5db;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+        .challenge-yesterday-thumb{width:38px;height:38px;border-radius:9px;object-fit:cover;cursor:zoom-in;flex-shrink:0;border:1px solid rgba(250,204,21,0.4);}
+        .challenge-prize-note{font-size:11px;color:#d1d5db;background:rgba(230,92,0,0.1);border:1px solid rgba(230,92,0,0.28);border-radius:11px;padding:8px 10px;margin-bottom:8px;line-height:1.4;}
         .publish-leader-btn{background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff;border:none;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer;}
 
         #lightboxModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);z-index:4200;align-items:center;justify-content:center;padding:14px;flex-direction:column;gap:12px;}
@@ -753,8 +755,9 @@
         </div>
         <p id="commentsChallengePrompt" style="display:none;font-size:12px;color:#ff7a14;background:rgba(230,92,0,0.1);padding:9px 11px;border-radius:12px;margin-bottom:8px;border:1px solid rgba(230,92,0,0.28);"></p>
         <div id="challengePrizeNote" class="challenge-prize-note" style="display:none;">
-            🏆 <strong>Приз лидеру дня:</strong> ответ с максимумом реакций получает статус <strong>Герой дня</strong> и шанс попасть в ленту города от <strong>⚡ PulseCity</strong>. Нажмите на фото, чтобы открыть на весь экран.
+            🏆 <strong>Как определяется победитель:</strong> у каждого вызова свой день. Лучший ответ дня по реакциям <strong>🔥 ❤️ 👏</strong> получает статус <strong>Герой дня</strong>, а при публикации в ленту победитель получает поздравление в ЛС.
         </div>
+        <div id="challengeYesterdayCard" class="challenge-yesterday-card" style="display:none;"></div>
         <div id="challengeLeaderBanner" class="challenge-leader-banner" style="display:none;"></div>
         <div class="chat-input-area" style="margin-bottom:6px;">
             <input type="file" id="commentMediaInput" accept="image/*,video/*" style="display:none" onchange="previewCommentMedia(this)">
@@ -783,7 +786,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v7_pulsecity';
+    const THEME_REVISION = 'orange_v8_pulsecity';
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
@@ -793,6 +796,11 @@
     let challengeReactsMap = JSON.parse(localStorage.getItem('pulseCity_challenge_reacts') || '{}');
     let currentCommentsRows = [];
     let lightboxPhotoUrl = '';
+
+    function getDateKeyByOffset(daysOffset = 0) {
+        const d = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000);
+        return d.toISOString().split('T')[0];
+    }
 
     function openLightbox(url) {
         if (!url) return;
@@ -836,6 +844,72 @@
         return total;
     }
 
+    function findBestCommentFromList(rows) {
+        if (!Array.isArray(rows) || rows.length === 0) return null;
+        let best = null;
+        let maxScore = 0;
+        rows.forEach(c => {
+            const score = getCommentTotalReactions(c);
+            if (score > maxScore) {
+                maxScore = score;
+                best = c;
+            }
+        });
+        return best ? { comment: best, score: maxScore } : null;
+    }
+
+    async function loadYesterdayChallengeWinner() {
+        const yesterdayCard = document.getElementById('challengeYesterdayCard');
+        if (!yesterdayCard) return;
+
+        if (!supabaseClient) {
+            yesterdayCard.style.display = 'none';
+            return;
+        }
+
+        const yesterdayKey = getDateKeyByOffset(-1);
+        const yesterdayTitle = `🎯 Вызов дня: ${yesterdayKey} (${selectedCity})`;
+
+        const { data: yPost } = await supabaseClient
+            .from('posts')
+            .select('id')
+            .eq('city', selectedCity)
+            .eq('title', yesterdayTitle)
+            .maybeSingle();
+
+        if (!yPost || !yPost.id) {
+            yesterdayCard.style.display = 'none';
+            return;
+        }
+
+        const { data: yComments } = await supabaseClient
+            .from('comments')
+            .select('*')
+            .eq('post_id', yPost.id)
+            .order('id', { ascending: false });
+
+        const bestInfo = findBestCommentFromList(yComments || []);
+        if (!bestInfo || bestInfo.score <= 0) {
+            yesterdayCard.style.display = 'none';
+            return;
+        }
+
+        const winner = bestInfo.comment;
+        const parsed = extractMediaFromCommentText(winner.text || '');
+        const cleanTxt = stripReactionsMarker(parsed.cleanText) || 'Фото-ответ';
+        const mediaUrl = winner.media_url || parsed.url;
+        const isImg = mediaUrl && !mediaUrl.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) && !mediaUrl.includes('video');
+
+        yesterdayCard.style.display = 'flex';
+        yesterdayCard.innerHTML = `
+            <div style="min-width:0;flex:1;">
+                <div style="font-weight:800;color:#fde047;margin-bottom:2px;">🕰️ Вчера (${yesterdayKey}) победил: ${winner.sender || 'Участник'} (${bestInfo.score} реакций)</div>
+                <div style="color:#d1d5db;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cleanTxt}</div>
+            </div>
+            ${isImg ? `<img src="${mediaUrl}" class="challenge-yesterday-thumb" onclick="openLightbox('${mediaUrl}')" title="Открыть фото вчерашнего победителя">` : ''}
+        `;
+    }
+
     async function toggleChallengeCommentReaction(commentId, emoji) {
         if (!myUsername || !commentId || !supabaseClient) return;
         const target = currentCommentsRows.find(c => String(c.id) === String(commentId));
@@ -875,6 +949,7 @@
         const parsed = extractMediaFromCommentText(winner.text || '');
         const cleanBody = stripReactionsMarker(parsed.cleanText) || 'Лучший ответ дня';
         const mediaUrl = winner.media_url || parsed.url || null;
+        const winnerNick = (winner.sender || '').trim();
 
         document.getElementById('loadingTitle').textContent = '⚡ Публикация победителя дня...';
         document.getElementById('loadingModal').classList.add('open');
@@ -882,13 +957,24 @@
         const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
             category: 'general',
-            title: `🏆 Победитель вызова дня: ${winner.sender || 'Участник'}`,
-            content: `${cleanBody}\n\n✨ Награда «Герой дня» от PulseCity за лучший кадр/ответ!`,
+            title: `🏆 Победитель вызова дня: ${winnerNick || 'Участник'}`,
+            content: `${cleanBody}\n\n✨ Награда «Герой дня» от PulseCity за лучший кадр/ответ дня!`,
             media_url: mediaUrl,
             author_username: '⚡ PulseCity',
             author_avatar: 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png',
             views: 1
         }]);
+
+        if (!error && winnerNick.startsWith('@') && winnerNick !== myUsername) {
+            await supabaseClient.from('messages').insert([{
+                chat_type: 'private',
+                city: selectedCity,
+                sender: myUsername || '⚡ PulseCity',
+                recipient: winnerNick,
+                text: `🏆 Поздравляем! Ваш ответ набрал больше всего реакций в «Вызове дня» (${selectedCity}) и опубликован в ленте от PulseCity!`,
+                avatar_url: myAvatar || 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png'
+            }]);
+        }
 
         document.getElementById('loadingModal').classList.remove('open');
         if (error) {
@@ -897,7 +983,7 @@
         }
         closeModal('commentsModal');
         loadPostsFromCloud(true);
-        showPulseAlert('🏆 Пост победителя вызова дня опубликован в ленте!');
+        showPulseAlert('🏆 Пост победителя вызова дня опубликован в ленте, а поздравление отправлено в ЛС!');
     }
 
     function forceFreshAssetsOnce() {
@@ -1365,7 +1451,7 @@
     }
 
     async function getOrCreateChallengePostId() {
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getDateKeyByOffset(0);
         const challengeTitle = `🎯 Вызов дня: ${todayStr} (${selectedCity})`;
         
         if (!supabaseClient) return 1;
@@ -1416,6 +1502,8 @@
         const challengeId = await getOrCreateChallengePostId();
         activePostIdForComments = challengeId;
         isChallengeMode = true;
+
+        await loadYesterdayChallengeWinner();
 
         document.getElementById('loadingModal').classList.remove('open');
 
@@ -2258,6 +2346,7 @@
             isChallengeMode = false;
             document.getElementById('challengePrizeNote').style.display = 'none';
             document.getElementById('challengeLeaderBanner').style.display = 'none';
+            document.getElementById('challengeYesterdayCard').style.display = 'none';
         }
         document.getElementById(id).classList.remove('open');
     }
@@ -2997,7 +3086,10 @@
             });
         }
 
-        const challengePost = globalPostsData.find(p => p.category === 'challenge');
+        const todayKey = getDateKeyByOffset(0);
+        const todayChallengeTitle = `🎯 Вызов дня: ${todayKey} (${selectedCity})`;
+        const challengePost = globalPostsData.find(p => p.category === 'challenge' && p.title === todayChallengeTitle)
+            || globalPostsData.find(p => p.category === 'challenge');
         const count = challengePost ? (globalCommentsData[challengePost.id] || 0) : 0;
         const challengeBadge = document.getElementById('challengeCommentsBadge');
         const challengeMiniBadge = document.getElementById('challengeCommentsMiniBadge');
@@ -3249,6 +3341,7 @@
         document.getElementById('commentsChallengePrompt').style.display = 'none';
         document.getElementById('challengePrizeNote').style.display = 'none';
         document.getElementById('challengeLeaderBanner').style.display = 'none';
+        document.getElementById('challengeYesterdayCard').style.display = 'none';
         document.getElementById('commentInput').placeholder = 'Комментарий или фото...';
         clearCommentMedia();
         openModal('commentsModal');
@@ -3278,13 +3371,11 @@
         let maxScore = 0;
 
         if (isChallengeMode) {
-            rows.forEach(c => {
-                const score = getCommentTotalReactions(c);
-                if (score > maxScore) {
-                    maxScore = score;
-                    leaderId = String(c.id);
-                }
-            });
+            const bestInfo = findBestCommentFromList(rows);
+            if (bestInfo && bestInfo.score > 0) {
+                maxScore = bestInfo.score;
+                leaderId = String(bestInfo.comment.id);
+            }
 
             if (bannerEl) {
                 if (leaderId && maxScore > 0) {
