@@ -209,6 +209,11 @@
         .contact-email-box{background:rgba(255,107,0,0.1);border:1px solid rgba(255,149,0,0.4);border-radius:14px;padding:11px 14px;font-size:13px;font-weight:800;color:#ff9500;word-break:break-all;text-align:center;flex:1}
         .contact-inapp-box{background:rgba(255,107,0,0.08);border:1px solid rgba(255,149,0,0.3);border-radius:18px;padding:14px;margin-bottom:14px;text-align:left}
 
+        .support-ticket-card{background:rgba(0,0,0,0.35);border:1px solid rgba(255,149,0,0.25);border-radius:14px;padding:11px 12px;margin-bottom:8px;text-align:left}
+        .support-ticket-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;font-size:11px;color:#ff9500;font-weight:700}
+        .support-ticket-topic{display:inline-block;background:rgba(255,107,0,0.2);color:#ffa200;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px}
+        .support-ticket-msg{font-size:13px;color:#f3f4f6;line-height:1.4;white-space:pre-line;word-break:break-word;margin-bottom:8px}
+
         .nav-wrapper{position:fixed;bottom:16px;left:16px;right:16px;z-index:1000}
         nav{background:linear-gradient(180deg,rgba(22,15,11,0.96),rgba(10,7,5,0.99));backdrop-filter:blur(30px);border:1px solid rgba(255,107,0,0.25);border-radius:32px;display:flex;padding:8px;box-shadow:0 25px 50px rgba(0,0,0,0.9);gap:8px}
         nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:26px;padding:12px 8px;color:#9ca3af;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.2s}
@@ -474,6 +479,16 @@
     <div class="modal-card" style="max-width:440px;">
         <h3>👑 Кабинет разработчика</h3>
         <p style="font-size:13px;color:#9ca3af;margin-bottom:14px">Панель управления и модерации:</p>
+
+        <div style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,149,0,0.3);padding:14px;border-radius:16px;margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <p style="font-weight:700;font-size:14px;color:#ff9500;margin:0;">📩 Обращения пользователей</p>
+                <button type="button" onclick="loadSupportTickets()" style="background:rgba(255,107,0,0.18);border:1px solid rgba(255,149,0,0.4);color:#ff9500;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">🔄 Обновить</button>
+            </div>
+            <div id="supportTicketsList" style="max-height:220px;overflow-y:auto;">
+                <p style="color:#9ca3af;font-size:12px;">Загрузка обращений...</p>
+            </div>
+        </div>
         
         <div style="background:rgba(255,107,0,0.08);padding:14px;border-radius:16px;margin-bottom:14px;">
             <p style="font-weight:700;font-size:14px;margin-bottom:8px;color:#ff9500">✨ Опубликовать от PulseCity в ленту</p>
@@ -629,7 +644,6 @@
 <script>
     const SUPPORT_EMAIL = 'pulsecity1@gmail.com';
     const SUPPORT_RECIPIENT = '@andrey';
-    // Подставьте ваш VAPID public key, когда настроите отправку Web Push через Edge Function
     const VAPID_PUBLIC_KEY = '';
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
@@ -767,6 +781,12 @@
         }
     }
 
+    function saveLocalSupportTicket(ticket) {
+        const list = JSON.parse(localStorage.getItem('pulseCity_local_support') || '[]');
+        list.unshift(ticket);
+        localStorage.setItem('pulseCity_local_support', JSON.stringify(list.slice(0, 50)));
+    }
+
     async function sendInAppSupportMessage() {
         const topic = document.getElementById('contactTopicSelect').value;
         const msgInput = document.getElementById('contactMessageInput');
@@ -787,8 +807,21 @@
 
         const senderTag = myUsername || 'Гость';
         const formattedText = `📩 Обратная связь (${topic}):\n${text}`;
+        let savedToSupportTable = false;
 
-        const { error } = await supabaseClient.from('messages').insert([{
+        const { error: supportErr } = await supabaseClient.from('support_messages').insert([{
+            sender: senderTag,
+            city: selectedCity,
+            topic: topic,
+            message: text,
+            avatar_url: myAvatar || ''
+        }]);
+
+        if (!supportErr) {
+            savedToSupportTable = true;
+        }
+
+        const { error: dmErr } = await supabaseClient.from('messages').insert([{
             chat_type: 'private',
             city: selectedCity,
             sender: senderTag,
@@ -800,15 +833,135 @@
         btn.disabled = false;
         btn.textContent = '⚡ Отправить в приложении';
 
-        if (error) {
-            showPulseAlert('Не удалось отправить сообщение: ' + error.message);
+        if (!savedToSupportTable && dmErr) {
+            showPulseAlert('Не удалось отправить сообщение: ' + dmErr.message);
             return;
         }
+
+        saveLocalSupportTicket({
+            id: 'local_' + Date.now(),
+            source: 'local',
+            sender: senderTag,
+            city: selectedCity,
+            topic: topic,
+            message: text,
+            created_at: new Date().toISOString()
+        });
 
         msgInput.value = '';
         playSystemSound('send');
         closeModal('contactModal');
-        showPulseAlert('✓ Сообщение отправлено команде PulseCity! Ответ придёт в ваши личные чаты.');
+        showPulseAlert('✓ Обращение отправлено разработчикам PulseCity!');
+    }
+
+    async function loadSupportTickets() {
+        const listEl = document.getElementById('supportTicketsList');
+        if (!listEl) return;
+        listEl.innerHTML = '<p style="color:#9ca3af;font-size:12px;">Загрузка обращений...</p>';
+
+        let tickets = [];
+
+        if (supabaseClient) {
+            const { data: supData, error: supErr } = await supabaseClient
+                .from('support_messages')
+                .select('*')
+                .order('id', { ascending: false })
+                .limit(30);
+
+            if (!supErr && Array.isArray(supData)) {
+                supData.forEach(item => {
+                    tickets.push({
+                        id: item.id,
+                        source: 'support_messages',
+                        sender: item.sender || 'Гость',
+                        city: item.city || '',
+                        topic: item.topic || 'Обращение',
+                        message: item.message || '',
+                        created_at: item.created_at
+                    });
+                });
+            }
+
+            const { data: dmData } = await supabaseClient
+                .from('messages')
+                .select('*')
+                .eq('recipient', SUPPORT_RECIPIENT)
+                .order('id', { ascending: false })
+                .limit(30);
+
+            if (Array.isArray(dmData)) {
+                dmData.forEach(m => {
+                    if (m.text && m.text.startsWith('📩 Обратная связь')) {
+                        const lines = m.text.split('\n');
+                        const firstLine = lines[0] || '';
+                        const topicMatch = firstLine.match(/\(([^)]+)\)/);
+                        const bodyText = lines.slice(1).join('\n') || m.text;
+                        const exists = tickets.some(t => t.sender === m.sender && t.message === bodyText);
+                        if (!exists) {
+                            tickets.push({
+                                id: m.id,
+                                source: 'messages',
+                                sender: m.sender || 'Гость',
+                                city: m.city || '',
+                                topic: topicMatch ? topicMatch[1] : 'Обратная связь',
+                                message: bodyText,
+                                created_at: m.created_at
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        const localTickets = JSON.parse(localStorage.getItem('pulseCity_local_support') || '[]');
+        localTickets.forEach(lt => {
+            const exists = tickets.some(t => t.sender === lt.sender && t.message === lt.message);
+            if (!exists) tickets.push(lt);
+        });
+
+        tickets.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+        if (tickets.length === 0) {
+            listEl.innerHTML = '<p style="color:#9ca3af;font-size:12px;text-align:center;margin:8px 0;">Обращений пока нет.</p>';
+            return;
+        }
+
+        listEl.innerHTML = '';
+        tickets.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'support-ticket-card';
+            const canReply = t.sender && t.sender !== 'Гость' && t.sender.startsWith('@');
+            card.innerHTML = `
+                <div class="support-ticket-head">
+                    <span>${t.sender} ${t.city ? '• ' + t.city : ''}</span>
+                    <span>${formatNiceTime(t.created_at)}</span>
+                </div>
+                <div class="support-ticket-topic">${t.topic}</div>
+                <div class="support-ticket-msg">${t.message}</div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    ${canReply ? `<button type="button" onclick="replyToSupportSender('${t.sender}')" style="background:rgba(255,107,0,0.25);border:1px solid rgba(255,149,0,0.5);color:#fff;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">💬 Ответить в ЛС</button>` : ''}
+                    <button type="button" onclick="removeSupportTicket('${t.source}', '${t.id}')" style="background:rgba(239,68,68,0.16);border:1px solid rgba(239,68,68,0.35);color:#ef4444;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+                </div>
+            `;
+            listEl.appendChild(card);
+        });
+    }
+
+    function replyToSupportSender(senderTag) {
+        closeModal('adminModal');
+        jumpToPrivateChat(senderTag);
+    }
+
+    async function removeSupportTicket(source, id) {
+        if (source === 'support_messages' && supabaseClient) {
+            await supabaseClient.from('support_messages').delete().eq('id', Number(id));
+        } else if (source === 'messages' && supabaseClient) {
+            await supabaseClient.from('messages').delete().eq('id', Number(id));
+        }
+        const localTickets = JSON.parse(localStorage.getItem('pulseCity_local_support') || '[]')
+            .filter(item => String(item.id) !== String(id));
+        localStorage.setItem('pulseCity_local_support', JSON.stringify(localTickets));
+        loadSupportTickets();
     }
 
     function copySupportEmail() {
@@ -1600,7 +1753,10 @@
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    function openAdminModal() { openModal('adminModal'); }
+    function openAdminModal() {
+        openModal('adminModal');
+        loadSupportTickets();
+    }
 
     function checkScrollPosition() {
         const container = document.getElementById('mainContainer');
@@ -2802,7 +2958,10 @@
         };
 
         const { data, error } = await supabaseClient.from('messages').insert([msgData]).select();
-        if (error) return;
+        if (error) {
+            showPulseAlert('Ошибка отправки сообщения: ' + error.message);
+            return;
+        }
 
         if (data && data[0]) {
             const prefix = msgData.chat_type === 'private' ? 'dm_' : 'pub_';
