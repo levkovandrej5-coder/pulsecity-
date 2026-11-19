@@ -111,10 +111,13 @@
         
         .news-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
         .news-author-info{display:flex;align-items:center;gap:12px}
-        .news-author-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,149,0,0.6);box-shadow:0 4px 12px rgba(255,107,0,0.3)}
+        .news-author-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#ff3300);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,149,0,0.6);box-shadow:0 4px 12px rgba(255,107,0,0.3);transition:transform .18s ease}
+        .news-author-avatar.clickable:active{transform:scale(0.92)}
         .news-author-avatar img{width:100%;height:100%;object-fit:cover}
         .news-meta{display:flex;flex-direction:column;gap:2px}
         .news-author-name{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+        .news-author-name.clickable{cursor:pointer}
+        .news-author-name.clickable:hover{color:#ff9500}
         .news-time-tag{font-size:11px;color:#9ca3af;font-weight:500}
         
         .card h3{font-size:19px;font-weight:800;margin-bottom:10px;color:#fff;line-height:1.35}
@@ -2049,7 +2052,7 @@
         convList.innerHTML = '';
 
         if (error || !data || data.length === 0) {
-            convList.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:15px 0;">У вас пока нет активных личных чатов.<br>Нажмите на аватарку любого пользователя в общем чате, чтобы написать ему.</p>';
+            convList.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:15px 0;">У вас пока нет активных личных чатов.<br>Нажмите на аватарку любого пользователя в ленте или общем чате, чтобы написать ему.</p>';
             document.getElementById('totalUnreadBadge').style.display = 'none';
             return;
         }
@@ -2114,10 +2117,32 @@
         });
     }
 
+    function canDirectMessageUser(username) {
+        if (!username) return false;
+        const clean = username.trim();
+        if (!clean || clean === myUsername) return false;
+        if (clean === '⚡ PulseCity') return false;
+        const blockedLabels = ['Ночной дозор', 'Свидетель улиц', 'Городской лис', 'Инкогнито', 'Автор', 'Гость'];
+        if (blockedLabels.some(label => clean.includes(label))) return false;
+        return true;
+    }
+
     function startPrivateChatWith(username) {
-        if (username === myUsername || username.includes('Ночной дозор') || username.includes('Инкогнито') || username.includes('Городской лис') || username.includes('Свидетель улиц')) return;
-        switchChatMode('private', username);
+        if (!canDirectMessageUser(username)) return;
+        let target = username.trim();
+        if (!target.startsWith('@')) target = '@' + target;
+        switchChatMode('private', target);
         switchTab('chat', document.querySelectorAll('nav button')[1]);
+    }
+
+    function openAuthorPrivateChat(authorUsername) {
+        if (!canDirectMessageUser(authorUsername)) {
+            if (authorUsername && authorUsername.trim() === myUsername) {
+                showPulseAlert('Это ваш собственный пост 🙂');
+            }
+            return;
+        }
+        startPrivateChatWith(authorUsername);
     }
 
     function selectCity(c) {
@@ -2362,9 +2387,11 @@
 
             const authorAvatarHtml = p.author_avatar 
                 ? `<img src="${p.author_avatar}">` 
-                : (p.author_username ? p.author_username[1].toUpperCase() : 'U');
+                : (p.author_username && p.author_username.length > 1 ? p.author_username[1].toUpperCase() : 'U');
 
             const authorName = p.author_username || 'Автор';
+            const canMessageAuthor = canDirectMessageUser(authorName);
+            const safeAuthor = authorName.replace(/'/g, "\\'");
             const canDelete = (p.author_username === myUsername) || isAdmin || (myUsername.toLowerCase() === '@andrey');
             const cCount = globalCommentsData[p.id] || 0;
             const isAdminPost = authorName === '⚡ PulseCity';
@@ -2387,13 +2414,13 @@
             card.innerHTML = `
                 <div class="news-header">
                     <div class="news-author-info">
-                        <div class="news-author-avatar">${authorAvatarHtml}</div>
+                        <div class="news-author-avatar ${canMessageAuthor ? 'clickable' : ''}" ${canMessageAuthor ? `onclick="openAuthorPrivateChat('${safeAuthor}')" title="Написать личное сообщение ${authorName}"` : ''}>${authorAvatarHtml}</div>
                         <div class="news-meta">
-                            <span class="news-author-name">${authorName} ${isFounder ? '👑' : ''}</span>
+                            <span class="news-author-name ${canMessageAuthor ? 'clickable' : ''}" ${canMessageAuthor ? `onclick="openAuthorPrivateChat('${safeAuthor}')" title="Написать личное сообщение ${authorName}"` : ''}>${authorName} ${isFounder ? '👑' : ''}</span>
                             <span class="news-time-tag">${formattedTime} • <span style="color:#ff9500">${p.city}</span></span>
                         </div>
                     </div>
-                    ${canDelete ? `<button class="delete-btn" onclick="deletePost(${p.id}, '${p.author_username}')">Удалить</button>` : ''}
+                    ${canDelete ? `<button class="delete-btn" onclick="deletePost(${p.id}, '${safeAuthor}')">Удалить</button>` : ''}
                 </div>
                 <h3>${p.title}</h3>
                 <div class="news-media-wrap">
