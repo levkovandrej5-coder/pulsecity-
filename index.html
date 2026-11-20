@@ -235,7 +235,7 @@
         .msg-row.mine .msg-quote-author{color:#fff !important}
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-        /* Реакции на сообщениях: скрыты пока пользователь не нажмёт на сообщение */
+        /* Реакции на сообщениях: скрыты пока нет поставленных реакций или пока не открыта панель выбора */
         .msg-reactions-row{
             display:none;
             align-items:center;
@@ -243,6 +243,7 @@
             gap:4px;
             padding:2px 2px 0;
         }
+        .msg-row.has-reactions .msg-reactions-row,
         .msg-row.reactions-open .msg-reactions-row{
             display:flex;
         }
@@ -251,9 +252,6 @@
             display:none;
         }
         .msg-row.reactions-open .msg-react-pill.unselected-pick{
-            display:inline-flex;
-        }
-        .msg-row.reactions-open .msg-add-react-btn{
             display:inline-flex;
         }
         .msg-add-react-btn{
@@ -266,6 +264,9 @@
             font-size:11px;
             font-weight:700;
             cursor:pointer;
+        }
+        .msg-row.reactions-open .msg-add-react-btn{
+            display:inline-flex;
         }
 
         .msg-react-pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#f3f4f6;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;cursor:pointer;transition:.15s}
@@ -858,7 +859,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v12_stable_reacts_scroll';
+    const THEME_REVISION = 'orange_v13_keep_selected_reacts';
 
     // === МОДУЛЬ БЕЗОПАСНОСТИ И АНТИСПАМА ===
     const IMPULSE_GUARD = {
