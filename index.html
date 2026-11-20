@@ -876,8 +876,8 @@
     const SUPPORT_EMAIL = 'pulsecity1@gmail.com';
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
-    const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v19_clean_video_push';
+    const VAPID_PUBLIC_KEY = 'BPyEb_gyNWnth-8PtxG39X2qiuyEeQZwd1W_rKtqDOCLoVnt4Wxygs_x1AaCk2vjb2lMubavzFzBGk3_M3ZrwLo';
+    const THEME_REVISION = 'orange_v20_vapid_push_sub';
 
     const MAJOR_CITIES = [
         'Иркутск',
@@ -1384,6 +1384,76 @@
         return outputArray;
     }
 
+    async function subscribeAndSavePushSubscription(reg, showFeedback = false) {
+        if (!('PushManager' in window)) {
+            if (showFeedback) {
+                showPulseAlert('ℹ️ В этом браузере Web Push не поддерживается, но уведомления внутри открытого PulseCity работают.');
+            }
+            return false;
+        }
+
+        if (!VAPID_PUBLIC_KEY) {
+            if (showFeedback) {
+                showPulseAlert('⚠️ Публичный VAPID-ключ не задан.');
+            }
+            return false;
+        }
+
+        if (Notification.permission !== 'granted') {
+            return false;
+        }
+
+        try {
+            let sub = await reg.pushManager.getSubscription();
+            if (!sub) {
+                sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+            }
+
+            const serializedSub = JSON.stringify(sub);
+            localStorage.setItem('pulseCity_push_sub', serializedSub);
+
+            if (!supabaseClient) {
+                if (showFeedback) showPulseAlert('⚠️ Нет подключения к Supabase.');
+                return false;
+            }
+
+            await IMPULSE_GUARD.syncSession(supabaseClient);
+            if (!myUsername) {
+                if (showFeedback) showPulseAlert('⚠️ Сначала войдите в аккаунт PulseCity, чтобы сохранить подписку.');
+                return false;
+            }
+
+            const { error } = await supabaseClient
+                .from('push_subscriptions')
+                .upsert([{
+                    username: myUsername,
+                    city: selectedCity,
+                    subscription: serializedSub,
+                    updated_at: new Date().toISOString()
+                }], { onConflict: 'username' });
+
+            if (error) {
+                if (showFeedback) {
+                    showPulseAlert('❌ Подписка создана в браузере, но не сохранилась в базу: ' + error.message);
+                }
+                return false;
+            }
+
+            if (showFeedback) {
+                showPulseAlert('✅ Push-уведомления включены и подписка сохранена в базе для ' + myUsername + ' (' + selectedCity + ')!');
+            }
+            return true;
+        } catch (err) {
+            if (showFeedback) {
+                showPulseAlert('❌ Не удалось оформить push-подписку: ' + (err && err.message ? err.message : err));
+            }
+            return false;
+        }
+    }
+
     async function registerServiceWorkerAndPush() {
         if (!('serviceWorker' in navigator)) return false;
         try {
@@ -1400,21 +1470,9 @@
                 }
             });
 
-            if (VAPID_PUBLIC_KEY && 'PushManager' in window && Notification.permission === 'granted') {
-                const existingSub = await reg.pushManager.getSubscription();
-                const sub = existingSub || await reg.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                });
-                localStorage.setItem('pulseCity_push_sub', JSON.stringify(sub));
-                if (supabaseClient && myUsername) {
-                    await supabaseClient.from('push_subscriptions').upsert([{
-                        username: myUsername,
-                        city: selectedCity,
-                        subscription: JSON.stringify(sub),
-                        updated_at: new Date().toISOString()
-                    }], { onConflict: 'username' }).catch(() => {});
-                }
+            if (Notification.permission === 'granted' && myUsername) {
+                const readyReg = await navigator.serviceWorker.ready;
+                await subscribeAndSavePushSubscription(readyReg, false);
             }
             return true;
         } catch (e) {
@@ -1885,8 +1943,11 @@
         }
 
         if (Notification.permission === "granted") {
-            if (showFeedback) {
-                showPulseAlert("✅ Системные уведомления разрешены и готовы к работе! Уведомления о новых постах и сообщениях будут приходить.");
+            if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.ready;
+                await subscribeAndSavePushSubscription(reg, showFeedback);
+            } else if (showFeedback) {
+                showPulseAlert("✅ Системные уведомления разрешены и готовы к работе!");
             }
             return;
         }
@@ -1902,8 +1963,9 @@
             const permission = await Notification.requestPermission();
             if (permission === "granted") {
                 await registerServiceWorkerAndPush();
-                if (showFeedback) {
-                    showPulseAlert("✅ Push-уведомления успешно включены!");
+                if ('serviceWorker' in navigator) {
+                    const reg = await navigator.serviceWorker.ready;
+                    await subscribeAndSavePushSubscription(reg, showFeedback);
                 }
             } else if (permission === "denied") {
                 if (showFeedback) {
