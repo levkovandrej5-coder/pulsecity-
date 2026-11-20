@@ -1,62 +1,40 @@
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('push', (event) => {
-    let data = {
-        title: '⚡ PulseCity',
-        body: 'У вас новое событие в приложении',
-        target: 'feed',
-        partner: ''
-    };
-
-    if (event.data) {
-        try {
-            const parsed = event.data.json();
-            data = { ...data, ...parsed };
-        } catch (e) {
-            data.body = event.data.text() || data.body;
-        }
+self.addEventListener("push", (event) => {
+  let payload = { title: "PulseCity", body: "Новое уведомление", url: "/" };
+  if (event.data) {
+    try {
+      payload = Object.assign(payload, event.data.json());
+    } catch (_) {
+      payload.body = event.data.text() || payload.body;
     }
-
-    event.waitUntil(
-        self.registration.showNotification(data.title, {
-            body: data.body,
-            icon: '/icon.png',
-            badge: '/icon.png',
-            vibrate: [100, 50, 100],
-            data: {
-                target: data.target || 'feed',
-                partner: data.partner || ''
-            }
-        })
-    );
+  }
+  event.waitUntil(
+    self.registration.showNotification(payload.title || "PulseCity", {
+      body: payload.body || "",
+      tag: "pulsecity-" + Date.now(),
+      renotify: true,
+      requireInteraction: false,
+      data: { url: payload.url || "/" }
+    })
+  );
 });
 
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    const payload = event.notification.data || {};
-
-    event.waitUntil(
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            for (const client of clientList) {
-                if ('focus' in client) {
-                    client.postMessage({
-                        type: 'OPEN_NOTIFICATION',
-                        target: payload.target || 'feed',
-                        partner: payload.partner || ''
-                    });
-                    return client.focus();
-                }
-            }
-            if (self.clients.openWindow) {
-                return self.clients.openWindow('/');
-            }
-        })
-    );
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ("focus" in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+    })
+  );
 });
-
