@@ -891,15 +891,16 @@
         localStorage.setItem('pulseCity_push_sub', serializedSub);
 
         if (supabaseClient && myUsername) {
-            await supabaseClient
-                .from('push_subscriptions')
-                .upsert([{
-                    username: myUsername,
-                    city: selectedCity,
-                    subscription: serializedSub,
-                    updated_at: new Date().toISOString()
-                }], { onConflict: 'username' })
-                .catch(() => {});
+            try {
+                await supabaseClient
+                    .from('push_subscriptions')
+                    .upsert([{
+                        username: myUsername,
+                        city: selectedCity,
+                        subscription: serializedSub,
+                        updated_at: new Date().toISOString()
+                    }], { onConflict: 'username' });
+            } catch (_) {}
         }
 
         if (showFeedback) {
@@ -1214,7 +1215,9 @@
     }
 
     async function logoutUser() {
-        if (supabaseClient) await supabaseClient.auth.signOut().catch(() => {});
+        if (supabaseClient) {
+            try { await supabaseClient.auth.signOut(); } catch (_) {}
+        }
         localStorage.clear();
         location.reload();
     }
@@ -1222,8 +1225,10 @@
     async function clearLocalCache() {
         ['pulseCity_notified_keys', 'pulseCity_viewed_posts', 'pulseCity_msg_reactions', 'pulseCity_poll_votes', 'pulseCity_challenge_reacts'].forEach(k => localStorage.removeItem(k));
         if ('caches' in window) {
-            const keys = await caches.keys().catch(() => []);
-            await Promise.all(keys.map(k => caches.delete(k))).catch(() => {});
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            } catch (_) {}
         }
         closeModal('settingsModal');
         showPulseAlert('🧹 Локальный кэш очищен.');
@@ -1732,9 +1737,11 @@
         }
     }
 
-    function notifyTyping() {
+    async function notifyTyping() {
         if (!supabaseClient || !myUsername || privacyHideStatus) return;
-        supabaseClient.from('typing').upsert([{ username: myUsername, city: selectedCity, updated_at: new Date().toISOString() }]).then(() => {});
+        try {
+            await supabaseClient.from('typing').upsert([{ username: myUsername, city: selectedCity, updated_at: new Date().toISOString() }]);
+        } catch (_) {}
     }
 
     async function sendInAppSupportMessage() {
@@ -1808,8 +1815,10 @@
         } catch (_) {}
 
         if (supabaseClient && supabaseClient.auth) {
-            const { data } = await supabaseClient.auth.getUser().catch(() => ({}));
-            if (data?.user?.email) authSessionEmail = data.user.email;
+            try {
+                const { data } = await supabaseClient.auth.getUser();
+                if (data?.user?.email) authSessionEmail = data.user.email;
+            } catch (_) {}
         }
 
         if (!myName || !myUsername) {
