@@ -22,6 +22,12 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
         body{background:radial-gradient(circle at top right,#190f08,var(--dark-bg) 70%) !important;color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
+        /* === РЕЖИМ ЧЕРНОВИКА / ТЕСТОВ ОСНОВАТЕЛЯ === */
+        .lab-only{display:none !important}
+        body.founder-lab-active .lab-only{display:block !important}
+        body.founder-lab-active .lab-only-flex{display:flex !important}
+        .lab-banner{background:rgba(230,92,0,0.14);border:1px dashed rgba(230,92,0,0.65);color:#ff9440;border-radius:14px;padding:8px 12px;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center}
+
         header{background:rgba(16,11,7,0.95) !important;backdrop-filter:blur(25px);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(230,92,0,0.18) !important;z-index:25;flex-shrink:0}
         .logo{font-size:20px;font-weight:900;background:linear-gradient(135deg,#e65c00,#ff7300) !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;letter-spacing:-0.5px}
         
@@ -346,6 +352,8 @@
     <button id="fabAddNews" onclick="openModal('newsModal')" title="Добавить новость">+</button>
 
     <div id="tab-feed" class="content active">
+        <div class="lab-banner lab-only">🧪 Активен ваш личный черновой режим — обычные пользователи тестовые блоки не видят</div>
+
         <div class="challenge-pinned-card" id="pinnedChallengeCard" onclick="openDailyChallengeComments()">
             <div class="challenge-content-wrap">
                 <div class="challenge-top-row">
@@ -364,6 +372,15 @@
                     💬 <span id="challengeCommentsMiniBadge">0</span>
                 </button>
             </div>
+        </div>
+
+        <!-- Тестовая песочница только для основателя (видна при включённом черновом режиме) -->
+        <div class="card lab-only" id="founderSandboxCard" style="border:1px dashed rgba(230,92,0,0.55);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:11px;font-weight:800;color:#ff7a14;text-transform:uppercase;">🧪 Черновик функции (виден только вам)</span>
+                <button type="button" onclick="toggleFounderLabMode()" style="background:rgba(230,92,0,0.18);border:1px solid rgba(230,92,0,0.45);color:#ff7a14;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">Скрыть</button>
+            </div>
+            <p style="margin:0;font-size:13px;color:#d1d5db;">Сюда можно добавлять новые блоки и кнопки с классом <strong>lab-only</strong> и спокойно проверять их на телефонах, не мешая горожанам.</p>
         </div>
 
         <div id="newsItemsContainer">
@@ -615,6 +632,14 @@
         <h3>👑 Кабинет разработчика</h3>
         <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Панель управления и модерации:</p>
 
+        <div class="setting-row" style="margin-bottom:12px;border-color:rgba(230,92,0,0.45);background:rgba(230,92,0,0.08);">
+            <div>
+                <p style="font-weight:700;font-size:13px;color:#ff7a14;">🧪 Черновой режим (только для меня)</p>
+                <p style="font-size:11px;color:#9ca3af;">Показывает скрытые тестовые блоки только в вашем интерфейсе</p>
+            </div>
+            <div id="founderLabToggle" class="toggle-switch" onclick="toggleFounderLabMode()"></div>
+        </div>
+
         <div style="background:rgba(230,92,0,0.08);border:1px solid rgba(230,92,0,0.45);padding:12px;border-radius:14px;margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                 <p style="font-weight:700;font-size:13px;color:#ff7a14;margin:0;">📩 Обращения пользователей</p>
@@ -786,7 +811,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v9_sec';
+    const THEME_REVISION = 'orange_v10_lab';
 
     // === МОДУЛЬ БЕЗОПАСНОСТИ И АНТИСПАМА ===
     const IMPULSE_GUARD = {
@@ -856,6 +881,34 @@
             this.lastActionText = String(text || '').trim();
         }
     };
+
+    // === ЧЕРНОВОЙ / ТЕСТОВЫЙ РЕЖИМ ОСНОВАТЕЛЯ ===
+    const FOUNDER_LAB_STORAGE_KEY = 'pulseCity_founder_lab_enabled';
+    let founderLabEnabled = localStorage.getItem(FOUNDER_LAB_STORAGE_KEY) === 'true';
+
+    function syncFounderLabMode() {
+        const active = Boolean(isFounderAccount() && founderLabEnabled);
+        document.body.classList.toggle('founder-lab-active', active);
+        const toggleEl = document.getElementById('founderLabToggle');
+        if (toggleEl) {
+            toggleEl.classList.toggle('active', active);
+        }
+    }
+
+    function toggleFounderLabMode() {
+        if (!isFounderAccount()) {
+            showPulseAlert('Этот переключатель доступен только основателю.');
+            return;
+        }
+        founderLabEnabled = !founderLabEnabled;
+        localStorage.setItem(FOUNDER_LAB_STORAGE_KEY, String(founderLabEnabled));
+        syncFounderLabMode();
+        showPulseAlert(
+            founderLabEnabled
+                ? '🧪 Черновой режим включён: тестовые блоки видны только вам.'
+                : '🔒 Черновой режим выключен: интерфейс показан как для обычных пользователей.'
+        );
+    }
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
@@ -1724,6 +1777,7 @@
             document.getElementById('adminPanelBtn').style.display = 'none';
             document.getElementById('userBadge').textContent = '⭐ Местный эксперт';
         }
+        syncFounderLabMode();
     }
 
     function updateProfileUI() {
@@ -2424,6 +2478,7 @@
             showPulseAlert('Доступ к кабинету разработчика есть только у создателя PulseCity.');
             return;
         }
+        syncFounderLabMode();
         openModal('adminModal');
         loadSupportTickets();
     }
