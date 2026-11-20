@@ -66,7 +66,6 @@
         #scrollTopBtn{position:fixed;bottom:126px;right:20px;background:rgba(24,18,14,0.9);border:1px solid rgba(230,92,0,0.45) !important;color:#ff7a14 !important;width:36px;height:36px;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,0.6);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:900;transition:.2s}
         #scrollTopBtn:active{transform:scale(0.9)}
 
-        /* Плавная плашка «Вызов дня» без рывков при скролле */
         .challenge-pinned-card {
             background: linear-gradient(145deg,#211308,#120b07) !important;
             border: 1px solid rgba(230,92,0,0.45) !important;
@@ -139,7 +138,6 @@
             pointer-events: auto;
         }
 
-        /* Без backdrop-filter на карточках ленты — устраняет мерцание видео на мобильных GPU */
         .card{background:linear-gradient(145deg,#1b1410,#110c09);border-radius:22px;padding:15px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.09);box-shadow:0 14px 28px rgba(0,0,0,0.58);position:relative;overflow:hidden}
         .card.admin-card{border:1px solid rgba(230,92,0,0.45) !important;background:linear-gradient(145deg,#24150b,#140d08) !important;}
         .chat-main-card{padding:10px 11px 8px;margin-bottom:4px;border-radius:18px;}
@@ -400,22 +398,22 @@
 <header>
     <div class="logo">⚡ PulseCity</div>
     <div class="header-actions">
-        <button class="top-mini-btn" id="toggleSearchBtn" onclick="toggleHeaderSearch()" title="Поиск по ленте">🔍</button>
-        <button class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
-        <button class="city-btn" onclick="openCityModal()">📍 <span id="currentCity">Иркутск</span> ▾</button>
+        <button type="button" class="top-mini-btn" id="toggleSearchBtn" onclick="toggleHeaderSearch()" title="Поиск по ленте">🔍</button>
+        <button type="button" class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
+        <button type="button" class="city-btn" onclick="openCityModal()">📍 <span id="currentCity">Иркутск</span> ▾</button>
     </div>
 </header>
 
 <div id="headerSearchDrop">
     <div style="display:flex;gap:8px;align-items:center;">
         <input type="text" id="feedSearchInput" class="search-input" placeholder="🔍 Найти новость или автора..." oninput="filterFeedSearch()">
-        <button onclick="clearAndCloseSearch()" style="background:rgba(255,255,255,0.08);border:none;color:#9ca3af;width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:15px;flex-shrink:0;">✕</button>
+        <button type="button" onclick="clearAndCloseSearch()" style="background:rgba(255,255,255,0.08);border:none;color:#9ca3af;width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:15px;flex-shrink:0;">✕</button>
     </div>
 </div>
 
 <div class="container" id="mainContainer" onscroll="checkScrollPosition()">
-    <button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
-    <button id="fabAddNews" onclick="openModal('newsModal')" title="Добавить новость">+</button>
+    <button type="button" id="scrollTopBtn" onclick="scrollToTop()">↑</button>
+    <button type="button" id="fabAddNews" onclick="openModal('newsModal')" title="Добавить новость">+</button>
 
     <div id="tab-feed" class="content active">
         <div class="lab-banner lab-only">🧪 Активен ваш личный черновой режим — обычные пользователи тестовые блоки не видят</div>
@@ -459,8 +457,8 @@
     <div id="tab-chat" class="content">
         <div class="card chat-main-card">
             <div class="chat-tabs">
-                <button class="chat-tab-btn active" id="tabBtnPublic" onclick="switchChatMode('public')">🌍 Общий чат</button>
-                <button class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные чаты <span id="totalUnreadBadge" style="display:none;" class="unread-badge">0</span></button>
+                <button type="button" class="chat-tab-btn active" id="tabBtnPublic" onclick="switchChatMode('public')">🌍 Общий чат</button>
+                <button type="button" class="chat-tab-btn" id="tabBtnPrivate" onclick="switchChatMode('private')">💬 Личные чаты <span id="totalUnreadBadge" style="display:none;" class="unread-badge">0</span></button>
             </div>
             
             <div class="chat-header-bar">
@@ -476,7 +474,7 @@
                 <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;padding-right:8px;">
                     📌 <strong style="color:#ff7a14">Закреплено:</strong> <span id="pinnedMsgText" style="color:#e5e7eb">...</span>
                 </div>
-                <button onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;display:none;">✕ Снять</button>
+                <button type="button" onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;display:none;">✕ Снять</button>
             </div>
             
             <div id="privateSectionContainer" style="display:none;margin-bottom:4px;">
@@ -497,9 +495,9 @@
 
             <div class="chat-input-area" id="chatInputAreaWrapper">
                 <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
-                <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
+                <button type="button" class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
                 <input type="text" id="messageInput" placeholder="Написать сообщение..." oninput="notifyTyping()" onkeydown="if(event.key==='Enter')sendPublicMessage()">
-                <button class="send-btn" onclick="sendPublicMessage()">➤</button>
+                <button type="button" class="send-btn" onclick="sendPublicMessage()">➤</button>
             </div>
         </div>
     </div>
@@ -516,16 +514,16 @@
             
             <div id="userBadge" style="display:inline-block;background:rgba(230,92,0,0.16);color:#ff7a14;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;margin-bottom:14px;border:1px solid rgba(230,92,0,0.45)">⭐ Местный эксперт</div>
             
-            <button class="btn-main" onclick="openEditProfileModal()" style="margin-bottom:8px;">✏️ Настроить профиль</button>
-            <button class="btn-sec" onclick="openModal('contactModal')" style="color:#ff7a14;border-color:rgba(230,92,0,0.45);">✉️ Связь с PulseCity</button>
+            <button type="button" class="btn-main" onclick="openEditProfileModal()" style="margin-bottom:8px;">✏️ Настроить профиль</button>
+            <button type="button" class="btn-sec" onclick="openModal('contactModal')" style="color:#ff7a14;border-color:rgba(230,92,0,0.45);">✉️ Связь с PulseCity</button>
             <p style="margin:10px 0;font-size:14px">Текущий город: <strong id="profileCity" style="color:#ff7a14">Иркутск</strong></p>
             
-            <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
-            <button class="btn-sec" onclick="openCityModal()">📍 Сменить город</button>
+            <button type="button" class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
+            <button type="button" class="btn-sec" onclick="openCityModal()">📍 Сменить город</button>
             
-            <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
+            <button type="button" id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
             
-            <button class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти из аккаунта</button>
+            <button type="button" class="btn-sec" onclick="logoutUser()" style="color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Выйти из аккаунта</button>
         </div>
     </div>
 </div>
@@ -568,7 +566,7 @@
         <a href="mailto:pulsecity1@gmail.com?subject=PulseCity%20—%20обратная%20связь" style="text-decoration:none;display:block;">
             <button class="btn-sec" type="button" style="color:#ff7a14;border-color:rgba(230,92,0,0.45);padding:10px 14px;font-size:13px;">📨 Открыть почтовый клиент</button>
         </a>
-        <button class="btn-sec" onclick="closeModal('contactModal')" style="margin-bottom:0;padding:10px 14px;font-size:13px;">Закрыть</button>
+        <button type="button" class="btn-sec" onclick="closeModal('contactModal')" style="margin-bottom:0;padding:10px 14px;font-size:13px;">Закрыть</button>
     </div>
 </div>
 
@@ -581,8 +579,8 @@
             <p style="color:#d1d5db;font-size:12px;margin-bottom:10px">Укажите почту и пароль для входа или регистрации</p>
 
             <div class="chat-tabs" style="margin-bottom:12px;">
-                <button class="chat-tab-btn active" id="btnModeReg" onclick="switchAuthMode('register')">Регистрация</button>
-                <button class="chat-tab-btn" id="btnModeLogin" onclick="switchAuthMode('login')">Вход</button>
+                <button type="button" class="chat-tab-btn active" id="btnModeReg" onclick="switchAuthMode('register')">Регистрация</button>
+                <button type="button" class="chat-tab-btn" id="btnModeLogin" onclick="switchAuthMode('login')">Вход</button>
             </div>
             
             <div id="regOnlyFields">
@@ -610,7 +608,7 @@
                 <span>Согласен с <span style="color:#ff7a14;text-decoration:underline;cursor:pointer;" onclick="showPulseAlert('Приложение обрабатывает только указанные вами данные для работы городского чата и ленты новостей.')">Политикой конфиденциальности</span></span>
             </div>
 
-            <button class="btn-main" id="authSubmitBtn" style="margin:0" onclick="handleAuthSubmit()">Создать аккаунт</button>
+            <button type="button" class="btn-main" id="authSubmitBtn" style="margin:0" onclick="handleAuthSubmit()">Создать аккаунт</button>
         </div>
 
         <div id="authStepOtp" style="display:none;">
@@ -619,9 +617,9 @@
                 <strong id="otpTargetEmail" style="color:#ff7a14;"></strong>
             </p>
             <input type="text" id="otpCodeInput" class="otp-input" inputmode="numeric" maxlength="8" placeholder="12345678" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')verifySignupCode()">
-            <button class="btn-main" style="margin-bottom:8px;" onclick="verifySignupCode()">Подтвердить код</button>
-            <button class="btn-sec" id="resendOtpBtn" onclick="resendSignupCode()" style="font-size:12px;padding:10px;">🔄 Отправить код повторно</button>
-            <button class="btn-sec" onclick="backToAuthCredentials()" style="font-size:12px;padding:10px;margin-bottom:0;color:#9ca3af;">← Изменить почту</button>
+            <button type="button" class="btn-main" style="margin-bottom:8px;" onclick="verifySignupCode()">Подтвердить код</button>
+            <button type="button" class="btn-sec" id="resendOtpBtn" onclick="resendSignupCode()" style="font-size:12px;padding:10px;">🔄 Отправить код повторно</button>
+            <button type="button" class="btn-sec" onclick="backToAuthCredentials()" style="font-size:12px;padding:10px;margin-bottom:0;color:#9ca3af;">← Изменить почту</button>
         </div>
 
         <div id="authStepReset" style="display:none;">
@@ -629,8 +627,8 @@
                 Укажите почту аккаунта — отправим ссылку для восстановления пароля. Откройте её в этом же браузере.
             </p>
             <input type="email" id="resetEmailInput" placeholder="Электронная почта..." style="text-align:center;margin-bottom:10px;">
-            <button class="btn-main" id="sendResetBtn" style="margin-bottom:8px;" onclick="sendPasswordResetRequest()">📨 Отправить ссылку на почту</button>
-            <button class="btn-sec" onclick="backToAuthCredentials()" style="font-size:12px;padding:10px;margin-bottom:0;color:#9ca3af;">← Назад ко входу</button>
+            <button type="button" class="btn-main" id="sendResetBtn" style="margin-bottom:8px;" onclick="sendPasswordResetRequest()">📨 Отправить ссылку на почту</button>
+            <button type="button" class="btn-sec" onclick="backToAuthCredentials()" style="font-size:12px;padding:10px;margin-bottom:0;color:#9ca3af;">← Назад ко входу</button>
         </div>
 
         <div id="authStepNewPassword" style="display:none;">
@@ -638,7 +636,7 @@
                 Ссылка подтверждена. Придумайте новый пароль для входа в <strong style="color:#ff7a14;">PulseCity</strong>:
             </p>
             <input type="password" id="recoveryPasswordInput" placeholder="Новый пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:12px;">
-            <button class="btn-main" style="margin:0;" onclick="applyRecoveryPassword()">✓ Сохранить пароль и войти</button>
+            <button type="button" class="btn-main" style="margin:0;" onclick="applyRecoveryPassword()">✓ Сохранить пароль и войти</button>
         </div>
     </div>
 </div>
@@ -679,8 +677,8 @@
         </div>
 
         <div style="display:flex;gap:8px;">
-            <button class="btn-sec" onclick="closeModal('editProfileModal')" style="margin:0;">Отмена</button>
-            <button class="btn-main" style="margin:0" onclick="saveProfileChanges()">Сохранить</button>
+            <button type="button" class="btn-sec" onclick="closeModal('editProfileModal')" style="margin:0;">Отмена</button>
+            <button type="button" class="btn-main" style="margin:0" onclick="saveProfileChanges()">Сохранить</button>
         </div>
     </div>
 </div>
@@ -690,7 +688,7 @@
         <div style="font-size:36px;margin-bottom:8px">⚡</div>
         <h3>Индекс пульса города</h3>
         <p id="modalPulseText" style="color:#ff7a14;font-size:15px;font-weight:700;line-height:1.5;margin-bottom:18px;background:rgba(230,92,0,0.08);padding:14px;border-radius:14px;border:1px solid rgba(230,92,0,0.45);">Анализируем активность...</p>
-        <button class="btn-main" onclick="closeModal('pulseModal')" style="margin:0;">Понятно</button>
+        <button type="button" class="btn-main" onclick="closeModal('pulseModal')" style="margin:0;">Понятно</button>
     </div>
 </div>
 
@@ -721,25 +719,25 @@
             <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ff7a14">✨ Опубликовать от PulseCity в ленту</p>
             <input type="text" id="adminFeedTitleInput" placeholder="Заголовок..." style="margin-bottom:8px;">
             <textarea id="adminFeedTextInput" placeholder="Текст официальной новости..." style="height:64px;margin-bottom:8px;"></textarea>
-            <button class="btn-main" style="padding:11px;font-size:13px;margin:0;" onclick="publishAdminFeedPost()">Опубликовать в ленту</button>
+            <button type="button" class="btn-main" style="padding:11px;font-size:13px;margin:0;" onclick="publishAdminFeedPost()">Опубликовать в ленту</button>
         </div>
 
         <div style="background:rgba(230,92,0,0.08);padding:12px;border-radius:14px;margin-bottom:12px;">
             <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ff7a14">📢 Написать объявление в чат</p>
             <input type="text" id="adminBroadcastInput" placeholder="Текст объявления..." style="margin-bottom:8px;">
-            <button class="btn-main" style="padding:11px;font-size:13px;margin:0;" onclick="sendAdminBroadcast()">Отправить в общий чат</button>
+            <button type="button" class="btn-main" style="padding:11px;font-size:13px;margin:0;" onclick="sendAdminBroadcast()">Отправить в общий чат</button>
         </div>
 
         <div style="background:rgba(239,68,68,0.06);padding:12px;border-radius:14px;margin-bottom:12px;">
             <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ef4444">🚫 Заблокировать пользователя</p>
             <input type="text" id="adminBanInput" placeholder="Введите @никнейм..." style="margin-bottom:8px;">
-            <button class="btn-sec" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);margin:0;" onclick="banUser()">Заблокировать навсегда</button>
+            <button type="button" class="btn-sec" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);margin:0;" onclick="banUser()">Заблокировать навсегда</button>
         </div>
         
-        <button class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Очистить весь городской чат</button>
-        <button class="btn-sec" onclick="adminClearPosts()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Удалить все новости города</button>
+        <button type="button" class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Очистить весь городской чат</button>
+        <button type="button" class="btn-sec" onclick="adminClearPosts()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Удалить все новости города</button>
         
-        <button class="btn-sec" onclick="closeModal('adminModal')" style="margin-top:8px;margin-bottom:0;">Закрыть</button>
+        <button type="button" class="btn-sec" onclick="closeModal('adminModal')" style="margin-top:8px;margin-bottom:0;">Закрыть</button>
     </div>
 </div>
 
@@ -756,7 +754,7 @@
         <div style="font-size:34px;margin-bottom:8px">⚡</div>
         <h3 id="alertTitle" style="font-size:17px;margin-bottom:8px;">PulseCity</h3>
         <p id="alertText" style="color:#d1d5db;font-size:13px;margin-bottom:18px;line-height:1.45;"></p>
-        <button class="btn-main" onclick="closeModal('alertModal')" style="margin:0;">ОК</button>
+        <button type="button" class="btn-main" onclick="closeModal('alertModal')" style="margin:0;">ОК</button>
     </div>
 </div>
 
@@ -766,8 +764,8 @@
         <h3 id="confirmTitle" style="font-size:17px;margin-bottom:8px;">Подтверждение</h3>
         <p id="confirmText" style="color:#d1d5db;font-size:13px;margin-bottom:18px;">Вы уверены?</p>
         <div style="display:flex;gap:8px;">
-            <button class="btn-sec" onclick="closeConfirmModal(false)" style="margin:0;background:rgba(255,255,255,0.06);">Отмена</button>
-            <button class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626) !important;color:#fff;box-shadow:0 8px 25px rgba(239,68,68,0.4) !important;">Подтвердить</button>
+            <button type="button" class="btn-sec" onclick="closeConfirmModal(false)" style="margin:0;background:rgba(255,255,255,0.06);">Отмена</button>
+            <button type="button" class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626) !important;color:#fff;box-shadow:0 8px 25px rgba(239,68,68,0.4) !important;">Подтвердить</button>
         </div>
     </div>
 </div>
@@ -792,10 +790,10 @@
             <div id="soundToggle" class="toggle-switch active" onclick="toggleSystemSound()"></div>
         </div>
 
-        <button class="btn-sec" onclick="requestNotificationPermission(true)" style="margin-top:8px;background:rgba(230,92,0,0.15);color:#ff7a14;border-color:rgba(230,92,0,0.45)">🔔 Проверить / включить push-уведомления</button>
-        <button class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
-        <button class="btn-sec" onclick="deleteAccountCompletely()" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.3);margin-top:8px;">🗑️ Удалить аккаунт и данные</button>
-        <button class="btn-sec" onclick="closeModal('settingsModal')" style="margin-bottom:0;">Закрыть</button>
+        <button type="button" class="btn-sec" onclick="requestNotificationPermission(true)" style="margin-top:8px;background:rgba(230,92,0,0.15);color:#ff7a14;border-color:rgba(230,92,0,0.45)">🔔 Проверить / включить push-уведомления</button>
+        <button type="button" class="btn-sec" onclick="clearLocalCache()">🧹 Очистить локальный кэш</button>
+        <button type="button" class="btn-sec" onclick="deleteAccountCompletely()" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.3);margin-top:8px;">🗑️ Удалить аккаунт и данные</button>
+        <button type="button" class="btn-sec" onclick="closeModal('settingsModal')" style="margin-bottom:0;">Закрыть</button>
     </div>
 </div>
 
@@ -804,7 +802,7 @@
         <h3>Выберите ваш город</h3>
         <input type="text" id="citySearchInput" class="search-input" placeholder="🔍 Найти город..." oninput="renderCityOptions()" style="margin-bottom:10px;padding:10px 12px;font-size:13px;border-radius:13px;">
         <div id="cityOptionsList" class="city-list-scroll"></div>
-        <button class="btn-sec" onclick="closeModal('cityModal')" style="margin-bottom:0;">Закрыть</button>
+        <button type="button" class="btn-sec" onclick="closeModal('cityModal')" style="margin-bottom:0;">Закрыть</button>
     </div>
 </div>
 
@@ -828,12 +826,12 @@
 
         <div style="margin-bottom: 10px;">
             <input type="file" id="newsMediaInput" accept="image/*,video/*" style="display:none" onchange="previewNewsMedia(this)">
-            <button class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#ff7a14;border-color:rgba(230,92,0,0.45);margin-bottom:0;">📎 Прикрепить фото или видео</button>
+            <button type="button" class="btn-sec" onclick="document.getElementById('newsMediaInput').click()" style="color:#ff7a14;border-color:rgba(230,92,0,0.45);margin-bottom:0;">📎 Прикрепить фото или видео</button>
             <div id="newsMediaPreview" style="font-size:12px;color:#10b981;margin-top:6px;display:none;">✓ Файл выбран</div>
         </div>
         <div style="display:flex;gap:8px">
-            <button class="btn-sec" onclick="closeModal('newsModal')" style="margin:0;">Отмена</button>
-            <button class="btn-main" style="margin:0" onclick="publishNews()">Опубликовать</button>
+            <button type="button" class="btn-sec" onclick="closeModal('newsModal')" style="margin:0;">Отмена</button>
+            <button type="button" class="btn-main" style="margin:0" onclick="publishNews()">Опубликовать</button>
         </div>
     </div>
 </div>
@@ -842,7 +840,7 @@
     <div class="modal-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
             <h3 id="commentsModalTitle" style="margin:0;font-size:18px;">Комментарии</h3>
-            <button class="btn-sec" style="width:auto;padding:5px 11px;margin:0;font-size:12px;background:rgba(255,255,255,0.06);" onclick="closeModal('commentsModal')">✕</button>
+            <button type="button" class="btn-sec" style="width:auto;padding:5px 11px;margin:0;font-size:12px;background:rgba(255,255,255,0.06);" onclick="closeModal('commentsModal')">✕</button>
         </div>
         <p id="commentsChallengePrompt" style="display:none;font-size:12px;color:#ff7a14;background:rgba(230,92,0,0.1);padding:9px 11px;border-radius:12px;margin-bottom:8px;border:1px solid rgba(230,92,0,0.28);"></p>
         <div id="challengePrizeNote" class="challenge-prize-note" style="display:none;">
@@ -866,9 +864,9 @@
 
 <div class="nav-wrapper">
     <nav>
-        <button class="active" onclick="switchTab('feed',this)"><span class="icon">📰</span><span>Лента</span></button>
-        <button id="nav-chat" onclick="switchTab('chat',this)"><span class="icon">💬</span><span>Чаты</span></button>
-        <button onclick="switchTab('profile',this)"><span class="icon">👤</span><span>Профиль</span></button>
+        <button type="button" class="active" onclick="switchTab('feed',this)"><span class="icon">📰</span><span>Лента</span></button>
+        <button type="button" id="nav-chat" onclick="switchTab('chat',this)"><span class="icon">💬</span><span>Чаты</span></button>
+        <button type="button" onclick="switchTab('profile',this)"><span class="icon">👤</span><span>Профиль</span></button>
     </nav>
 </div>
 
@@ -877,7 +875,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = 'BPyEb_gyNWnth-8PtxG39X2qiuyEeQZwd1W_rKtqDOCLoVnt4Wxygs_x1AaCk2vjb2lMubavzFzBGk3_M3ZrwLo';
-    const THEME_REVISION = 'orange_v20_vapid_push_sub';
+    const THEME_REVISION = 'orange_v21_push_button_ready';
 
     const MAJOR_CITIES = [
         'Иркутск',
@@ -1454,10 +1452,27 @@
         }
     }
 
+    async function getOrRegisterServiceWorker(timeoutMs = 4500) {
+        if (!('serviceWorker' in navigator)) return null;
+        let reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) {
+            reg = await Promise.race([
+                navigator.serviceWorker.register('sw.js'),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Таймаут регистрации sw.js')), timeoutMs))
+            ]);
+        }
+        return await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ещё активируется — нажмите ещё раз через пару секунд')), timeoutMs))
+        ]);
+    }
+
     async function registerServiceWorkerAndPush() {
         if (!('serviceWorker' in navigator)) return false;
         try {
-            const reg = await navigator.serviceWorker.register('sw.js?v=' + THEME_REVISION);
+            const reg = await getOrRegisterServiceWorker(4500);
+            if (!reg) return false;
+
             navigator.serviceWorker.addEventListener('message', (event) => {
                 const payload = event.data;
                 if (!payload || payload.type !== 'OPEN_NOTIFICATION') return;
@@ -1471,8 +1486,7 @@
             });
 
             if (Notification.permission === 'granted' && myUsername) {
-                const readyReg = await navigator.serviceWorker.ready;
-                await subscribeAndSavePushSubscription(readyReg, false);
+                await subscribeAndSavePushSubscription(reg, false);
             }
             return true;
         } catch (e) {
@@ -1930,53 +1944,46 @@
             syncPushToggleUI();
         }
 
-        const swOk = await registerServiceWorkerAndPush();
-
         if (!("Notification" in window)) {
             if (showFeedback) {
-                showPulseAlert(
-                    "🔔 В этом браузере системные уведомления не поддерживаются, но уведомления внутри открытого PulseCity работают!" +
-                    (swOk ? "\nService Worker активен." : "")
-                );
-            }
-            return;
-        }
-
-        if (Notification.permission === "granted") {
-            if ('serviceWorker' in navigator) {
-                const reg = await navigator.serviceWorker.ready;
-                await subscribeAndSavePushSubscription(reg, showFeedback);
-            } else if (showFeedback) {
-                showPulseAlert("✅ Системные уведомления разрешены и готовы к работе!");
-            }
-            return;
-        }
-
-        if (Notification.permission === "denied") {
-            if (showFeedback) {
-                showPulseAlert("🚫 Уведомления заблокированы в настройках браузера или телефона. Откройте настройки сайта/приложения и разрешите уведомления для PulseCity.");
+                showPulseAlert("🔔 В этом браузере системные уведомления не поддерживаются, но уведомления внутри открытого PulseCity работают!");
             }
             return;
         }
 
         try {
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                await registerServiceWorkerAndPush();
-                if ('serviceWorker' in navigator) {
-                    const reg = await navigator.serviceWorker.ready;
-                    await subscribeAndSavePushSubscription(reg, showFeedback);
-                }
-            } else if (permission === "denied") {
+            let permission = Notification.permission;
+            if (permission === "default") {
+                permission = await Notification.requestPermission();
+            }
+
+            if (permission === "denied") {
                 if (showFeedback) {
-                    showPulseAlert("🚫 Разрешение не выдано. Включить его можно позже в настройках браузера или устройства.");
+                    showPulseAlert("🚫 Уведомления заблокированы в настройках браузера или телефона. Откройте настройки сайта/приложения и разрешите уведомления для PulseCity.");
+                }
+                return;
+            }
+
+            if (permission !== "granted") {
+                if (showFeedback) {
+                    showPulseAlert("ℹ️ Запрос уведомлений закрыт. Пока активны уведомления внутри открытого приложения.");
+                }
+                return;
+            }
+
+            if ('serviceWorker' in navigator) {
+                const reg = await getOrRegisterServiceWorker(4500);
+                if (reg) {
+                    await subscribeAndSavePushSubscription(reg, showFeedback);
+                } else if (showFeedback) {
+                    showPulseAlert("✅ Системные уведомления разрешены!");
                 }
             } else if (showFeedback) {
-                showPulseAlert("ℹ️ Запрос уведомлений закрыт. Пока активны уведомления внутри открытого приложения.");
+                showPulseAlert("✅ Системные уведомления разрешены и готовы к работе!");
             }
         } catch (e) {
             if (showFeedback) {
-                showPulseAlert("ℹ️ Не удалось вызвать системный запрос уведомлений. Проверьте разрешения браузера/устройства для PulseCity.");
+                showPulseAlert("⚠️ " + (e && e.message ? e.message : "Не удалось оформить push-подписку. Проверьте разрешения браузера и файл sw.js."));
             }
         }
     }
@@ -3641,7 +3648,7 @@
                     <div class="media-download-bar" id="download-bar-${p.id}">
                         <div class="download-progress-fill" id="download-fill-${p.id}"></div>
                         <span>📎 Медиафайл публикации</span>
-                        <button class="download-quick-btn" id="download-btn-${p.id}" onclick="downloadMediaWithProgress('${p.media_url}', 'download-btn-${p.id}', 'download-fill-${p.id}')">📥 Сохранить</button>
+                        <button type="button" class="download-quick-btn" id="download-btn-${p.id}" onclick="downloadMediaWithProgress('${p.media_url}', 'download-btn-${p.id}', 'download-fill-${p.id}')">📥 Сохранить</button>
                     </div>
                 `;
             }
@@ -3696,7 +3703,7 @@
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
                 let count = postReacts[emo] || 0;
                 let activeStyle = postReacts.userReacted === emo ? 'background:rgba(230,92,0,0.32);border-color:#e65c00;' : '';
-                reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
+                reactionsHtml += `<button type="button" class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
             let realViews = p.views || 1;
@@ -3715,7 +3722,7 @@
                             <span class="news-time-tag">${formattedTime} • <span style="color:#ff7a14">${p.city}</span></span>
                         </div>
                     </div>
-                    ${canDelete ? `<button class="delete-btn" onclick="deletePost(${p.id}, '${safeAuthor}')">Удалить</button>` : ''}
+                    ${canDelete ? `<button type="button" class="delete-btn" onclick="deletePost(${p.id}, '${safeAuthor}')">Удалить</button>` : ''}
                 </div>
                 <h3>${p.title}</h3>
                 <div class="news-media-wrap">
@@ -3912,7 +3919,7 @@
                 <div class="msg-bubble" style="flex:1;">
                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                         <div class="msg-author">${c.sender}${isLeader ? '<span class="leader-badge">🏆 Лидер дня</span>' : ''}</div>
-                        ${canDeleteComment ? `<button class="delete-btn" style="padding:2px 6px;font-size:10px;" onclick="deleteComment(${c.id}, '${c.sender}')">Удалить</button>` : ''}
+                        ${canDeleteComment ? `<button type="button" class="delete-btn" style="padding:2px 6px;font-size:10px;" onclick="deleteComment(${c.id}, '${c.sender}')">Удалить</button>` : ''}
                     </div>
                     ${displayText ? `<div style="margin-top:4px;">${displayText}</div>` : ''}
                     ${mediaHtml}
@@ -4257,7 +4264,7 @@
                       <div class="media-download-bar" id="download-bar-msg-${m.id}" style="margin-top:8px;">
                           <div class="download-progress-fill" id="download-fill-msg-${m.id}"></div>
                           <span>📎 Видеофайл</span>
-                          <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
+                          <button type="button" class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
                       </div>
                       <video src="${m.media_url}" class="msg-media" controls playsinline preload="metadata" style="margin-top:6px;"></video>
                     `
@@ -4265,7 +4272,7 @@
                       <div class="media-download-bar" id="download-bar-msg-${m.id}" style="margin-top:8px;">
                           <div class="download-progress-fill" id="download-fill-msg-${m.id}"></div>
                           <span>📎 Фотография</span>
-                          <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
+                          <button type="button" class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${m.media_url}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
                       </div>
                       <img src="${m.media_url}" class="msg-media" loading="lazy" onclick="openLightbox('${m.media_url}')" style="margin-top:6px;cursor:zoom-in;">
                     `;
