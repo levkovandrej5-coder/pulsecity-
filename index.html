@@ -52,7 +52,7 @@
         .container{flex:1;overflow-y:auto;padding:10px 14px;padding-bottom:84px;position:relative}
         .content{display:none;animation:fadeIn .25s ease}
         .content.active{display:block}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
         .search-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:11px 14px;color:#fff;font-size:14px;outline:none;transition:.2s}
         .search-input:focus{border-color:#e65c00 !important;background:rgba(230,92,0,0.08) !important}
@@ -169,7 +169,6 @@
             margin-top:10px;
             padding-top:10px;
             border-top:1px dashed rgba(230,92,0,0.35);
-            animation:fadeIn .18s ease;
         }
         .card.reactions-open .post-reactions-drawer{
             display:flex;
@@ -210,8 +209,8 @@
 
         .pinned-msg-box{background:rgba(230,92,0,0.12) !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:11px;padding:6px 10px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
         
-        /* Увеличенная область сообщений за счёт компактного ввода ниже */
-        .chat-box{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px;max-height:54vh;overflow-y:auto;padding-right:3px}
+        /* Увеличенная область сообщений и плавный скролл без проскакивания вверх */
+        .chat-box{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px;max-height:54vh;overflow-y:auto;padding-right:3px;overflow-anchor:none}
         .msg-row{display:flex;align-items:flex-end;gap:7px;max-width:92%;position:relative}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
         
@@ -243,15 +242,35 @@
             flex-wrap:wrap;
             gap:4px;
             padding:2px 2px 0;
-            animation:fadeIn .16s ease;
         }
         .msg-row.reactions-open .msg-reactions-row{
             display:flex;
         }
+        /* Невыбранные эмодзи видны только когда панель открыта по клику на сообщение; при закрытии остаются только выбранные */
+        .msg-react-pill.unselected-pick{
+            display:none;
+        }
+        .msg-row.reactions-open .msg-react-pill.unselected-pick{
+            display:inline-flex;
+        }
+        .msg-row.reactions-open .msg-add-react-btn{
+            display:inline-flex;
+        }
+        .msg-add-react-btn{
+            display:none;
+            background:rgba(230,92,0,0.14);
+            border:1px dashed rgba(230,92,0,0.5);
+            color:#ff9440;
+            border-radius:10px;
+            padding:2px 7px;
+            font-size:11px;
+            font-weight:700;
+            cursor:pointer;
+        }
+
         .msg-react-pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#f3f4f6;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;cursor:pointer;transition:.15s}
         .msg-react-pill.active{background:rgba(230,92,0,0.28) !important;border-color:#e65c00 !important;color:#ff9440 !important}
         .msg-react-pill:active{transform:scale(0.9)}
-        .msg-add-react-btn{background:rgba(230,92,0,0.14);border:1px dashed rgba(230,92,0,0.5);color:#ff9440;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;cursor:pointer}
         .msg-add-react-btn:active{color:#fff !important;border-color:#e65c00 !important}
 
         .msg-time{font-size:10px;color:rgba(255,255,255,0.65);margin-top:2px;text-align:right}
@@ -839,7 +858,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v11_tap_reacts';
+    const THEME_REVISION = 'orange_v12_stable_reacts_scroll';
 
     // === МОДУЛЬ БЕЗОПАСНОСТИ И АНТИСПАМА ===
     const IMPULSE_GUARD = {
@@ -1806,6 +1825,7 @@
     let activeReplyTarget = null;
     let activeReactionMsgId = null;
     let messageReactionsMap = JSON.parse(localStorage.getItem('pulseCity_msg_reactions') || '{}');
+    let pendingReactionLocks = new Map();
     let messageReactionsTableReady = null;
     let isPasswordRecoveryFlow = false;
 
@@ -2249,7 +2269,7 @@
         requestNotificationPermission(false);
         registerServiceWorkerAndPush();
         loadPostsFromCloud(true);
-        loadPublicMessages();
+        loadPublicMessages(true);
         setupRealtimeSubscriptions();
         playSystemSound('send');
         showPulseAlert('✓ Добро пожаловать в PulseCity!');
@@ -2522,7 +2542,7 @@
         showPulseAlert('🧹 Локальный кэш очищен! Аккаунт и город сохранены.');
         if (myUsername) {
             loadPostsFromCloud(true);
-            loadPublicMessages();
+            loadPublicMessages(true);
         }
     }
 
@@ -2614,7 +2634,7 @@
             if (!res) return;
             await supabaseClient.from('messages').delete().eq('city', selectedCity);
             closeModal('adminModal');
-            loadPublicMessages();
+            loadPublicMessages(true);
         });
     }
 
@@ -2677,7 +2697,7 @@
 
         input.value = '';
         closeModal('adminModal');
-        loadPublicMessages();
+        loadPublicMessages(true);
     }
 
     function banUser() {
@@ -2720,7 +2740,7 @@
         showConfirm('Удаление сообщения', 'Вы уверены, что хотите удалить это сообщение?', async (res) => {
             if (!res) return;
             await supabaseClient.from('messages').delete().eq('id', msgId);
-            loadPublicMessages();
+            loadPublicMessages(true);
         });
     }
 
@@ -2754,8 +2774,12 @@
             document.getElementById('headerSearchDrop').classList.remove('open');
         }
 
-        if (t === 'chat' && chatMode === 'private' && !privateRecipient) {
-            loadConversationsList();
+        if (t === 'chat') {
+            if (chatMode === 'private' && !privateRecipient) {
+                loadConversationsList();
+            } else {
+                loadPublicMessages(false);
+            }
         }
     }
 
@@ -2838,7 +2862,7 @@
                 loadConversationsList();
             }
         }
-        loadPublicMessages();
+        loadPublicMessages(true);
         loadPinnedMessage();
     }
 
@@ -2945,17 +2969,29 @@
     async function syncReactionsForMessages(msgs) {
         if (!Array.isArray(msgs) || msgs.length === 0) return;
 
+        const now = Date.now();
         const nextMap = { ...messageReactionsMap };
+
         msgs.forEach(m => {
+            const key = String(m.id);
+            const lockUntil = pendingReactionLocks.get(key) || 0;
+            if (now < lockUntil) {
+                return;
+            }
             const embedded = parseReactionsFromMessageText(m.text || '');
             if (embedded) {
-                nextMap[String(m.id)] = embedded;
+                nextMap[key] = embedded;
+            } else if (!nextMap[key]) {
+                nextMap[key] = {};
             }
         });
 
         const tableReady = await checkMessageReactionsTable();
         if (tableReady && supabaseClient) {
-            const ids = msgs.map(m => Number(m.id)).filter(n => !Number.isNaN(n));
+            const ids = msgs
+                .map(m => Number(m.id))
+                .filter(n => !Number.isNaN(n) && now >= (pendingReactionLocks.get(String(n)) || 0));
+
             if (ids.length > 0) {
                 const { data, error } = await supabaseClient
                     .from('message_reactions')
@@ -2963,8 +2999,14 @@
                     .in('message_id', ids);
 
                 if (!error && Array.isArray(data)) {
+                    const hasAnyDbRowForId = new Set(data.map(r => String(r.message_id)));
                     ids.forEach(id => {
-                        nextMap[String(id)] = {};
+                        const k = String(id);
+                        const msgObj = msgs.find(m => Number(m.id) === id);
+                        const hasEmbedded = msgObj ? Boolean(parseReactionsFromMessageText(msgObj.text || '')) : false;
+                        if (hasAnyDbRowForId.has(k) || !hasEmbedded) {
+                            nextMap[k] = {};
+                        }
                     });
                     data.forEach(r => {
                         if (!r || !r.message_id || !r.emoji || !r.username) return;
@@ -2987,9 +3029,11 @@
         if (!myUsername || !msgId || !supabaseClient) return;
         const key = String(msgId);
         openMsgReactionIds.add(key);
+        pendingReactionLocks.set(key, Date.now() + 2500);
+
         if (!messageReactionsMap[key]) messageReactionsMap[key] = {};
         const currentEmojis = { ...messageReactionsMap[key] };
-        const users = Array.isArray(currentEmojis[emoji]) ? [...currentEmojis[emoji]] : [];
+        const users = Array.isArray(currentEmojis[emoji]) ? [...new Set(currentEmojis[emoji])] : [];
         const alreadyReacted = users.includes(myUsername);
 
         if (alreadyReacted) {
@@ -3005,7 +3049,7 @@
 
         messageReactionsMap[key] = currentEmojis;
         saveLocalMessageReactions();
-        renderMessagesList(globalMessagesData);
+        renderMessagesList(globalMessagesData, { force: true, preserveScroll: true });
 
         const tableReady = await checkMessageReactionsTable();
         let syncedToTable = false;
@@ -3031,20 +3075,17 @@
             }
         }
 
-        if (!syncedToTable) {
-            const targetMsg = globalMessagesData.find(m => String(m.id) === String(msgId));
-            if (targetMsg) {
-                const updatedText = attachReactionsMarkerToText(targetMsg.text || '', currentEmojis);
-                targetMsg.text = updatedText;
-                await supabaseClient
-                    .from('messages')
-                    .update({ text: updatedText })
-                    .eq('id', Number(msgId));
-            }
+        const targetMsg = globalMessagesData.find(m => String(m.id) === key);
+        const updatedText = attachReactionsMarkerToText(targetMsg ? (targetMsg.text || '') : '', currentEmojis);
+        if (targetMsg) {
+            targetMsg.text = updatedText;
         }
-
-        await syncReactionsForMessages(globalMessagesData);
-        renderMessagesList(globalMessagesData);
+        if (!syncedToTable || (targetMsg && (targetMsg.text || '').includes('[reacts:'))) {
+            await supabaseClient
+                .from('messages')
+                .update({ text: updatedText })
+                .eq('id', Number(msgId));
+        }
     }
 
     async function loadConversationsList() {
@@ -3164,10 +3205,11 @@
         document.getElementById('profileCity').textContent = c;
         lastKnownMaxPostId = 0;
         lastKnownMaxMsgId = 0;
+        lastRenderedMessagesSignature = '';
         initPinnedChallengeCard();
         closeModal('cityModal');
         loadPostsFromCloud(true);
-        loadPublicMessages();
+        loadPublicMessages(true);
         loadPinnedMessage();
     }
 
@@ -3850,8 +3892,30 @@
 
     let globalMessagesData = [];
     let lastKnownMaxMsgId = 0;
+    let lastRenderedMessagesSignature = '';
+    let userManualScrollLockUntil = 0;
 
-    async function loadPublicMessages() {
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatBox = document.getElementById('chatMessages');
+        if (chatBox) {
+            chatBox.addEventListener('scroll', () => {
+                userManualScrollLockUntil = Date.now() + 2500;
+            }, { passive: true });
+            chatBox.addEventListener('touchstart', () => {
+                userManualScrollLockUntil = Date.now() + 3000;
+            }, { passive: true });
+        }
+    });
+
+    function buildMessagesRenderSignature(msgs) {
+        return msgs.map(m => {
+            const k = String(m.id);
+            const r = JSON.stringify(messageReactionsMap[k] || {});
+            return `${k}:${m.text || ''}:${m.media_url || ''}:${r}`;
+        }).join('||');
+    }
+
+    async function loadPublicMessages(forceRender = false) {
         if (!supabaseClient || !myUsername) return;
         
         let query = supabaseClient.from('messages').select('*').order('id', { ascending: false });
@@ -3861,6 +3925,7 @@
         } else {
             if (!privateRecipient) {
                 document.getElementById('chatMessages').innerHTML = '';
+                lastRenderedMessagesSignature = '';
                 loadConversationsList();
                 return;
             }
@@ -3885,8 +3950,9 @@
         await syncReactionsForMessages(globalMessagesData);
 
         const currentMaxMsgId = filteredData.length > 0 ? filteredData[filteredData.length - 1].id : 0;
+        const hasNewMessage = prevMaxId !== 0 && currentMaxMsgId > prevMaxId;
 
-        if (prevMaxId !== 0 && currentMaxMsgId > prevMaxId) {
+        if (hasNewMessage) {
             const latestMsg = filteredData[filteredData.length - 1];
             if (latestMsg && latestMsg.sender !== myUsername) {
                 playSystemSound('receive');
@@ -3896,11 +3962,13 @@
             lastKnownMaxMsgId = currentMaxMsgId;
         }
 
-        renderMessagesList(globalMessagesData);
-
-        if (currentMaxMsgId > prevMaxId) {
-            const chatBoxEl = document.getElementById('chatMessages');
-            chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+        const nextSignature = buildMessagesRenderSignature(globalMessagesData);
+        if (forceRender || nextSignature !== lastRenderedMessagesSignature) {
+            lastRenderedMessagesSignature = nextSignature;
+            renderMessagesList(globalMessagesData, {
+                force: true,
+                scrollToBottom: hasNewMessage || forceRender
+            });
         }
 
         if (chatMode === 'private' && !privateRecipient) {
@@ -3908,10 +3976,21 @@
         }
     }
 
-    function renderMessagesList(msgs) {
+    function renderMessagesList(msgs, options = {}) {
+        const { force = false, scrollToBottom = false } = options;
         const box = document.getElementById('chatMessages');
-        const prevScrollTop = box.scrollTop;
-        const wasNearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 80;
+        if (!box) return;
+
+        const nextSig = buildMessagesRenderSignature(msgs);
+        if (!force && nextSig === lastRenderedMessagesSignature && box.children.length > 0) {
+            return;
+        }
+        lastRenderedMessagesSignature = nextSig;
+
+        const savedScrollTop = box.scrollTop;
+        const savedScrollHeight = box.scrollHeight;
+        const wasNearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 60;
+        const userIsScrolling = Date.now() < userManualScrollLockUntil;
 
         box.innerHTML = '';
         if (msgs.length === 0) {
@@ -3965,8 +4044,22 @@
             const msgTimeFormatted = formatNiceTime(m.created_at);
 
             const msgReacts = messageReactionsMap[String(m.id)] || {};
+            const allEmojis = ['🔥', '👍', '😂', '❤️'];
             let pillsHtml = '';
+
+            allEmojis.forEach(emo => {
+                const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
+                const cnt = usersList.length;
+                const isActive = usersList.includes(myUsername);
+                if (cnt > 0) {
+                    pillsHtml += `<button type="button" class="msg-react-pill ${isActive ? 'active' : ''}" onclick="toggleMessageReaction('${m.id}', '${emo}')">${emo} <span>${cnt}</span></button>`;
+                } else {
+                    pillsHtml += `<button type="button" class="msg-react-pill unselected-pick" onclick="toggleMessageReaction('${m.id}', '${emo}')">${emo}</button>`;
+                }
+            });
+
             Object.keys(msgReacts).forEach(emo => {
+                if (allEmojis.includes(emo)) return;
                 const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
                 const cnt = usersList.length;
                 if (cnt > 0) {
@@ -3975,16 +4068,14 @@
                 }
             });
 
-            const quickPickHtml = ['🔥', '👍', '😂', '❤️'].map(emo => {
-                const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
-                const isActive = usersList.includes(myUsername);
-                return `<button type="button" class="msg-react-pill ${isActive ? 'active' : ''}" onclick="toggleMessageReaction('${m.id}', '${emo}')">${emo}</button>`;
-            }).join('');
+            const hasAnyReaction = Object.keys(msgReacts).some(emo => {
+                const arr = Array.isArray(msgReacts[emo]) ? msgReacts[emo] : [];
+                return arr.length > 0;
+            });
 
             const reactionsRowHtml = `
                 <div class="msg-reactions-row" id="msg-reactions-row-${m.id}">
                     ${pillsHtml}
-                    ${quickPickHtml}
                     <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker('${m.id}')" title="Выбрать реакцию">+</button>
                 </div>
             `;
@@ -3992,7 +4083,10 @@
             const isReactsOpen = openMsgReactionIds.has(String(m.id));
             const row = document.createElement('div');
             row.id = `msg-row-${m.id}`;
-            row.className = 'msg-row' + (isMine ? ' mine' : '') + (isReactsOpen ? ' reactions-open' : '');
+            row.className = 'msg-row'
+                + (isMine ? ' mine' : '')
+                + (isReactsOpen ? ' reactions-open' : '')
+                + (hasAnyReaction ? ' has-reactions' : '');
             row.onclick = (e) => toggleMessageReactionsDrawer(m.id, e);
             
             row.innerHTML = `
@@ -4016,18 +4110,27 @@
             box.appendChild(row);
         });
 
-        box.scrollTop = wasNearBottom ? box.scrollHeight : prevScrollTop;
+        if (userIsScrolling) {
+            const heightDelta = box.scrollHeight - savedScrollHeight;
+            box.scrollTop = Math.max(0, savedScrollTop + heightDelta);
+        } else if (scrollToBottom || wasNearBottom) {
+            box.scrollTop = box.scrollHeight;
+        } else {
+            const heightDelta = box.scrollHeight - savedScrollHeight;
+            box.scrollTop = Math.max(0, savedScrollTop + heightDelta);
+        }
+
         initVideoManager();
     }
 
     function filterChatSearch() {
         const q = document.getElementById('chatSearchInput').value.toLowerCase().trim();
         if (!q) {
-            renderMessagesList(globalMessagesData);
+            renderMessagesList(globalMessagesData, { force: true, preserveScroll: true });
             return;
         }
         const filtered = globalMessagesData.filter(m => parseReplyFromMessageText(m.text || '').body.toLowerCase().includes(q));
-        renderMessagesList(filtered);
+        renderMessagesList(filtered, { force: true, preserveScroll: true });
     }
 
     async function pinMessage(msgId, text) {
@@ -4075,12 +4178,14 @@
                 if (payload?.eventType === 'INSERT' && payload?.new) {
                     processIncomingMessagesForNotifications([payload.new]);
                 }
-                loadPublicMessages();
+                if (document.getElementById('tab-chat')?.classList.contains('active')) {
+                    loadPublicMessages(false);
+                }
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, () => {
-                if (globalMessagesData.length > 0) {
+                if (globalMessagesData.length > 0 && document.getElementById('tab-chat')?.classList.contains('active')) {
                     syncReactionsForMessages(globalMessagesData).then(() => {
-                        renderMessagesList(globalMessagesData);
+                        renderMessagesList(globalMessagesData, { force: false });
                     });
                 }
             })
@@ -4168,7 +4273,10 @@
 
         input.value = '';
         cancelReplyTarget();
-        loadPublicMessages();
+        userManualScrollLockUntil = 0;
+        await loadPublicMessages(true);
+        const box = document.getElementById('chatMessages');
+        if (box) box.scrollTop = box.scrollHeight;
     }
 
     async function handleMediaUpload(input) {
@@ -4212,7 +4320,10 @@
                 markEventNotified(`${prefix}${data[0].id}`);
             }
             cancelReplyTarget();
-            loadPublicMessages();
+            userManualScrollLockUntil = 0;
+            await loadPublicMessages(true);
+            const box = document.getElementById('chatMessages');
+            if (box) box.scrollTop = box.scrollHeight;
         }
         input.value = '';
     }
@@ -4225,7 +4336,7 @@
 
         if (myUsername) {
             loadPostsFromCloud(true);
-            loadPublicMessages();
+            loadPublicMessages(true);
             pollBackgroundNotifications();
             loadPinnedMessage();
             setupRealtimeSubscriptions();
@@ -4235,10 +4346,12 @@
     setInterval(() => {
         if (myUsername) {
             loadPostsFromCloud(false);
-            loadPublicMessages();
+            if (document.getElementById('tab-chat')?.classList.contains('active')) {
+                loadPublicMessages(false);
+            }
             pollBackgroundNotifications();
         }
-    }, 3000);
+    }, 4500);
 </script>
 </body>
 </html>
