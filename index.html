@@ -32,7 +32,7 @@
         .logo{font-size:20px;font-weight:900;background:linear-gradient(135deg,#e65c00,#ff7300) !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;letter-spacing:-0.5px}
         
         .header-actions{display:flex;gap:6px;align-items:center}
-        .city-btn{background:rgba(230,92,0,0.16) !important;color:#ff7a14 !important;font-size:12px;font-weight:700;padding:7px 11px;border-radius:16px;border:1px solid rgba(230,92,0,0.45) !important;cursor:pointer;display:flex;align-items:center;gap:4px}
+        .city-btn{background:rgba(230,92,0,0.16) !important;color:#ff7a14 !important;font-size:12px;font-weight:700;padding:7px 11px;border-radius:16px;border:1px solid rgba(230,92,0,0.45) !important;cursor:pointer;display:flex;align-items:center;gap:4px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         
         .top-mini-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ff7a14 !important;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:.2s}
         .top-mini-btn:active{transform:scale(0.9)}
@@ -178,7 +178,6 @@
         .poll-progress-bar{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,rgba(230,92,0,0.22),rgba(255,115,0,0.38)) !important;z-index:1;transition:width 0.4s ease}
         .poll-option span{position:relative;z-index:2}
 
-        /* Реакции на постах: скрыты по умолчанию, раскрываются по нажатию на карточку поста */
         .post-reactions-drawer{
             display:none;
             gap:6px;
@@ -227,7 +226,6 @@
 
         .pinned-msg-box{background:rgba(230,92,0,0.12) !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:11px;padding:6px 10px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
         
-        /* Увеличенная область сообщений и плавный скролл без проскакивания вверх */
         .chat-box{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px;max-height:54vh;overflow-y:auto;padding-right:3px;overflow-anchor:none}
         .msg-row{display:flex;align-items:flex-end;gap:7px;max-width:92%;position:relative}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
@@ -253,7 +251,6 @@
         .msg-row.mine .msg-quote-author{color:#fff !important}
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-        /* Реакции на сообщениях: скрыты пока нет поставленных реакций или пока не открыта панель выбора */
         .msg-reactions-row{
             display:none;
             align-items:center;
@@ -323,7 +320,6 @@
         
         .typing-indicator{font-size:11px;color:#ff7a14 !important;min-height:12px;margin-top:2px;font-style:italic}
 
-        /* Компактная строка ввода пониже в общем и личном чатах */
         .chat-input-area{display:flex;gap:5px;align-items:center;margin-top:6px;margin-bottom:0}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff7a14 !important;width:36px;height:36px;border-radius:11px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .attach-btn.has-file{background:rgba(230,92,0,0.25) !important;border-color:#e65c00 !important;color:#fff !important}
@@ -340,8 +336,9 @@
         .modal-card{background:#140f0c !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:24px;padding:20px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;overflow-y:auto;display:flex;flex-direction:column}
         .modal-card h3{font-size:20px;margin-bottom:14px;font-weight:800}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px;color:#fff;font-size:14px;margin-bottom:10px;outline:none}
-        .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:12px 16px;border-radius:14px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;transition:.2s}
-        .city-option:hover{background:rgba(230,92,0,0.15) !important;border-color:#e65c00 !important}
+        .city-list-scroll{max-height:52vh;overflow-y:auto;padding-right:2px;margin-bottom:10px}
+        .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:11px 14px;border-radius:14px;font-size:14px;font-weight:600;margin-bottom:7px;cursor:pointer;transition:.2s;display:flex;justify-content:space-between;align-items:center}
+        .city-option:hover,.city-option.selected{background:rgba(230,92,0,0.16) !important;border-color:#e65c00 !important;color:#ff9440}
         
         .setting-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:13px 14px;border-radius:14px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.08)}
         .toggle-switch{width:44px;height:24px;background:rgba(255,255,255,0.2);border-radius:14px;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
@@ -402,7 +399,7 @@
     <div class="header-actions">
         <button class="top-mini-btn" id="toggleSearchBtn" onclick="toggleHeaderSearch()" title="Поиск по ленте">🔍</button>
         <button class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
-        <button class="city-btn" onclick="openModal('cityModal')">📍 <span id="currentCity">Иркутск</span> ▾</button>
+        <button class="city-btn" onclick="openCityModal()">📍 <span id="currentCity">Иркутск</span> ▾</button>
     </div>
 </header>
 
@@ -521,7 +518,7 @@
             <p style="margin:10px 0;font-size:14px">Текущий город: <strong id="profileCity" style="color:#ff7a14">Иркутск</strong></p>
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
-            <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
+            <button class="btn-sec" onclick="openCityModal()">📍 Сменить город</button>
             
             <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
             
@@ -802,9 +799,8 @@
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
         <h3>Выберите ваш город</h3>
-        <button class="city-option" onclick="selectCity('Иркутск')">📍 Иркутск</button>
-        <button class="city-option" onclick="selectCity('Новосибирск')">📍 Новосибирск</button>
-        <button class="city-option" onclick="selectCity('Москва')">📍 Москва</button>
+        <input type="text" id="citySearchInput" class="search-input" placeholder="🔍 Найти город..." oninput="renderCityOptions()" style="margin-bottom:10px;padding:10px 12px;font-size:13px;border-radius:13px;">
+        <div id="cityOptionsList" class="city-list-scroll"></div>
         <button class="btn-sec" onclick="closeModal('cityModal')" style="margin-bottom:0;">Закрыть</button>
     </div>
 </div>
@@ -878,7 +874,108 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v14_smooth_challenge_banner';
+    const THEME_REVISION = 'orange_v15_major_cities_list';
+
+    const MAJOR_CITIES = [
+        'Иркутск',
+        'Москва',
+        'Санкт-Петербург',
+        'Новосибирск',
+        'Екатеринбург',
+        'Казань',
+        'Нижний Новгород',
+        'Челябинск',
+        'Красноярск',
+        'Самара',
+        'Уфа',
+        'Ростов-на-Дону',
+        'Омск',
+        'Краснодар',
+        'Воронеж',
+        'Пермь',
+        'Волгоград',
+        'Саратов',
+        'Тюмень',
+        'Тольятти',
+        'Барнаул',
+        'Ижевск',
+        'Хабаровск',
+        'Ульяновск',
+        'Владивосток',
+        'Ярославль',
+        'Махачкала',
+        'Томск',
+        'Оренбург',
+        'Кемерово',
+        'Новокузнецк',
+        'Рязань',
+        'Астрахань',
+        'Набережные Челны',
+        'Пенза',
+        'Липецк',
+        'Киров',
+        'Чебоксары',
+        'Калининград',
+        'Тула',
+        'Ставрополь',
+        'Курск',
+        'Сочи',
+        'Улан-Удэ',
+        'Тверь',
+        'Магнитогорск',
+        'Иваново',
+        'Брянск',
+        'Белгород',
+        'Сургут',
+        'Владимир',
+        'Чита',
+        'Архангельск',
+        'Якутск',
+        'Мурманск',
+        'Кемерово',
+        'Вологда',
+        'Смоленск',
+        'Калуга',
+        'Курган',
+        'Орёл',
+        'Череповец',
+        'Волжский',
+        'Саранск',
+        'Владикавказ',
+        'Якутск',
+        'Мурманск',
+        'Подольск',
+        'Грозный',
+        'Стерлитамак',
+        'Тамбов',
+        'Петрозаводск',
+        'Кострома',
+        'Нижневартовск',
+        'Новороссийск',
+        'Йошкар-Ола',
+        'Химки',
+        'Таганрог',
+        'Комсомольск-на-Амуре',
+        'Сыктывкар',
+        'Нижнекамск',
+        'Нальчик',
+        'Шахты',
+        'Дзержинск',
+        'Энгельс',
+        'Благовещенск',
+        'Великий Новгород',
+        'Псков',
+        'Бийск',
+        'Прокопьевск',
+        'Южно-Сахалинск',
+        'Абакан',
+        'Норильск',
+        'Братск',
+        'Ангарск',
+        'Мирный'
+    ];
+
+    const UNIQUE_CITIES = [...new Set(MAJOR_CITIES)];
 
     // === МОДУЛЬ БЕЗОПАСНОСТИ И АНТИСПАМА ===
     const IMPULSE_GUARD = {
@@ -2576,6 +2673,39 @@
         }
         document.getElementById(id).classList.remove('open');
     }
+
+    function openCityModal() {
+        const searchInput = document.getElementById('citySearchInput');
+        if (searchInput) searchInput.value = '';
+        renderCityOptions();
+        openModal('cityModal');
+    }
+
+    function renderCityOptions() {
+        const listEl = document.getElementById('cityOptionsList');
+        const query = (document.getElementById('citySearchInput')?.value || '').trim().toLowerCase();
+        if (!listEl) return;
+
+        const filtered = query
+            ? UNIQUE_CITIES.filter(c => c.toLowerCase().includes(query))
+            : UNIQUE_CITIES;
+
+        listEl.innerHTML = '';
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<p style="color:#9ca3af;font-size:13px;text-align:center;padding:12px 0;">Город не найден</p>';
+            return;
+        }
+
+        filtered.forEach(city => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'city-option' + (city === selectedCity ? ' selected' : '');
+            btn.onclick = () => selectCity(city);
+            btn.innerHTML = `<span>📍 ${city}</span>${city === selectedCity ? '<span style="font-size:12px;font-weight:800;">✓ Выбран</span>' : ''}`;
+            listEl.appendChild(btn);
+        });
+    }
+
     async function openAdminModal() {
         await IMPULSE_GUARD.syncSession(supabaseClient);
         if (!isFounderAccount()) {
@@ -2603,7 +2733,6 @@
                 btn.style.display = y > 320 ? 'flex' : 'none';
             }
 
-            // Гистерезис (75px вниз / 20px вверх), чтобы плашка не дёргалась на границе
             if (!isChallengeCompactState && y > 75) {
                 isChallengeCompactState = true;
                 if (challengeCard) challengeCard.classList.add('compact');
@@ -4356,6 +4485,7 @@
     }
 
     (async function bootApp() {
+        renderCityOptions();
         syncChatControlsUI();
         await IMPULSE_GUARD.syncSession(supabaseClient);
         checkAdminAccess();
