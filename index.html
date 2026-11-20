@@ -494,7 +494,7 @@
         <h3 id="authModalTitle">Регистрация в PulseCity</h3>
 
         <div id="authStepCredentials">
-            <p style="color:#d1d5db;font-size:12px;margin-bottom:10px">Используйте российскую почту (Яндекс, Mail.ru, VK и др.)</p>
+            <p style="color:#d1d5db;font-size:12px;margin-bottom:10px">Укажите почту и пароль для входа или регистрации</p>
 
             <div class="chat-tabs" style="margin-bottom:12px;">
                 <button class="chat-tab-btn active" id="btnModeReg" onclick="switchAuthMode('register')">Регистрация</button>
@@ -514,7 +514,7 @@
                 <input type="text" id="regUsernameInput" placeholder="@уникальный_ник" style="text-align:center;font-weight:600;margin-bottom:8px">
             </div>
 
-            <input type="email" id="authEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:8px">
+            <input type="email" id="authEmailInput" placeholder="Электронная почта..." style="text-align:center;margin-bottom:8px">
             <input type="password" id="authPasswordInput" placeholder="Пароль (минимум 6 символов)..." style="text-align:center;margin-bottom:8px">
 
             <div id="forgotPasswordRow" style="display:none;text-align:right;margin-bottom:6px;">
@@ -544,7 +544,7 @@
             <p style="color:#d1d5db;font-size:13px;line-height:1.45;margin-bottom:12px;">
                 Укажите почту аккаунта — отправим ссылку для восстановления пароля. Откройте её в этом же браузере.
             </p>
-            <input type="email" id="resetEmailInput" placeholder="Почта (@yandex.ru, @mail.ru)..." style="text-align:center;margin-bottom:10px;">
+            <input type="email" id="resetEmailInput" placeholder="Электронная почта..." style="text-align:center;margin-bottom:10px;">
             <button class="btn-main" id="sendResetBtn" style="margin-bottom:8px;" onclick="sendPasswordResetRequest()">📨 Отправить ссылку на почту</button>
             <button class="btn-sec" onclick="backToAuthCredentials()" style="font-size:12px;padding:10px;margin-bottom:0;color:#9ca3af;">← Назад ко входу</button>
         </div>
@@ -784,9 +784,78 @@
 <script>
     const SUPPORT_EMAIL = 'pulsecity1@gmail.com';
     const SUPPORT_RECIPIENT = '@andrey';
-    const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru'];
+    const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v8_pulsecity';
+    const THEME_REVISION = 'orange_v9_sec';
+
+    // === МОДУЛЬ БЕЗОПАСНОСТИ И АНТИСПАМА ===
+    const IMPULSE_GUARD = {
+        authVerified: false,
+        authUserEmail: '',
+        authUserId: '',
+        lastActionTime: 0,
+        lastActionText: '',
+
+        async syncSession(client) {
+            try {
+                if (!client || !client.auth || typeof client.auth.getUser !== 'function') {
+                    this.authVerified = false;
+                    return null;
+                }
+                const { data, error } = await client.auth.getUser();
+                if (error || !data || !data.user) {
+                    this.authVerified = false;
+                    this.authUserEmail = '';
+                    this.authUserId = '';
+                    return null;
+                }
+                this.authVerified = true;
+                this.authUserEmail = (data.user.email || '').toLowerCase().trim();
+                this.authUserId = data.user.id || '';
+                return data.user;
+            } catch (e) {
+                this.authVerified = false;
+                return null;
+            }
+        },
+
+        hasFounderEmail() {
+            const sessionEmail = (this.authUserEmail || '').toLowerCase().trim();
+            if (sessionEmail && FOUNDER_EMAILS.includes(sessionEmail)) {
+                return true;
+            }
+            const localEmail = (typeof myEmail === 'string' ? myEmail : '').toLowerCase().trim();
+            return Boolean(localEmail && FOUNDER_EMAILS.includes(localEmail));
+        },
+
+        validateText(rawText, { maxLength = 2000, cooldownMs = 1200, allowEmpty = false } = {}) {
+            const cleaned = String(rawText || '')
+                .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+                .trim();
+
+            if (!cleaned && !allowEmpty) {
+                return { ok: false, reason: 'Текст не может быть пустым.' };
+            }
+            if (cleaned.length > maxLength) {
+                return { ok: false, reason: `Слишком длинный текст (максимум ${maxLength} символов).` };
+            }
+
+            const now = Date.now();
+            if (now - this.lastActionTime < cooldownMs) {
+                return { ok: false, reason: 'Слишком частая отправка — подождите секунду.' };
+            }
+            if (cleaned && cleaned === this.lastActionText && (now - this.lastActionTime) < 12000) {
+                return { ok: false, reason: 'Вы уже только что отправили такой же текст.' };
+            }
+
+            return { ok: true, text: cleaned };
+        },
+
+        markSent(text) {
+            this.lastActionTime = Date.now();
+            this.lastActionText = String(text || '').trim();
+        }
+    };
 
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
@@ -1146,12 +1215,13 @@
     async function sendInAppSupportMessage() {
         const topic = document.getElementById('contactTopicSelect').value;
         const msgInput = document.getElementById('contactMessageInput');
-        const text = msgInput.value.trim();
+        const check = IMPULSE_GUARD.validateText(msgInput.value, { maxLength: 1500, cooldownMs: 2000 });
 
-        if (!text) {
-            showPulseAlert('Напишите текст сообщения перед отправкой!');
+        if (!check.ok) {
+            showPulseAlert(check.reason);
             return;
         }
+        const text = check.text;
         if (!supabaseClient) {
             showPulseAlert('Нет подключения к сети. Попробуйте позже или напишите на ' + SUPPORT_EMAIL);
             return;
@@ -1194,6 +1264,7 @@
             return;
         }
 
+        IMPULSE_GUARD.markSent(text);
         saveLocalSupportTicket({
             id: 'local_' + Date.now(),
             source: 'local',
@@ -1355,11 +1426,12 @@
     localStorage.removeItem('pulseCity_is_admin');
 
     function isFounderAccount() {
+        const sessionEmail = (IMPULSE_GUARD.authUserEmail || '').toLowerCase().trim();
+        if (sessionEmail) {
+            return FOUNDER_EMAILS.includes(sessionEmail);
+        }
         const normalizedEmail = (myEmail || '').toLowerCase().trim();
-        const normalizedNick = (myUsername || '').toLowerCase().trim();
-        const emailMatch = normalizedEmail && FOUNDER_EMAILS.includes(normalizedEmail);
-        const nickMatch = normalizedNick === '@andrey';
-        return Boolean(emailMatch || nickMatch);
+        return Boolean(normalizedEmail && FOUNDER_EMAILS.includes(normalizedEmail));
     }
 
     let soundEnabled = localStorage.getItem('pulseCity_sound') !== 'false';
@@ -1707,6 +1779,7 @@
             const { data, error } = await supabaseClient.auth.exchangeCodeForSession(recoveryCode);
             cleanRecoveryUrlParams();
             if (!error && data?.session) {
+                await IMPULSE_GUARD.syncSession(supabaseClient);
                 openNewPasswordStep();
                 return;
             }
@@ -1719,6 +1792,7 @@
             });
             cleanRecoveryUrlParams();
             if (!error && data?.session) {
+                await IMPULSE_GUARD.syncSession(supabaseClient);
                 openNewPasswordStep();
                 return;
             }
@@ -1726,7 +1800,9 @@
     }
 
     if (supabaseClient && supabaseClient.auth && supabaseClient.auth.onAuthStateChange) {
-        supabaseClient.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            await IMPULSE_GUARD.syncSession(supabaseClient);
+            checkAdminAccess();
             if (event === 'PASSWORD_RECOVERY' || (isPasswordRecoveryFlow && session)) {
                 cleanRecoveryUrlParams();
                 openNewPasswordStep();
@@ -1787,10 +1863,6 @@
             showPulseAlert('Введите корректный адрес электронной почты!');
             return;
         }
-        if (!isAllowedRussianEmail(email)) {
-            showPulseAlert('Используйте российскую почту (@yandex.ru, @mail.ru, @vk.com, @rambler.ru и т. д.).');
-            return;
-        }
         if (!supabaseClient) {
             showPulseAlert('Нет подключения к серверу.');
             return;
@@ -1839,6 +1911,7 @@
             return;
         }
 
+        await IMPULSE_GUARD.syncSession(supabaseClient);
         isPasswordRecoveryFlow = false;
         const userObj = data?.user;
         const email = userObj?.email || pendingRegData.email || myEmail || '';
@@ -1870,24 +1943,16 @@
     }
 
     function isAllowedRussianEmail(email) {
-        const lower = email.toLowerCase().trim();
-        const blockedDomains = ['gmail.com', 'googlemail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'me.com'];
-        const domain = lower.split('@')[1];
-        if (!domain) return false;
-        if (blockedDomains.includes(domain)) return false;
-        return true;
+        const clean = String(email || '').trim().toLowerCase();
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean);
     }
 
     async function handleAuthSubmit() {
         const email = document.getElementById('authEmailInput').value.trim();
         const password = document.getElementById('authPasswordInput').value.trim();
 
-        if (!email || !email.includes('@')) {
+        if (!email || !isAllowedRussianEmail(email)) {
             showPulseAlert('Введите корректный адрес электронной почты!');
-            return;
-        }
-        if (!isAllowedRussianEmail(email)) {
-            showPulseAlert('Регистрация с зарубежных почтовых сервисов (Gmail и др.) недоступна. Пожалуйста, используйте российскую почту (@yandex.ru, @mail.ru, @vk.com, @rambler.ru и т. д.).');
             return;
         }
         if (password.length < 6) {
@@ -1938,6 +2003,7 @@
                     return;
                 }
 
+                await IMPULSE_GUARD.syncSession(supabaseClient);
                 pendingRegData = {
                     email: email,
                     name: name,
@@ -1979,6 +2045,7 @@
                     return;
                 }
 
+                await IMPULSE_GUARD.syncSession(supabaseClient);
                 const meta = data.user?.user_metadata || {};
                 const loadedName = meta.full_name || email.split('@')[0];
                 const loadedUname = meta.username || ('@' + email.split('@')[0]);
@@ -2015,6 +2082,7 @@
                 return;
             }
 
+            await IMPULSE_GUARD.syncSession(supabaseClient);
             const meta = data?.user?.user_metadata || {};
             const finalName = pendingRegData.name || meta.full_name || email.split('@')[0];
             const finalUname = pendingRegData.username || meta.username || ('@' + email.split('@')[0]);
@@ -2350,7 +2418,8 @@
         }
         document.getElementById(id).classList.remove('open');
     }
-    function openAdminModal() {
+    async function openAdminModal() {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
         if (!isFounderAccount()) {
             showPulseAlert('Доступ к кабинету разработчика есть только у создателя PulseCity.');
             return;
@@ -2443,8 +2512,9 @@
     async function publishAdminFeedPost() {
         if (!isFounderAccount()) return;
         const title = document.getElementById('adminFeedTitleInput').value.trim();
-        const text = document.getElementById('adminFeedTextInput').value.trim();
-        if (!text) { showPulseAlert('Введите текст объявления!'); return; }
+        const check = IMPULSE_GUARD.validateText(document.getElementById('adminFeedTextInput').value, { maxLength: 3000, cooldownMs: 800 });
+        if (!check.ok) { showPulseAlert(check.reason); return; }
+        const text = check.text;
 
         document.getElementById('loadingTitle').textContent = 'Публикация от ⚡ PulseCity...';
         document.getElementById('loadingModal').classList.add('open');
@@ -2472,8 +2542,9 @@
     async function sendAdminBroadcast() {
         if (!isFounderAccount()) return;
         const input = document.getElementById('adminBroadcastInput');
-        const text = input.value.trim();
-        if (!text) return;
+        const check = IMPULSE_GUARD.validateText(input.value, { maxLength: 1500, cooldownMs: 800 });
+        if (!check.ok) { showPulseAlert(check.reason); return; }
+        const text = check.text;
 
         playSystemSound('send');
         await supabaseClient.from('messages').insert([{
@@ -3452,8 +3523,19 @@
 
     async function sendComment() {
         const input = document.getElementById('commentInput');
-        const text = input.value.trim();
-        if ((!text && !selectedCommentFile) || !activePostIdForComments) return;
+        if (!activePostIdForComments) return;
+
+        const check = IMPULSE_GUARD.validateText(input.value, {
+            maxLength: 1000,
+            cooldownMs: 1200,
+            allowEmpty: Boolean(selectedCommentFile)
+        });
+        if (!check.ok) {
+            showPulseAlert(check.reason);
+            return;
+        }
+        const text = check.text;
+        if (!text && !selectedCommentFile) return;
 
         let mediaUrl = null;
         if (selectedCommentFile) {
@@ -3493,6 +3575,7 @@
             return;
         }
 
+        IMPULSE_GUARD.markSent(text || fallbackLabel);
         input.value = '';
         clearCommentMedia();
         loadComments(activePostIdForComments);
@@ -3500,13 +3583,17 @@
     }
 
     async function publishNews() {
-        let title = document.getElementById('newsTitleInput').value.trim();
-        const text = document.getElementById('newsTextInput').value.trim();
-        const pollQ = document.getElementById('pollQuestionInput').value.trim();
-        const poll1 = document.getElementById('pollOpt1Input').value.trim();
-        const poll2 = document.getElementById('pollOpt2Input').value.trim();
+        let title = document.getElementById('newsTitleInput').value.trim().slice(0, 160);
+        const check = IMPULSE_GUARD.validateText(document.getElementById('newsTextInput').value, {
+            maxLength: 2500,
+            cooldownMs: 1500
+        });
+        const pollQ = document.getElementById('pollQuestionInput').value.trim().slice(0, 200);
+        const poll1 = document.getElementById('pollOpt1Input').value.trim().slice(0, 100);
+        const poll2 = document.getElementById('pollOpt2Input').value.trim().slice(0, 100);
         
-        if (!text) { showPulseAlert('Введите текст новости!'); return; }
+        if (!check.ok) { showPulseAlert(check.reason); return; }
+        const text = check.text;
         if (!title) { title = 'Новость от ' + myUsername; }
 
         document.getElementById('loadingTitle').textContent = selectedNewsFile ? '⚡ Обработка и загрузка медиа...' : '⚡ Публикация...';
@@ -3549,6 +3636,8 @@
             showPulseAlert('Ошибка публикации: ' + error.message);
             return;
         }
+
+        IMPULSE_GUARD.markSent(title + ':' + text);
 
         if (data && data[0]) {
             viewedPostsSet.add(data[0].id);
@@ -3901,8 +3990,12 @@
 
     async function sendPublicMessage() {
         const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if (!text) return;
+        const check = IMPULSE_GUARD.validateText(input.value, { maxLength: 1200, cooldownMs: 900 });
+        if (!check.ok) {
+            showPulseAlert(check.reason);
+            return;
+        }
+        const text = check.text;
 
         if (chatMode === 'private' && !privateRecipient) {
             showPulseAlert('Сначала выберите пользователя для личного сообщения!');
@@ -3926,6 +4019,8 @@
             showPulseAlert('Ошибка отправки сообщения: ' + error.message);
             return;
         }
+
+        IMPULSE_GUARD.markSent(text);
 
         if (data && data[0]) {
             const prefix = msgData.chat_type === 'private' ? 'dm_' : 'pub_';
@@ -3983,16 +4078,20 @@
         input.value = '';
     }
 
-    syncChatControlsUI();
-    handleRecoveryLinkOnLoad();
+    (async function bootApp() {
+        syncChatControlsUI();
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        checkAdminAccess();
+        await handleRecoveryLinkOnLoad();
 
-    if (myUsername) {
-        loadPostsFromCloud(true);
-        loadPublicMessages();
-        pollBackgroundNotifications();
-        loadPinnedMessage();
-        setupRealtimeSubscriptions();
-    }
+        if (myUsername) {
+            loadPostsFromCloud(true);
+            loadPublicMessages();
+            pollBackgroundNotifications();
+            loadPinnedMessage();
+            setupRealtimeSubscriptions();
+        }
+    })();
 
     setInterval(() => {
         if (myUsername) {
