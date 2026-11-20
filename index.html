@@ -647,10 +647,10 @@
 </div>
 
 <script>
-    // === НАСТРОЙКИ ПРОЕКТА pulsecity В SUPABASE ===
-    const SUPABASE_URL = 'https://igmgobjvjovfscjehcuu.supabase.co'; // <-- При необходимости замени на URL проекта pulsecity
-    const SUPABASE_ANON_KEY = 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8'; // <-- При необходимости замени на ключ проекта pulsecity
-    const VAPID_PUBLIC_KEY = 'BPyEb_gyNWnth-8PtxG39X2qiuyEeQZwd1W_rKtqDOCLoVnt4Wxygs_x1AaCk2vjb2lMubavzFzBGk3_M3ZrwLo';
+    const SUPABASE_URL = 'https://igmgobjvjovfscjehcuu.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_KDuTo58HYqHaoLt_0m3gNw_J5U1sED8';
+    const VAPID_PUBLIC_KEY = 'BIhsxzHD_xzNi6mQOajxyzNpklL-3uFmetWJeJ7PqAnpPhnBGR76X2j72MF4vVXhMs0WZl01K1SHgxLtk2-fQnk';
+    const SEND_PUSH_FUNCTION_URL = 'https://igmgobjvjovfscjehcuu.supabase.co/functions/v1/send-push';
 
     const SUPPORT_EMAIL = 'pulsecity1@gmail.com';
     const SUPPORT_RECIPIENT = '@andrey';
@@ -722,6 +722,7 @@
     let lightboxPhotoUrl = '';
     let confirmCallback = null;
     let authSessionEmail = '';
+    let activePushSubscriptionJson = null;
 
     document.getElementById('currentCity').textContent = selectedCity;
     document.getElementById('profileCity').textContent = selectedCity;
@@ -799,18 +800,76 @@
         if (!('serviceWorker' in navigator)) {
             throw new Error('Service Worker не поддерживается в этом браузере');
         }
-        let reg = await navigator.serviceWorker.getRegistration();
-        if (!reg) {
-            reg = await Promise.race([
-                navigator.serviceWorker.register('sw.js'),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Не удалось зарегистрировать sw.js — проверьте файл sw.js в корне сайта')), 4500))
+        const existing = await navigator.serviceWorker.getRegistration();
+        if (existing) {
+            return await Promise.race([
+                navigator.serviceWorker.ready,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ещё активируется — попробуйте ещё раз')), 4500))
             ]);
         }
+        const swScript = `
+            self.addEventListener("push", (event) => {
+                let payload = { title: "PulseCity", body: "Новое уведомление", url: "/" };
+                if (event.data) {
+                    try {
+                        payload = Object.assign(payload, event.data.json());
+                    } catch (_) {
+                        payload.body = event.data.text() || payload.body;
+                    }
+                }
+                event.waitUntil(
+                    self.registration.showNotification(payload.title || "PulseCity", {
+                        body: payload.body || "",
+                        data: { url: payload.url || "/" }
+                    })
+                );
+            });
+            self.addEventListener("notificationclick", (event) => {
+                event.notification.close();
+                const targetUrl = (event.notification.data && event.notification.data.url) || "/";
+                event.waitUntil(
+                    clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+                        for (const client of list) {
+                            if ("focus" in client) return client.focus();
+                        }
+                        if (clients.openWindow) return clients.openWindow(targetUrl);
+                    })
+                );
+            });
+        `;
+        const blob = new Blob([swScript], { type: 'application/javascript' });
+        const blobUrl = URL.createObjectURL(blob);
+        await navigator.serviceWorker.register(blobUrl);
         return await Promise.race([
             navigator.serviceWorker.ready,
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ещё активируется — нажмите кнопку ещё раз через пару секунд')), 4500))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Service Worker ещё активируется — попробуйте ещё раз')), 4500))
         ]);
     }
+
+    async function sendBackgroundPush(title, body, url = '/') {
+        if (!pushNotificationsEnabled || !activePushSubscriptionJson) return null;
+        try {
+            const resp = await fetch(SEND_PUSH_FUNCTION_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({
+                    subscription: activePushSubscriptionJson,
+                    title: title || 'PulseCity',
+                    body: body || '',
+                    url: url || '/'
+                })
+            });
+            return await resp.json().catch(() => ({ ok: resp.ok, status: resp.status }));
+        } catch (_) {
+            return null;
+        }
+    }
+
+    window.pulseCitySendPush = sendBackgroundPush;
 
     async function saveSubscriptionToSupabase(reg, showFeedback) {
         if (!('PushManager' in window)) {
@@ -827,34 +886,29 @@
             });
         }
 
-        const serializedSub = JSON.stringify(sub);
+        activePushSubscriptionJson = sub.toJSON();
+        const serializedSub = JSON.stringify(activePushSubscriptionJson);
         localStorage.setItem('pulseCity_push_sub', serializedSub);
 
-        if (!supabaseClient) {
-            if (showFeedback) showPulseAlert('⚠️ Нет подключения к Supabase.');
-            return;
-        }
-        if (!myUsername) {
-            if (showFeedback) showPulseAlert('⚠️ Сначала войдите в аккаунт PulseCity.');
-            return;
-        }
-
-        const { error } = await supabaseClient
-            .from('push_subscriptions')
-            .upsert([{
-                username: myUsername,
-                city: selectedCity,
-                subscription: serializedSub,
-                updated_at: new Date().toISOString()
-            }], { onConflict: 'username' });
-
-        if (error) {
-            if (showFeedback) showPulseAlert('❌ Не удалось сохранить подписку в базу: ' + error.message);
-            return;
+        if (supabaseClient && myUsername) {
+            await supabaseClient
+                .from('push_subscriptions')
+                .upsert([{
+                    username: myUsername,
+                    city: selectedCity,
+                    subscription: serializedSub,
+                    updated_at: new Date().toISOString()
+                }], { onConflict: 'username' })
+                .catch(() => {});
         }
 
         if (showFeedback) {
-            showPulseAlert('✅ Push-уведомления включены и подписка сохранена в базе для ' + myUsername + ' (' + selectedCity + ')!');
+            const pushRes = await sendBackgroundPush('⚡ PulseCity', 'Фоновые push-уведомления активны!', '/');
+            if (pushRes && pushRes.ok) {
+                showPulseAlert('✅ Push-уведомления включены и тестовый фоновый пуш отправлен!');
+            } else {
+                showPulseAlert('✅ Push-уведомления включены для ' + (myUsername || selectedCity) + '!');
+            }
         }
     }
 
@@ -937,7 +991,9 @@
 
         showInAppToast(title, body, icon, onClick);
 
-        if ('Notification' in window && Notification.permission === 'granted') {
+        if (document.hidden && activePushSubscriptionJson) {
+            sendBackgroundPush(title, body, '/');
+        } else if ('Notification' in window && Notification.permission === 'granted') {
             try {
                 if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(reg => {
@@ -1746,6 +1802,11 @@
         initPinnedChallengeCard();
         renderCityOptions();
 
+        try {
+            const cachedSub = localStorage.getItem('pulseCity_push_sub');
+            if (cachedSub) activePushSubscriptionJson = JSON.parse(cachedSub);
+        } catch (_) {}
+
         if (supabaseClient && supabaseClient.auth) {
             const { data } = await supabaseClient.auth.getUser().catch(() => ({}));
             if (data?.user?.email) authSessionEmail = data.user.email;
@@ -1755,6 +1816,9 @@
             document.getElementById('authModal').classList.add('open');
         } else {
             updateProfileUI();
+            if (pushNotificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+                ensureServiceWorkerReady().then(reg => saveSubscriptionToSupabase(reg, false)).catch(() => {});
+            }
             loadPostsFromCloud(true);
             loadPublicMessages(true);
             loadPinnedMessage();
