@@ -874,7 +874,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = '';
-    const THEME_REVISION = 'orange_v15_major_cities_list';
+    const THEME_REVISION = 'orange_v16_realtime_post_reactions';
 
     const MAJOR_CITIES = [
         'Иркутск',
@@ -2924,6 +2924,7 @@
         if (t === 'feed') {
             fab.style.display = 'flex';
             searchBtn.style.display = 'flex';
+            loadPostsFromCloud(true);
         } else {
             fab.style.display = 'none';
             searchBtn.style.display = 'none';
@@ -4345,6 +4346,9 @@
                     });
                 }
             })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
+                loadPostsFromCloud(true);
+            })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, (payload) => {
                 const post = payload?.new;
                 if (post && post.city === selectedCity && post.category !== 'challenge' && post.author_username !== myUsername) {
@@ -4502,7 +4506,8 @@
 
     setInterval(() => {
         if (myUsername) {
-            loadPostsFromCloud(false);
+            const feedActive = document.getElementById('tab-feed')?.classList.contains('active');
+            loadPostsFromCloud(Boolean(feedActive));
             if (document.getElementById('tab-chat')?.classList.contains('active')) {
                 loadPublicMessages(false);
             }
