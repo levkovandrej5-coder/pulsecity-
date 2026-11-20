@@ -156,6 +156,13 @@
 
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;flex-wrap:wrap;gap:8px}
         .card-actions-left{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+        /* Реакции на посты: по умолчанию скрыты, открываются при нажатии на пост; при выборе одной остаётся только выбранная */
+        .post-reactions-tray{display:none;gap:6px;flex-wrap:wrap;align-items:center}
+        .card.reactions-expanded .post-reactions-tray{display:flex}
+        .card:not(.reactions-expanded) .post-reactions-tray .action-btn.picked-only{display:inline-flex}
+        .card:not(.reactions-expanded) .post-reactions-tray .action-btn:not(.picked-only){display:none}
+        .card.reactions-expanded .post-reactions-tray .action-btn{display:inline-flex}
         
         .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:6px 11px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transform-origin:center;transition:background 0.2s ease;}
         .action-btn:active{transform:scale(0.9)}
@@ -199,7 +206,7 @@
         .msg-col{display:flex;flex-direction:column;gap:4px;min-width:0;max-width:100%}
         .msg-row.mine .msg-col{align-items:flex-end}
         
-        .msg-bubble{background:rgba(255,255,255,0.08);padding:9px 13px;border-radius:16px 16px 16px 6px;font-size:13px;line-height:1.4;word-break:break-word;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+        .msg-bubble{background:rgba(255,255,255,0.08);padding:9px 13px;border-radius:16px 16px 16px 6px;font-size:13px;line-height:1.4;word-break:break-word;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer}
         .msg-row.mine .msg-bubble{border-radius:16px 16px 6px 16px;background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(230,92,0,0.38) !important}
         .msg-author{font-size:11px;font-weight:700;color:#ff7a14 !important;cursor:pointer}
         .msg-row.mine .msg-author{display:none}
@@ -213,7 +220,15 @@
         .msg-row.mine .msg-quote-author{color:#fff !important}
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-        .msg-reactions-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:0 2px}
+        /* Реакции на сообщения: скрыты по умолчанию, открываются при нажатии на сообщение; при выборе одной остаётся только выбранная */
+        .msg-reactions-row{display:none;align-items:center;flex-wrap:wrap;gap:4px;padding:0 2px}
+        .msg-row.reactions-open .msg-reactions-row{display:flex}
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill.picked-only{display:inline-flex}
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill:not(.picked-only),
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-add-react-btn{display:none}
+        .msg-row.reactions-open .msg-reactions-row .msg-react-pill,
+        .msg-row.reactions-open .msg-reactions-row .msg-add-react-btn{display:inline-flex}
+
         .msg-react-pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#f3f4f6;border-radius:10px;padding:2px 6px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;cursor:pointer;transition:.15s}
         .msg-react-pill.active{background:rgba(230,92,0,0.28) !important;border-color:#e65c00 !important;color:#ff9440 !important}
         .msg-react-pill:active{transform:scale(0.9)}
@@ -268,8 +283,10 @@
         .modal-card{background:#140f0c !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:24px;padding:20px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;overflow-y:auto;display:flex;flex-direction:column}
         .modal-card h3{font-size:20px;margin-bottom:14px;font-weight:800}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px;color:#fff;font-size:14px;margin-bottom:10px;outline:none}
-        .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:12px 16px;border-radius:14px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;transition:.2s}
+        .city-list-scroll{max-height:46vh;overflow-y:auto;padding-right:2px;margin-bottom:10px}
+        .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:11px 14px;border-radius:14px;font-size:14px;font-weight:600;margin-bottom:7px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:space-between}
         .city-option:hover{background:rgba(230,92,0,0.15) !important;border-color:#e65c00 !important}
+        .city-option.selected{background:rgba(230,92,0,0.22) !important;border-color:#ff7a14 !important;color:#ff9440 !important}
         
         .setting-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:13px 14px;border-radius:14px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.08)}
         .toggle-switch{width:44px;height:24px;background:rgba(255,255,255,0.2);border-radius:14px;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
@@ -330,7 +347,7 @@
     <div class="header-actions">
         <button class="top-mini-btn" id="toggleSearchBtn" onclick="toggleHeaderSearch()" title="Поиск по ленте">🔍</button>
         <button class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
-        <button class="city-btn" onclick="openModal('cityModal')">📍 <span id="currentCity">Иркутск</span> ▾</button>
+        <button class="city-btn" onclick="openCityModal()">📍 <span id="currentCity">Иркутск</span> ▾</button>
     </div>
 </header>
 
@@ -437,7 +454,7 @@
             <p style="margin:10px 0;font-size:14px">Текущий город: <strong id="profileCity" style="color:#ff7a14">Иркутск</strong></p>
             
             <button class="btn-sec" onclick="openModal('settingsModal')">⚙️ Настройки и Безопасность</button>
-            <button class="btn-sec" onclick="openModal('cityModal')">📍 Сменить город</button>
+            <button class="btn-sec" onclick="openCityModal()">📍 Сменить город</button>
             
             <button id="adminPanelBtn" class="btn-sec" onclick="openAdminModal()" style="display:none;background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;border-color:transparent;">👑 Кабинет разработчика</button>
             
@@ -710,9 +727,8 @@
 <div id="cityModal" class="modal" onclick="if(event.target===this)closeModal('cityModal')">
     <div class="modal-card">
         <h3>Выберите ваш город</h3>
-        <button class="city-option" onclick="selectCity('Иркутск')">📍 Иркутск</button>
-        <button class="city-option" onclick="selectCity('Новосибирск')">📍 Новосибирск</button>
-        <button class="city-option" onclick="selectCity('Москва')">📍 Москва</button>
+        <input type="text" id="citySearchInput" class="search-input" placeholder="🔍 Поиск города..." oninput="renderCityOptions()" style="margin-bottom:10px;padding:10px 12px;font-size:13px;">
+        <div id="cityOptionsList" class="city-list-scroll"></div>
         <button class="btn-sec" onclick="closeModal('cityModal')" style="margin-bottom:0;">Закрыть</button>
     </div>
 </div>
@@ -788,7 +804,117 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = 'BIhsxzHD_xzNi6mQOajxyzNpklL-3uFmetWJeJ7PqAnpPhnBGR76X2j72MF4vVXhMs0WZl01K1SHgxLtk2-fQnk';
-    const THEME_REVISION = 'orange_v10_push_sec';
+    const THEME_REVISION = 'orange_v11_reactions_cities';
+
+    const MAJOR_CITIES = [
+        'Иркутск',
+        'Новосибирск',
+        'Москва',
+        'Санкт-Петербург',
+        'Екатеринбург',
+        'Казань',
+        'Нижний Новгород',
+        'Красноярск',
+        'Челябинск',
+        'Самара',
+        'Уфа',
+        'Ростов-на-Дону',
+        'Омск',
+        'Воронеж',
+        'Пермь',
+        'Волгоград',
+        'Владивосток',
+        'Хабаровск',
+        'Тюмень',
+        'Краснодар',
+        'Томск',
+        'Кемерово',
+        'Барнаул',
+        'Улан-Удэ',
+        'Чита',
+        'Якутск',
+        'Мирный',
+        'Калининград',
+        'Сочи'
+    ];
+
+    function openCityModal() {
+        const inp = document.getElementById('citySearchInput');
+        if (inp) inp.value = '';
+        renderCityOptions();
+        openModal('cityModal');
+        setTimeout(() => {
+            if (inp) inp.focus();
+        }, 120);
+    }
+
+    function renderCityOptions() {
+        const listEl = document.getElementById('cityOptionsList');
+        if (!listEl) return;
+        const q = (document.getElementById('citySearchInput')?.value || '').toLowerCase().trim();
+
+        const filtered = MAJOR_CITIES.filter(city => city.toLowerCase().includes(q));
+        listEl.innerHTML = '';
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;padding:12px 0;">Город не найден. Попробуйте ввести другое название.</p>';
+            return;
+        }
+
+        filtered.forEach(city => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const isSelected = city === selectedCity;
+            btn.className = 'city-option' + (isSelected ? ' selected' : '');
+            btn.onclick = () => selectCity(city);
+            btn.innerHTML = `<span>📍 ${escapeHtml(city)}</span>${isSelected ? '<span style="font-size:12px;font-weight:800;">✓ Выбран</span>' : ''}`;
+            listEl.appendChild(btn);
+        });
+    }
+
+    // Состояние раскрытия реакций для постов и сообщений
+    const expandedPostReactions = new Set();
+    const pickedPostReactionOnly = {}; // postId -> emoji (если выбрана одна реакция и плашка свернута)
+    const expandedMsgReactions = new Set();
+    const pickedMsgReactionOnly = {};  // msgId -> emoji
+
+    function togglePostReactionsTray(postId, event) {
+        if (!postId) return;
+        if (event) {
+            const tag = event.target?.tagName?.toLowerCase();
+            if (['button', 'a', 'input', 'textarea', 'video', 'img'].includes(tag)) return;
+            if (event.target?.closest('button, a, video, .poll-box, .media-download-bar')) return;
+        }
+        const key = String(postId);
+        if (expandedPostReactions.has(key)) {
+            expandedPostReactions.delete(key);
+        } else {
+            expandedPostReactions.add(key);
+        }
+        const card = document.getElementById(`post-card-${key}`);
+        if (card) {
+            card.classList.toggle('reactions-expanded', expandedPostReactions.has(key));
+        }
+    }
+
+    function toggleMsgReactionsTray(msgId, event) {
+        if (!msgId) return;
+        if (event) {
+            const tag = event.target?.tagName?.toLowerCase();
+            if (['button', 'a', 'input', 'video', 'img'].includes(tag)) return;
+            if (event.target?.closest('button, a, video, .msg-mini-actions, .msg-quote-box')) return;
+        }
+        const key = String(msgId);
+        if (expandedMsgReactions.has(key)) {
+            expandedMsgReactions.delete(key);
+        } else {
+            expandedMsgReactions.add(key);
+        }
+        const row = document.getElementById(`msg-row-${key}`);
+        if (row) {
+            row.classList.toggle('reactions-open', expandedMsgReactions.has(key));
+        }
+    }
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -2952,9 +3078,16 @@
             } else {
                 delete currentEmojis[emoji];
             }
+            if (pickedMsgReactionOnly[key] === emoji) {
+                delete pickedMsgReactionOnly[key];
+            }
         } else {
             currentEmojis[emoji] = [...users, myUsername];
+            pickedMsgReactionOnly[key] = emoji;
         }
+
+        // После выбора реакции остаётся только нажатая, остальные прячутся
+        expandedMsgReactions.delete(key);
 
         messageReactionsMap[key] = currentEmojis;
         saveLocalMessageReactions();
@@ -3250,6 +3383,7 @@
                 globalReactionsData[r.post_id][r.emoji] = (globalReactionsData[r.post_id][r.emoji] || 0) + 1;
                 if (r.username === myUsername) {
                     globalReactionsData[r.post_id].userReacted = r.emoji;
+                    pickedPostReactionOnly[String(r.post_id)] = r.emoji;
                 }
             });
         }
@@ -3366,18 +3500,24 @@
             const formattedTime = formatNiceTime(p.created_at);
 
             let postReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
+            const postKey = String(p.id);
+            const isExpanded = expandedPostReactions.has(postKey);
+            const onlyPickedEmoji = postReacts.userReacted || pickedPostReactionOnly[postKey] || null;
 
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
                 let count = postReacts[emo] || 0;
                 let activeStyle = postReacts.userReacted === emo ? 'background:rgba(230,92,0,0.32);border-color:#e65c00;' : '';
-                reactionsHtml += `<button class="action-btn" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
+                let pickedClass = (!isExpanded && onlyPickedEmoji === emo) ? ' picked-only' : '';
+                reactionsHtml += `<button class="action-btn${pickedClass}" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
             let realViews = p.views || 1;
 
             const card = document.createElement('div');
-            card.className = 'card' + (isAdminPost ? ' admin-card' : '');
+            card.id = `post-card-${postKey}`;
+            card.className = 'card' + (isAdminPost ? ' admin-card' : '') + (isExpanded ? ' reactions-expanded' : '');
+            card.onclick = (e) => togglePostReactionsTray(p.id, e);
             card.innerHTML = `
                 <div class="news-header">
                     <div class="news-author-info">
@@ -3398,7 +3538,7 @@
                 ${pollHtml}
                 <div class="card-actions">
                     <div class="card-actions-left">
-                        ${reactionsHtml}
+                        <div class="post-reactions-tray">${reactionsHtml}</div>
                         <button class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
                     </div>
                     <div class="views-badge">👁️ <span id="views-count-${p.id}">${realViews}</span></div>
@@ -3414,6 +3554,7 @@
         if (!supabaseClient || !myUsername) return;
         
         let postReacts = globalReactionsData[postId] || { userReacted: null };
+        const postKey = String(postId);
         
         if (postReacts.userReacted) {
             await supabaseClient.from('post_reactions').delete().eq('post_id', postId).eq('username', myUsername);
@@ -3425,7 +3566,13 @@
                 username: myUsername,
                 emoji: emoji
             }]);
+            pickedPostReactionOnly[postKey] = emoji;
+        } else {
+            delete pickedPostReactionOnly[postKey];
         }
+
+        // Оставляем только выбранную реакцию и прячем остальные
+        expandedPostReactions.delete(postKey);
 
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
         if (btnEl) {
@@ -3922,26 +4069,39 @@
             const safeSender = escapeHtml(m.sender || '').replace(/'/g, '&#39;');
             const safePinText = escapeHtml(displayText).replace(/'/g, '');
 
-            const msgReacts = messageReactionsMap[String(m.id)] || {};
+            const msgKey = String(m.id);
+            const isMsgOpen = expandedMsgReactions.has(msgKey);
+            const msgReacts = messageReactionsMap[msgKey] || {};
+            let activeUserEmoji = pickedMsgReactionOnly[msgKey] || null;
+            if (!activeUserEmoji) {
+                Object.keys(msgReacts).forEach(emo => {
+                    const uList = Array.isArray(msgReacts[emo]) ? msgReacts[emo] : [];
+                    if (uList.includes(myUsername)) activeUserEmoji = emo;
+                });
+            }
+
             let pillsHtml = '';
             Object.keys(msgReacts).forEach(emo => {
                 const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
                 const cnt = usersList.length;
                 if (cnt > 0) {
                     const isActive = usersList.includes(myUsername);
-                    pillsHtml += `<button type="button" class="msg-react-pill ${isActive ? 'active' : ''}" onclick="toggleMessageReaction('${escapeHtml(String(m.id))}', '${emo}')">${emo} <span>${cnt}</span></button>`;
+                    const pickedClass = (!isMsgOpen && activeUserEmoji === emo) ? ' picked-only' : '';
+                    pillsHtml += `<button type="button" class="msg-react-pill ${isActive ? 'active' : ''}${pickedClass}" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')">${emo} <span>${cnt}</span></button>`;
                 }
             });
 
             const reactionsRowHtml = `
                 <div class="msg-reactions-row">
                     ${pillsHtml}
-                    <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker('${escapeHtml(String(m.id))}')" title="Поставить реакцию">+😀</button>
+                    <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker('${escapeHtml(msgKey)}')" title="Поставить реакцию">+😀</button>
                 </div>
             `;
 
             const row = document.createElement('div');
-            row.className = 'msg-row' + (isMine ? ' mine' : '');
+            row.id = `msg-row-${msgKey}`;
+            row.className = 'msg-row' + (isMine ? ' mine' : '') + (isMsgOpen ? ' reactions-open' : '');
+            row.onclick = (e) => toggleMsgReactionsTray(m.id, e);
             
             row.innerHTML = `
                 <div class="msg-avatar" onclick="startPrivateChatWith('${safeSender}')" title="Написать личное сообщение">${avatarHtml}</div>
@@ -3950,7 +4110,7 @@
                         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:2px;">
                             <span class="msg-author" onclick="startPrivateChatWith('${safeSender}')">${escapeHtml(m.sender)}</span>
                             <div class="msg-mini-actions">
-                                <button type="button" class="msg-icon-btn" onclick="startReplyToMessage('${escapeHtml(String(m.id))}')" title="Ответить">↩</button>
+                                <button type="button" class="msg-icon-btn" onclick="startReplyToMessage('${escapeHtml(msgKey)}')" title="Ответить">↩</button>
                                 ${canPin ? `<button type="button" class="msg-icon-btn" style="color:#ff7a14;" onclick="pinMessage(${Number(m.id)}, '${safePinText}')" title="Закрепить">📌</button>` : ''}
                                 ${canDeleteMsg ? `<button type="button" class="msg-icon-btn" style="color:#ef4444;" onclick="deleteMessage(${Number(m.id)}, '${safeSender}')" title="Удалить">✕</button>` : ''}
                             </div>
@@ -4182,6 +4342,7 @@
 
     (async function bootApp() {
         syncChatControlsUI();
+        renderCityOptions();
         await IMPULSE_GUARD.syncSession(supabaseClient);
         checkAdminAccess();
         await handleRecoveryLinkOnLoad();
