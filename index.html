@@ -77,7 +77,6 @@
         .challenge-pinned-card.compact .challenge-mini-row{max-height:36px;opacity:1;transform:translateY(0);pointer-events:auto}
 
         .card{background:linear-gradient(145deg,#1b1410,#110c09);border-radius:22px;padding:15px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.09);box-shadow:0 14px 28px rgba(0,0,0,0.58);position:relative;overflow:hidden}
-        .card.admin-card{border:1px solid rgba(230,92,0,0.45);background:linear-gradient(145deg,#24150b,#140d08)}
         .chat-main-card{padding:10px 11px 8px;margin-bottom:4px;border-radius:18px}
 
         .skeleton-card{background:rgba(255,255,255,0.03);border-radius:22px;padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.05);animation:pulseSkeleton 1.5s infinite ease-in-out}
@@ -92,6 +91,7 @@
         .news-meta{display:flex;flex-direction:column;gap:2px}
         .news-author-name{font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px}
         .news-author-name.clickable{cursor:pointer}
+        .news-author-name.clickable:hover{color:#ff7a14;text-decoration:underline}
         .news-time-tag{font-size:11px;color:#9ca3af;font-weight:500}
 
         .card h3{font-size:17px;font-weight:800;margin-bottom:8px;color:#fff;line-height:1.3}
@@ -100,29 +100,15 @@
         .news-media{width:100%;max-height:360px;object-fit:cover;display:block;background:#090706}
         video.news-media{min-height:210px}
 
-        .media-download-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);padding:9px 12px;border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.08);position:relative;overflow:hidden}
-        .media-download-bar span{font-size:12px;color:#9ca3af;font-weight:600;z-index:2;position:relative}
-        .download-progress-fill{position:absolute;top:0;left:0;bottom:0;background:rgba(230,92,0,0.25);width:0%;z-index:1;transition:width .1s linear}
-        .download-quick-btn{background:rgba(230,92,0,0.16);border:1px solid rgba(230,92,0,0.45);color:#ff7a14;padding:5px 12px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;z-index:2;position:relative}
-
-        .poll-box{background:rgba(0,0,0,0.4);border:1px solid rgba(230,92,0,0.22);border-radius:16px;padding:14px;margin-bottom:12px}
-        .poll-question{font-weight:700;font-size:14px;margin-bottom:10px;color:#ff7a14}
-        .poll-option{position:relative;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:11px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;overflow:hidden}
-        .poll-progress-bar{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,rgba(230,92,0,0.22),rgba(255,115,0,0.38));z-index:1}
-        .poll-option span{position:relative;z-index:2}
-
-        .post-reactions-drawer{display:none;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(230,92,0,0.35)}
-        .card.reactions-open .post-reactions-drawer{display:flex}
-
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;flex-wrap:wrap;gap:8px}
         .card-actions-left{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 
-        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:6px 11px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px}
-        .action-btn.pop{animation:popAnim .4s ease}
-        @keyframes popAnim{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
+        .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:6px 11px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transition:.15s}
+        .action-btn.liked{background:rgba(230,92,0,0.24);border-color:#e65c00;color:#ff9440}
+        .action-btn.pop{animation:popAnim .35s ease}
+        @keyframes popAnim{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
 
         .views-badge{font-size:12px;color:#9ca3af;display:flex;align-items:center;gap:4px;font-weight:600}
-        .delete-btn{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer}
 
         .btn-sec{background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:8px;transition:.2s}
         .btn-sec:hover{background:rgba(255,255,255,0.1)}
@@ -152,49 +138,35 @@
         .msg-col{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%}
         .msg-row.mine .msg-col{align-items:flex-end}
 
-        .msg-bubble{background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:15px 15px 15px 5px;font-size:13px;line-height:1.38;word-break:break-word;cursor:pointer}
+        .msg-bubble{background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:15px 15px 15px 5px;font-size:13px;line-height:1.38;word-break:break-word}
         .msg-row.mine .msg-bubble{border-radius:15px 15px 5px 15px;background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;font-weight:600}
-        .msg-author{font-size:11px;font-weight:700;color:#ff7a14;cursor:pointer}
+        .msg-author{font-size:11px;font-weight:700;color:#ff7a14;cursor:pointer;display:inline-block;margin-bottom:2px}
+        .msg-author:hover{text-decoration:underline}
         .msg-row.mine .msg-author{display:none}
-        .msg-mini-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
-        .msg-icon-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#e5e7eb;width:22px;height:22px;border-radius:7px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 
-        .msg-quote-box{background:rgba(0,0,0,0.22);border-left:3px solid #ff7a14;border-radius:8px;padding:4px 8px;margin-bottom:5px;font-size:11px;line-height:1.3;cursor:pointer}
-        .msg-quote-author{font-weight:800;color:#ff7a14;font-size:10px;margin-bottom:2px}
+        .msg-quote-box{background:rgba(0,0,0,0.24);border-left:3px solid #ff7a14;border-radius:8px;padding:4px 8px;margin-bottom:5px;font-size:11px;line-height:1.3}
+        .msg-quote-author{font-weight:800;color:#ff7a14;font-size:10px;margin-bottom:1px}
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-        .msg-reactions-row{display:none;align-items:center;flex-wrap:wrap;gap:4px;padding:2px 2px 0}
-        .msg-row.has-reactions .msg-reactions-row,.msg-row.reactions-open .msg-reactions-row{display:flex}
-        .msg-react-pill.unselected-pick{display:none}
-        .msg-row.reactions-open .msg-react-pill.unselected-pick{display:inline-flex}
-        .msg-add-react-btn{display:none;background:rgba(230,92,0,0.14);border:1px dashed rgba(230,92,0,0.5);color:#ff9440;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;cursor:pointer}
-        .msg-row.reactions-open .msg-add-react-btn{display:inline-flex}
-        .msg-react-pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#f3f4f6;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;cursor:pointer}
-        .msg-react-pill.active{background:rgba(230,92,0,0.28);border-color:#e65c00;color:#ff9440}
+        .comment-tools-row{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+        .comment-mini-btn{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#e5e7eb;border-radius:9px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:3px}
+        .comment-mini-btn.active{background:rgba(230,92,0,0.28);border-color:#e65c00;color:#ff9440}
 
-        .msg-time{font-size:10px;color:rgba(255,255,255,0.65);margin-top:2px;text-align:right}
+        .msg-time{font-size:10px;color:rgba(255,255,255,0.65);margin-top:3px;text-align:right}
         .msg-media{max-width:100%;max-height:210px;border-radius:12px;margin-top:5px;display:block;object-fit:cover;background:#090706}
-        video.msg-media{width:100%;min-height:150px}
 
         .challenge-entry{max-width:100% !important;align-items:flex-start !important;flex-direction:row !important}
         .challenge-entry.leader-entry .msg-bubble{border:1px solid rgba(250,204,21,0.55);background:linear-gradient(145deg,rgba(230,92,0,0.16),rgba(250,204,21,0.07))}
         .leader-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(250,204,21,0.18);color:#fde047;border:1px solid rgba(250,204,21,0.45);font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:6px}
-        .challenge-react-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:6px}
-        .challenge-react-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:10px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-        .challenge-react-btn.active{background:rgba(230,92,0,0.3);border-color:#e65c00;color:#ff9440}
-        .challenge-photo-zoomable{cursor:zoom-in;max-height:230px;width:100%;object-fit:cover}
         .challenge-leader-banner{background:rgba(250,204,21,0.09);border:1px solid rgba(250,204,21,0.35);border-radius:12px;padding:8px 11px;margin-bottom:10px;font-size:12px;color:#fef08a;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-        .challenge-yesterday-card{background:rgba(255,255,255,0.04);border:1px solid rgba(230,92,0,0.28);border-radius:12px;padding:8px 11px;margin-bottom:10px;font-size:11px;color:#d1d5db;display:flex;align-items:center;justify-content:space-between;gap:8px}
-        .challenge-yesterday-thumb{width:38px;height:38px;border-radius:9px;object-fit:cover;cursor:zoom-in;flex-shrink:0;border:1px solid rgba(250,204,21,0.4)}
         .challenge-prize-note{font-size:11px;color:#d1d5db;background:rgba(230,92,0,0.1);border:1px solid rgba(230,92,0,0.28);border-radius:11px;padding:8px 10px;margin-bottom:8px;line-height:1.4}
-        .publish-leader-btn{background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;border:none;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer}
 
         #lightboxModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);z-index:4200;align-items:center;justify-content:center;padding:14px;flex-direction:column;gap:12px}
         #lightboxModal.open{display:flex}
         #lightboxImg{max-width:100%;max-height:78vh;border-radius:14px;object-fit:contain}
         .lightbox-actions{display:flex;gap:10px;width:100%;max-width:360px}
 
-        .reply-composer-bar{display:none;align-items:center;justify-content:space-between;gap:8px;background:rgba(230,92,0,0.14);border:1px solid rgba(230,92,0,0.45);border-left:3px solid #e65c00;border-radius:10px;padding:5px 9px;margin-top:4px;font-size:12px}
+        .reply-composer-bar{display:none;align-items:center;justify-content:space-between;gap:8px;background:rgba(230,92,0,0.14);border:1px solid rgba(230,92,0,0.45);border-left:3px solid #e65c00;border-radius:10px;padding:5px 9px;margin-top:4px;margin-bottom:6px;font-size:12px}
         .reply-composer-bar.open{display:flex}
         .reply-composer-info{min-width:0;flex:1}
         .reply-composer-author{font-weight:800;color:#ff7a14;font-size:11px}
@@ -205,13 +177,9 @@
 
         .chat-input-area{display:flex;gap:5px;align-items:center;margin-top:6px;margin-bottom:0}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff7a14;width:36px;height:36px;border-radius:11px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-        .attach-btn.has-file{background:rgba(230,92,0,0.25);border-color:#e65c00;color:#fff}
         .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);border-radius:11px;padding:8px 11px;color:#fff;font-size:13px;outline:none;min-width:0;height:36px}
         .chat-input-area input[type="text"]:focus{border-color:#e65c00}
         .send-btn{background:linear-gradient(135deg,#e65c00,#ff7300);color:#fff;border:none;border-radius:11px;height:36px;padding:0 13px;font-size:14px;font-weight:800;cursor:pointer;flex-shrink:0}
-
-        .emoji-picker-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
-        .emoji-pick-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(230,92,0,0.45);border-radius:14px;width:46px;height:46px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(15px);z-index:2500;align-items:center;justify-content:center;padding:16px}
         .modal.open{display:flex}
@@ -237,7 +205,6 @@
 
         .support-ticket-card{background:rgba(0,0,0,0.35);border:1px solid rgba(230,92,0,0.45);border-radius:12px;padding:10px 11px;margin-bottom:8px;text-align:left}
         .support-ticket-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;font-size:11px;color:#ff7a14;font-weight:700}
-        .support-ticket-topic{display:inline-block;background:rgba(230,92,0,0.2);color:#ff7a14;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px}
         .support-ticket-msg{font-size:12px;color:#f3f4f6;line-height:1.4;white-space:pre-line;word-break:break-word;margin-bottom:6px}
 
         .nav-wrapper{position:fixed;bottom:6px;left:12px;right:12px;z-index:1000}
@@ -386,19 +353,6 @@
     </div>
 </div>
 
-<div id="msgReactionPickerModal" class="modal" onclick="if(event.target===this)closeModal('msgReactionPickerModal')">
-    <div class="modal-card" style="max-width:300px;text-align:center;">
-        <h3 style="font-size:17px;margin-bottom:12px;">Реакция на сообщение</h3>
-        <div class="emoji-picker-row">
-            <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('🔥')">🔥</button>
-            <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('👍')">👍</button>
-            <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('😂')">😂</button>
-            <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('❤️')">❤️</button>
-        </div>
-        <button type="button" class="btn-sec" onclick="closeModal('msgReactionPickerModal')" style="margin-bottom:0;padding:10px;">Отмена</button>
-    </div>
-</div>
-
 <div id="contactModal" class="modal" onclick="if(event.target===this)closeModal('contactModal')">
     <div class="modal-card" style="max-width:390px;text-align:center;">
         <div style="font-size:34px;margin-bottom:6px">✉️</div>
@@ -464,7 +418,7 @@
             <p style="color:#d1d5db;font-size:13px;line-height:1.45;margin-bottom:12px;">
                 Код подтверждения отправлен на почту:<br><strong id="otpTargetEmail" style="color:#ff7a14;"></strong>
             </p>
-            <input type="text" id="otpCodeInput" class="otp-input" inputmode="numeric" maxlength="8" placeholder="12345678" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            <input type="text" id="otpCodeInput" class="otp-input" inputmode="numeric" maxlength="8" placeholder="123456" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
             <button type="button" class="btn-main" style="margin-bottom:8px;" onclick="verifySignupCode()">Подтвердить код</button>
             <button type="button" class="btn-sec" onclick="backToAuthCredentials()" style="font-size:12px;padding:10px;margin-bottom:0;color:#9ca3af;">← Назад</button>
         </div>
@@ -552,18 +506,6 @@
     </div>
 </div>
 
-<div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirmModal(false)">
-    <div class="modal-card" style="max-width:320px;text-align:center;">
-        <div style="font-size:34px;margin-bottom:8px">⚠️</div>
-        <h3 id="confirmTitle" style="font-size:17px;margin-bottom:8px;">Подтверждение</h3>
-        <p id="confirmText" style="color:#d1d5db;font-size:13px;margin-bottom:18px;">Вы уверены?</p>
-        <div style="display:flex;gap:8px;">
-            <button type="button" class="btn-sec" onclick="closeConfirmModal(false)" style="margin:0;">Отмена</button>
-            <button type="button" class="btn-main" onclick="closeConfirmModal(true)" style="margin:0;background:linear-gradient(135deg,#ef4444,#dc2626);">Подтвердить</button>
-        </div>
-    </div>
-</div>
-
 <div id="settingsModal" class="modal" onclick="if(event.target===this)closeModal('settingsModal')">
     <div class="modal-card">
         <h3>Безопасность и настройки</h3>
@@ -595,9 +537,6 @@
         <h3>Новая публикация</h3>
         <input type="text" id="newsTitleInput" placeholder="Заголовок новости...">
         <textarea id="newsTextInput" placeholder="Текст новости..."></textarea>
-        <input type="text" id="pollQuestionInput" placeholder="Опрос (необязательно): Вопрос?">
-        <input type="text" id="pollOpt1Input" placeholder="Вариант ответа 1">
-        <input type="text" id="pollOpt2Input" placeholder="Вариант ответа 2">
         <div class="setting-row" style="margin:8px 0;">
             <div><p style="font-weight:700;font-size:13px">🕶️ Анонимная маска</p><p style="font-size:11px;color:#9ca3af">Опубликовать под тайным ником</p></div>
             <div id="anonToggle" class="toggle-switch" onclick="toggleAnonymousPost()"></div>
@@ -621,9 +560,17 @@
             <button type="button" class="btn-sec" style="width:auto;padding:5px 11px;margin:0;font-size:12px;" onclick="closeModal('commentsModal')">✕</button>
         </div>
         <p id="commentsChallengePrompt" style="display:none;font-size:12px;color:#ff7a14;background:rgba(230,92,0,0.1);padding:9px 11px;border-radius:12px;margin-bottom:8px;border:1px solid rgba(230,92,0,0.28);"></p>
-        <div id="challengePrizeNote" class="challenge-prize-note" style="display:none;">🏆 Лучший ответ дня по реакциям получает статус <strong>Герой дня</strong>.</div>
-        <div id="challengeYesterdayCard" class="challenge-yesterday-card" style="display:none;"></div>
+        <div id="challengePrizeNote" class="challenge-prize-note" style="display:none;">🏆 Лучший ответ дня по лайкам получает статус <strong>Герой дня</strong>.</div>
         <div id="challengeLeaderBanner" class="challenge-leader-banner" style="display:none;"></div>
+
+        <div id="commentReplyBar" class="reply-composer-bar">
+            <div class="reply-composer-info">
+                <div class="reply-composer-author" id="commentReplyAuthor">Ответ @user</div>
+                <div class="reply-composer-text" id="commentReplyText">Текст комментария</div>
+            </div>
+            <button type="button" class="reply-composer-close" onclick="cancelCommentReply()" title="Отменить ответ">✕</button>
+        </div>
+
         <div class="chat-input-area" style="margin-bottom:6px;">
             <input type="file" id="commentMediaInput" accept="image/*,video/*" style="display:none" onchange="previewCommentMedia(this)">
             <button type="button" class="attach-btn" id="commentAttachBtn" onclick="document.getElementById('commentMediaInput').click()">📎</button>
@@ -631,7 +578,7 @@
             <button type="button" class="send-btn" onclick="sendComment()">➤</button>
         </div>
         <div id="commentMediaPreview" style="display:none;justify-content:space-between;align-items:center;background:rgba(230,92,0,0.12);border:1px solid rgba(230,92,0,0.45);padding:7px 11px;border-radius:11px;margin-bottom:8px;font-size:12px;color:#ff7a14;">
-            <span id="commentMediaName">✓ Фото выбрано</span>
+            <span id="commentMediaName">✓ Файл выбрано</span>
             <button type="button" onclick="clearCommentMedia()" style="background:none;border:none;color:#ef4444;font-weight:700;cursor:pointer;font-size:12px;">✕ Убрать</button>
         </div>
         <div class="chat-box" id="commentsList" style="max-height:42vh;"></div>
@@ -696,31 +643,27 @@
     let activePostIdForComments = null;
     let isChallengeMode = false;
     let activeReplyTarget = null;
-    let activeReactionMsgId = null;
+    let activeCommentReplyTarget = null;
     let currentAuthMode = 'register';
-    let isPasswordRecoveryFlow = false;
     let pendingRegData = { email: '', name: '', username: '', avatarUrl: '' };
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
-    let viewedPostsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '[]'));
-    let messageReactionsMap = JSON.parse(localStorage.getItem('pulseCity_msg_reactions') || '{}');
-    let challengeReactsMap = JSON.parse(localStorage.getItem('pulseCity_challenge_reacts') || '{}');
-    let openMsgReactionIds = new Set();
-    let openPostReactionIds = new Set();
+
+    let likedPostsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_liked_posts') || '[]'));
+    let postLikesCounts = JSON.parse(localStorage.getItem('pulseCity_post_likes_counts') || '{}');
+    let likedCommentsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_liked_comments') || '[]'));
+    let commentLikesCounts = JSON.parse(localStorage.getItem('pulseCity_comment_likes_counts') || '{}');
+
     let globalPostsData = [];
     let globalMessagesData = [];
     let currentCommentsRows = [];
-    let globalReactionsData = {};
     let globalCommentsData = {};
-    let globalPollVotesData = {};
     let lastKnownMaxPostId = 0;
     let lastKnownMaxMsgId = 0;
     let lastRenderedPostsSignature = '';
     let lastRenderedMessagesSignature = '';
-    let userManualScrollLockUntil = 0;
     let toastTimer = null;
     let pendingToastAction = null;
     let lightboxPhotoUrl = '';
-    let confirmCallback = null;
     let authSessionEmail = '';
     let activePushSubscriptionJson = null;
 
@@ -729,6 +672,36 @@
     document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
     document.getElementById('pushToggle').classList.toggle('active', pushNotificationsEnabled);
     document.getElementById('soundToggle').classList.toggle('active', soundEnabled);
+
+    function persistLikesState() {
+        localStorage.setItem('pulseCity_liked_posts', JSON.stringify([...likedPostsSet]));
+        localStorage.setItem('pulseCity_post_likes_counts', JSON.stringify(postLikesCounts));
+        localStorage.setItem('pulseCity_liked_comments', JSON.stringify([...likedCommentsSet]));
+        localStorage.setItem('pulseCity_comment_likes_counts', JSON.stringify(commentLikesCounts));
+    }
+
+    function normalizeUsername(raw) {
+        if (!raw) return '';
+        const clean = String(raw).replace(/^🕶️\s*/, '').trim();
+        if (!clean || clean === 'Горожанин' || clean === '⚡ PulseCity') return '';
+        return clean.startsWith('@') ? clean : '@' + clean;
+    }
+
+    function openPrivateChatWithUser(rawUsername) {
+        const target = normalizeUsername(rawUsername);
+        if (!target) {
+            showPulseAlert('У этого автора скрыт профиль или нет никнейма для личного чата.');
+            return;
+        }
+        if (target === myUsername) {
+            showPulseAlert('Это ваш собственный аккаунт.');
+            return;
+        }
+        closeModal('commentsModal');
+        const chatNavBtn = document.getElementById('nav-chat');
+        switchTab('chat', chatNavBtn);
+        switchChatMode('private', target);
+    }
 
     function showPulseAlert(text) {
         document.getElementById('alertText').textContent = text;
@@ -739,26 +712,11 @@
     function closeModal(id) {
         if (id === 'commentsModal') {
             isChallengeMode = false;
+            cancelCommentReply();
             document.getElementById('challengePrizeNote').style.display = 'none';
             document.getElementById('challengeLeaderBanner').style.display = 'none';
-            document.getElementById('challengeYesterdayCard').style.display = 'none';
         }
         document.getElementById(id).classList.remove('open');
-    }
-
-    function showConfirm(title, text, callback) {
-        document.getElementById('confirmTitle').textContent = title;
-        document.getElementById('confirmText').textContent = text;
-        confirmCallback = callback;
-        document.getElementById('confirmModal').classList.add('open');
-    }
-
-    function closeConfirmModal(result) {
-        document.getElementById('confirmModal').classList.remove('open');
-        if (confirmCallback) {
-            confirmCallback(result);
-            confirmCallback = null;
-        }
     }
 
     function isFounderAccount() {
@@ -1009,7 +967,6 @@
     }
 
     function switchAuthMode(mode) {
-        isPasswordRecoveryFlow = false;
         currentAuthMode = mode;
         document.getElementById('authStepOtp').style.display = 'none';
         document.getElementById('authStepReset').style.display = 'none';
@@ -1031,6 +988,10 @@
             document.getElementById('forgotPasswordRow').style.display = 'block';
             document.getElementById('authSubmitBtn').textContent = 'Войти';
         }
+    }
+
+    function backToAuthCredentials() {
+        switchAuthMode(currentAuthMode);
     }
 
     function openForgotPasswordStep() {
@@ -1223,7 +1184,7 @@
     }
 
     async function clearLocalCache() {
-        ['pulseCity_notified_keys', 'pulseCity_viewed_posts', 'pulseCity_msg_reactions', 'pulseCity_poll_votes', 'pulseCity_challenge_reacts'].forEach(k => localStorage.removeItem(k));
+        ['pulseCity_notified_keys', 'pulseCity_liked_posts', 'pulseCity_post_likes_counts', 'pulseCity_liked_comments', 'pulseCity_comment_likes_counts'].forEach(k => localStorage.removeItem(k));
         if ('caches' in window) {
             try {
                 const keys = await caches.keys();
@@ -1382,6 +1343,7 @@
         const id = await getOrCreateChallengePostId();
         activePostIdForComments = id;
         isChallengeMode = true;
+        cancelCommentReply();
         document.getElementById('commentsModalTitle').textContent = '🎯 Вызов дня • Участники';
         const promptEl = document.getElementById('commentsChallengePrompt');
         promptEl.textContent = getCurrentChallengeText();
@@ -1394,28 +1356,152 @@
     function openComments(postId) {
         activePostIdForComments = postId;
         isChallengeMode = false;
+        cancelCommentReply();
         document.getElementById('commentsModalTitle').textContent = 'Комментарии';
         document.getElementById('commentsChallengePrompt').style.display = 'none';
         document.getElementById('challengePrizeNote').style.display = 'none';
+        document.getElementById('challengeLeaderBanner').style.display = 'none';
         openModal('commentsModal');
         loadComments(postId);
+    }
+
+    function parseCommentPayload(rawText) {
+        const str = String(rawText || '');
+        const quoteMatch = str.match(/\[replyto:([^|\]]+)\|([^\]]*)\]\s*/);
+        let replyAuthor = '';
+        let replyText = '';
+        let body = str;
+        if (quoteMatch) {
+            replyAuthor = quoteMatch[1];
+            replyText = quoteMatch[2];
+            body = body.replace(quoteMatch[0], '');
+        }
+        const mediaMatch = body.match(/\[media:([^\]]+)\]/);
+        let mediaUrl = '';
+        if (mediaMatch) {
+            mediaUrl = mediaMatch[1];
+            body = body.replace(mediaMatch[0], '').trim();
+        }
+        return { replyAuthor, replyText, body, mediaUrl };
+    }
+
+    function setCommentReplyTarget(author, text) {
+        activeCommentReplyTarget = {
+            author: author || 'Пользователь',
+            text: (text || '').slice(0, 120)
+        };
+        document.getElementById('commentReplyAuthor').textContent = `Ответ ${activeCommentReplyTarget.author}`;
+        document.getElementById('commentReplyText').textContent = activeCommentReplyTarget.text || 'Вложение';
+        document.getElementById('commentReplyBar').classList.add('open');
+        document.getElementById('commentInput').focus();
+    }
+
+    function cancelCommentReply() {
+        activeCommentReplyTarget = null;
+        const bar = document.getElementById('commentReplyBar');
+        if (bar) bar.classList.remove('open');
+    }
+
+    function toggleCommentLike(commentId, btnEl) {
+        const key = String(commentId);
+        const currentCount = Number(commentLikesCounts[key] || 0);
+        if (likedCommentsSet.has(key)) {
+            likedCommentsSet.delete(key);
+            commentLikesCounts[key] = Math.max(0, currentCount - 1);
+        } else {
+            likedCommentsSet.add(key);
+            commentLikesCounts[key] = currentCount + 1;
+        }
+        persistLikesState();
+        if (btnEl) {
+            btnEl.classList.toggle('active', likedCommentsSet.has(key));
+            btnEl.classList.add('pop');
+            setTimeout(() => btnEl.classList.remove('pop'), 350);
+        }
+        renderCommentsList(currentCommentsRows);
+    }
+
+    function renderCommentsList(rows) {
+        const list = document.getElementById('commentsList');
+        list.innerHTML = '';
+        if (!rows || rows.length === 0) {
+            list.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:10px 0;">Пока нет ответов.</p>';
+            document.getElementById('challengeLeaderBanner').style.display = 'none';
+            return;
+        }
+
+        let leaderId = null;
+        let maxLikes = 0;
+        if (isChallengeMode) {
+            rows.forEach(c => {
+                const cnt = Number(commentLikesCounts[String(c.id)] || 0);
+                if (cnt > maxLikes) {
+                    maxLikes = cnt;
+                    leaderId = c.id;
+                }
+            });
+            const banner = document.getElementById('challengeLeaderBanner');
+            if (leaderId && maxLikes > 0) {
+                const leaderObj = rows.find(x => x.id === leaderId);
+                banner.style.display = 'flex';
+                banner.innerHTML = `<span>👑 Лидер дня: <strong>${leaderObj?.sender || 'Участник'}</strong></span><span>❤️ ${maxLikes}</span>`;
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        rows.forEach(c => {
+            const parsed = parseCommentPayload(c.text);
+            const cKey = String(c.id);
+            const isLiked = likedCommentsSet.has(cKey);
+            const likesNum = Number(commentLikesCounts[cKey] || 0);
+            const isLeader = isChallengeMode && leaderId && c.id === leaderId && maxLikes > 0;
+            const safeSender = (c.sender || 'Пользователь').replace(/'/g, "\\'");
+            const safeSnippet = (parsed.body || 'Вложение').replace(/'/g, "\\'").replace(/\n/g, ' ');
+
+            const row = document.createElement('div');
+            row.className = 'msg-row' + (isChallengeMode ? ' challenge-entry' : '') + (isLeader ? ' leader-entry' : '');
+
+            const avatarHtml = c.avatar_url
+                ? `<img src="${c.avatar_url}">`
+                : (c.sender && c.sender.length > 1 ? c.sender[1].toUpperCase() : 'U');
+
+            const quoteHtml = parsed.replyAuthor
+                ? `<div class="msg-quote-box"><div class="msg-quote-author">↩️ ${parsed.replyAuthor}</div><div class="msg-quote-text">${parsed.replyText || ''}</div></div>`
+                : '';
+
+            const mediaHtml = parsed.mediaUrl
+                ? (parsed.mediaUrl.match(/\.(mp4|mov|webm|ogg)$/i)
+                    ? `<video src="${parsed.mediaUrl}" class="msg-media" controls playsinline preload="metadata"></video>`
+                    : `<img src="${parsed.mediaUrl}" class="msg-media" loading="lazy" onclick="openPhotoLightbox('${parsed.mediaUrl}')">`)
+                : '';
+
+            row.innerHTML = `
+                <div class="msg-avatar" onclick="openPrivateChatWithUser('${safeSender}')" title="Написать в личку">${avatarHtml}</div>
+                <div class="msg-col" style="flex:1;">
+                    <div class="msg-bubble">
+                        <div>
+                            <span class="msg-author" onclick="openPrivateChatWithUser('${safeSender}')">${c.sender || 'Пользователь'}</span>
+                            ${isLeader ? '<span class="leader-badge">👑 Герой дня</span>' : ''}
+                        </div>
+                        ${quoteHtml}
+                        <div>${parsed.body || ''}</div>
+                        ${mediaHtml}
+                        <div class="comment-tools-row">
+                            <button type="button" class="comment-mini-btn ${isLiked ? 'active' : ''}" onclick="toggleCommentLike('${cKey}', this)">❤️ <span>${likesNum}</span></button>
+                            <button type="button" class="comment-mini-btn" onclick="setCommentReplyTarget('${safeSender}', '${safeSnippet}')">↩️ Ответить</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            list.appendChild(row);
+        });
     }
 
     async function loadComments(postId) {
         const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: false });
         currentCommentsRows = Array.isArray(data) ? data : [];
-        const list = document.getElementById('commentsList');
-        list.innerHTML = '';
-        if (currentCommentsRows.length === 0) {
-            list.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:10px 0;">Пока нет ответов.</p>';
-            return;
-        }
-        currentCommentsRows.forEach(c => {
-            const row = document.createElement('div');
-            row.className = 'msg-row';
-            row.innerHTML = `<div class="msg-avatar">${c.sender ? c.sender[1].toUpperCase() : 'U'}</div><div class="msg-bubble"><div class="msg-author">${c.sender}</div><div>${c.text}</div></div>`;
-            list.appendChild(row);
-        });
+        renderCommentsList(currentCommentsRows);
     }
 
     function previewCommentMedia(input) {
@@ -1438,9 +1524,24 @@
         if (!txt && !selectedCommentFile) return;
         let mediaUrl = null;
         if (selectedCommentFile) mediaUrl = await uploadFileToSupabase(selectedCommentFile);
-        const finalText = mediaUrl ? `${txt || '📎 Медиа'} [media:${mediaUrl}]` : txt;
-        await supabaseClient.from('comments').insert([{ post_id: activePostIdForComments, sender: myUsername, text: finalText, avatar_url: myAvatar }]);
+
+        let prefix = '';
+        if (activeCommentReplyTarget) {
+            const cleanAuthor = String(activeCommentReplyTarget.author).replace(/[|\]]/g, '');
+            const cleanText = String(activeCommentReplyTarget.text).replace(/[|\]]/g, '');
+            prefix = `[replyto:${cleanAuthor}|${cleanText}] `;
+        }
+        const mediaTag = mediaUrl ? ` [media:${mediaUrl}]` : '';
+        const finalText = `${prefix}${txt || (mediaUrl ? '📎 Медиа' : '')}${mediaTag}`;
+
+        await supabaseClient.from('comments').insert([{
+            post_id: activePostIdForComments,
+            sender: myUsername,
+            text: finalText,
+            avatar_url: myAvatar
+        }]);
         inp.value = '';
+        cancelCommentReply();
         clearCommentMedia();
         loadComments(activePostIdForComments);
         loadPostsFromCloud(true);
@@ -1470,10 +1571,6 @@
         let mediaUrl = null;
         if (selectedNewsFile) mediaUrl = await uploadFileToSupabase(selectedNewsFile);
 
-        const pollQ = document.getElementById('pollQuestionInput').value.trim();
-        const poll1 = document.getElementById('pollOpt1Input').value.trim();
-        const poll2 = document.getElementById('pollOpt2Input').value.trim();
-
         const payload = {
             city: selectedCity,
             category: 'general',
@@ -1484,10 +1581,6 @@
             author_avatar: isAnonymousPost ? '' : myAvatar,
             views: 1
         };
-        if (pollQ && poll1 && poll2) {
-            payload.poll_question = pollQ;
-            payload.poll_options = [poll1, poll2];
-        }
 
         const { error } = await supabaseClient.from('posts').insert([payload]);
         document.getElementById('loadingModal').classList.remove('open');
@@ -1495,15 +1588,32 @@
 
         document.getElementById('newsTitleInput').value = '';
         document.getElementById('newsTextInput').value = '';
-        document.getElementById('pollQuestionInput').value = '';
-        document.getElementById('pollOpt1Input').value = '';
-        document.getElementById('pollOpt2Input').value = '';
         selectedNewsFile = null;
         document.getElementById('newsMediaPreview').style.display = 'none';
         isAnonymousPost = false;
         document.getElementById('anonToggle').classList.remove('active');
         closeModal('newsModal');
         loadPostsFromCloud(true);
+    }
+
+    function togglePostLike(postId, btnEl) {
+        const key = String(postId);
+        const currentCount = Number(postLikesCounts[key] || 0);
+        if (likedPostsSet.has(key)) {
+            likedPostsSet.delete(key);
+            postLikesCounts[key] = Math.max(0, currentCount - 1);
+        } else {
+            likedPostsSet.add(key);
+            postLikesCounts[key] = currentCount + 1;
+        }
+        persistLikesState();
+        if (btnEl) {
+            btnEl.classList.toggle('liked', likedPostsSet.has(key));
+            btnEl.classList.add('pop');
+            setTimeout(() => btnEl.classList.remove('pop'), 350);
+            const span = btnEl.querySelector('.post-like-count');
+            if (span) span.textContent = postLikesCounts[key];
+        }
     }
 
     async function loadPostsFromCloud(forced = false) {
@@ -1551,18 +1661,27 @@
         regular.forEach(p => {
             const card = document.createElement('div');
             card.className = 'card';
+            const pKey = String(p.id);
+            const isLiked = likedPostsSet.has(pKey);
+            const likesNum = Number(postLikesCounts[pKey] || 0);
+            const canOpenChat = Boolean(normalizeUsername(p.author_username));
+            const safeAuthor = (p.author_username || '').replace(/'/g, "\\'");
+
             const mediaHtml = p.media_url
                 ? (p.media_url.match(/\.(mp4|mov|webm|ogg)$/i)
                     ? `<video src="${p.media_url}" class="news-media" controls playsinline preload="metadata"></video>`
-                    : `<img src="${p.media_url}" class="news-media" loading="lazy">`)
+                    : `<img src="${p.media_url}" class="news-media" loading="lazy" onclick="openPhotoLightbox('${p.media_url}')" style="cursor:zoom-in;">`)
                 : '';
             const cCount = globalCommentsData[p.id] || 0;
+
             card.innerHTML = `
                 <div class="news-header">
                     <div class="news-author-info">
-                        <div class="news-author-avatar">${p.author_avatar ? `<img src="${p.author_avatar}">` : (p.author_username?.[1]?.toUpperCase() || 'U')}</div>
+                        <div class="news-author-avatar ${canOpenChat ? 'clickable' : ''}" ${canOpenChat ? `onclick="openPrivateChatWithUser('${safeAuthor}')" title="Написать в личку"` : ''}>
+                            ${p.author_avatar ? `<img src="${p.author_avatar}">` : (p.author_username?.[1]?.toUpperCase() || 'U')}
+                        </div>
                         <div class="news-meta">
-                            <span class="news-author-name">${p.author_username || 'Автор'}</span>
+                            <span class="news-author-name ${canOpenChat ? 'clickable' : ''}" ${canOpenChat ? `onclick="openPrivateChatWithUser('${safeAuthor}')"` : ''}>${p.author_username || 'Автор'}</span>
                             <span class="news-time-tag">${formatNiceTime(p.created_at)} • ${p.city}</span>
                         </div>
                     </div>
@@ -1571,7 +1690,10 @@
                 <div class="news-media-wrap">${mediaHtml}</div>
                 <p>${p.content}</p>
                 <div class="card-actions">
-                    <button type="button" class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
+                    <div class="card-actions-left">
+                        <button type="button" class="action-btn ${isLiked ? 'liked' : ''}" onclick="togglePostLike('${pKey}', this)">❤️ <span class="post-like-count">${likesNum}</span></button>
+                        <button type="button" class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
+                    </div>
                     <div class="views-badge">👁️ ${p.views || 1}</div>
                 </div>
             `;
@@ -1611,7 +1733,7 @@
         });
         const keys = Object.keys(partners);
         if (keys.length === 0) {
-            list.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:12px 0;">Личных чатов пока нет.</p>';
+            list.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px;margin:12px 0;">Личных чатов пока нет. Нажмите на аватарку автора в ленте или чате, чтобы начать диалог.</p>';
             return;
         }
         keys.forEach(p => {
@@ -1666,13 +1788,14 @@
         }
         msgs.forEach(m => {
             const isMine = m.sender === myUsername;
+            const safeSender = (m.sender || '').replace(/'/g, "\\'");
             const row = document.createElement('div');
             row.className = 'msg-row' + (isMine ? ' mine' : '');
             row.innerHTML = `
-                <div class="msg-avatar">${m.sender?.[1]?.toUpperCase() || 'U'}</div>
+                <div class="msg-avatar" onclick="openPrivateChatWithUser('${safeSender}')" title="Написать в личку">${m.sender?.[1]?.toUpperCase() || 'U'}</div>
                 <div class="msg-col">
                     <div class="msg-bubble">
-                        <div class="msg-author">${m.sender}</div>
+                        <div class="msg-author" onclick="openPrivateChatWithUser('${safeSender}')">${m.sender}</div>
                         <div>${m.text || ''}</div>
                         <div class="msg-time">${formatNiceTime(m.created_at)}</div>
                     </div>
@@ -1802,6 +1925,12 @@
             .subscribe();
     }
 
+    function openPhotoLightbox(url) {
+        if (!url) return;
+        lightboxPhotoUrl = url;
+        document.getElementById('lightboxImg').src = url;
+        document.getElementById('lightboxModal').classList.add('open');
+    }
     function closeLightbox() { document.getElementById('lightboxModal').classList.remove('open'); }
     function downloadLightboxPhoto() { if (lightboxPhotoUrl) window.open(lightboxPhotoUrl, '_blank'); }
 
