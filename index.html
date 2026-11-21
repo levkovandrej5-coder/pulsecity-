@@ -43,9 +43,10 @@
         .toast-title{font-size:13px;font-weight:800;color:#ff7a14 !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .toast-text{font-size:12px;color:#f3f4f6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-        .container{flex:1;overflow-y:auto;padding:10px 14px;padding-bottom:104px;position:relative}
-        .content{display:none;animation:fadeIn .25s ease}
-        .content.active{display:block}
+        .container{flex:1;overflow-y:auto;padding:10px 14px;padding-bottom:92px;position:relative;display:flex;flex-direction:column}
+        .content{display:none;animation:fadeIn .25s ease;flex:1;min-height:0}
+        .content.active{display:flex;flex-direction:column}
+        #tab-feed.content.active, #tab-profile.content.active{display:block}
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
         .search-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:11px 14px;color:#fff;font-size:14px;outline:none;transition:.2s}
@@ -54,10 +55,10 @@
         .btn-main{width:100%;background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff !important;border:none;border-radius:18px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 10px 26px rgba(230,92,0,0.38) !important;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
         .btn-main:active{transform:scale(0.98)}
         
-        #fabAddNews{position:fixed;bottom:84px;right:16px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff !important;border:1px solid rgba(255,255,255,0.25);box-shadow:0 8px 22px rgba(230,92,0,0.5) !important;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:950;transition:.2s}
+        #fabAddNews{position:fixed;bottom:80px;right:16px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff !important;border:1px solid rgba(255,255,255,0.25);box-shadow:0 8px 22px rgba(230,92,0,0.5) !important;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:950;transition:.2s}
         #fabAddNews:active{transform:scale(0.92)}
 
-        #scrollTopBtn{position:fixed;bottom:142px;right:19px;background:rgba(24,18,14,0.9);border:1px solid rgba(230,92,0,0.45) !important;color:#ff7a14 !important;width:38px;height:38px;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,0.6);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:900;transition:.2s}
+        #scrollTopBtn{position:fixed;bottom:138px;right:19px;background:rgba(24,18,14,0.9);border:1px solid rgba(230,92,0,0.45) !important;color:#ff7a14 !important;width:38px;height:38px;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,0.6);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:900;transition:.2s}
         #scrollTopBtn:active{transform:scale(0.9)}
 
         .challenge-pinned-card {
@@ -117,7 +118,17 @@
 
         .card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:22px;padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 32px rgba(0,0,0,0.6);position:relative;overflow:hidden}
         .card.admin-card{border:1px solid rgba(230,92,0,0.45) !important;background:linear-gradient(145deg,rgba(230,92,0,0.12),rgba(255,115,0,0.03)) !important;}
-        .chat-main-card{padding:12px;margin-bottom:10px;border-radius:20px;}
+
+        /* Компактная карточка чата, прижатая вниз */
+        .chat-main-card{
+            padding:8px 10px 6px;
+            margin-bottom:0;
+            border-radius:18px;
+            flex:1;
+            min-height:0;
+            display:flex;
+            flex-direction:column;
+        }
         
         .skeleton-card{background:rgba(255,255,255,0.03);border-radius:22px;padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.05);animation:pulseSkeleton 1.5s infinite ease-in-out}
         @keyframes pulseSkeleton{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}
@@ -174,6 +185,7 @@
         }
         
         .views-badge{font-size:12px;color:#9ca3af;display:flex;align-items:center;gap:4px;font-weight:600}
+        .comment-views-badge{font-size:10px;color:#9ca3af;display:inline-flex;align-items:center;gap:2px;font-weight:600}
         .delete-btn{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer}
         
         .btn-sec{background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:8px;transition:.2s}
@@ -182,31 +194,32 @@
         .link-reset-btn{background:none;border:none;color:#ff7a14 !important;font-size:13px;font-weight:700;cursor:pointer;padding:6px 4px;margin-bottom:10px;display:inline-block;text-decoration:underline}
         .link-reset-btn:active{opacity:0.75}
 
-        .chat-tabs{display:flex;gap:6px;margin-bottom:8px}
-        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;padding:9px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;position:relative}
+        .chat-tabs{display:flex;gap:6px;margin-bottom:5px;flex-shrink:0}
+        .chat-tab-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;padding:7px;border-radius:11px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;position:relative}
         .chat-tab-btn.active{background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 18px rgba(230,92,0,0.38) !important}
 
         .unread-badge{background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:5px;display:inline-block;vertical-align:middle}
 
-        .chat-header-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;min-height:30px}
+        .chat-header-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;min-height:24px;flex-shrink:0}
         .chat-header-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
-        .back-chats-link{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ff7a14 !important;font-size:12px;font-weight:700;padding:5px 10px;border-radius:10px;display:none;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;transition:.18s}
+        .back-chats-link{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ff7a14 !important;font-size:11px;font-weight:700;padding:4px 9px;border-radius:9px;display:none;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;transition:.18s}
         .back-chats-link.visible{display:inline-flex}
         .back-chats-link:active{transform:scale(0.95);background:rgba(230,92,0,0.2) !important}
 
-        .pinned-msg-box{background:rgba(230,92,0,0.12) !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:12px;padding:8px 11px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+        .pinned-msg-box{background:rgba(230,92,0,0.12) !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:10px;padding:6px 10px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;font-size:11px;flex-shrink:0}
         
-        .chat-box{display:flex;flex-direction:column;gap:10px;margin:6px 0 6px;max-height:42vh;overflow-y:auto;padding-right:4px}
-        .msg-row{display:flex;align-items:flex-end;gap:8px;max-width:92%;position:relative}
+        /* Максимально просторная область сообщений, прижимающая строку ввода к низу */
+        .chat-box{display:flex;flex-direction:column;gap:8px;margin:2px 0 2px;flex:1;min-height:0;max-height:none;overflow-y:auto;padding-right:3px}
+        .msg-row{display:flex;align-items:flex-end;gap:7px;max-width:92%;position:relative}
         .msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
         
-        .msg-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#e65c00,#ff7300) !important;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(230,92,0,0.45) !important;cursor:pointer}
+        .msg-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#e65c00,#ff7300) !important;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;object-fit:cover;overflow:hidden;border:2px solid rgba(230,92,0,0.45) !important;cursor:pointer}
         .msg-avatar img{width:100%;height:100%;object-fit:cover}
 
         .msg-col{display:flex;flex-direction:column;gap:4px;min-width:0;max-width:100%}
         .msg-row.mine .msg-col{align-items:flex-end}
         
-        .msg-bubble{background:rgba(255,255,255,0.08);padding:9px 13px;border-radius:16px 16px 16px 6px;font-size:13px;line-height:1.4;word-break:break-word;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer}
+        .msg-bubble{background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:16px 16px 16px 6px;font-size:13px;line-height:1.38;word-break:break-word;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer}
         .msg-row.mine .msg-bubble{border-radius:16px 16px 6px 16px;background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(230,92,0,0.38) !important}
         .msg-author{font-size:11px;font-weight:700;color:#ff7a14 !important;cursor:pointer}
         .msg-row.mine .msg-author{display:none}
@@ -221,18 +234,23 @@
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
         /* Реакции на сообщения: скрыты по умолчанию, открываются при нажатии на сообщение; при выборе одной остаётся только выбранная */
-        .msg-reactions-row{display:none;align-items:center;flex-wrap:wrap;gap:4px;padding:0 2px}
+        .msg-reactions-row{display:none;align-items:center;flex-wrap:wrap;gap:5px;padding:2px 2px}
         .msg-row.reactions-open .msg-reactions-row{display:flex}
         .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill.picked-only{display:inline-flex}
         .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill:not(.picked-only),
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-add-react-btn{display:none}
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-add-react-btn,
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-quick-react-btn{display:none}
         .msg-row.reactions-open .msg-reactions-row .msg-react-pill,
-        .msg-row.reactions-open .msg-reactions-row .msg-add-react-btn{display:inline-flex}
+        .msg-row.reactions-open .msg-reactions-row .msg-add-react-btn,
+        .msg-row.reactions-open .msg-reactions-row .msg-quick-react-btn{display:inline-flex}
 
-        .msg-react-pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#f3f4f6;border-radius:10px;padding:2px 6px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;cursor:pointer;transition:.15s}
-        .msg-react-pill.active{background:rgba(230,92,0,0.28) !important;border-color:#e65c00 !important;color:#ff9440 !important}
+        .msg-quick-react-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:10px;padding:3px 7px;font-size:12px;cursor:pointer;transition:.15s}
+        .msg-quick-react-btn:active{transform:scale(0.88);background:rgba(230,92,0,0.28) !important;border-color:#e65c00 !important}
+
+        .msg-react-pill{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#f3f4f6;border-radius:10px;padding:3px 7px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;cursor:pointer;transition:.15s}
+        .msg-react-pill.active{background:rgba(230,92,0,0.32) !important;border-color:#e65c00 !important;color:#ff9440 !important}
         .msg-react-pill:active{transform:scale(0.9)}
-        .msg-add-react-btn{background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.16);color:#9ca3af;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:700;cursor:pointer}
+        .msg-add-react-btn{background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.18);color:#9ca3af;border-radius:10px;padding:3px 7px;font-size:11px;font-weight:700;cursor:pointer}
         .msg-add-react-btn:active{color:#ff7a14 !important;border-color:#e65c00 !important}
 
         .msg-time{font-size:10px;color:rgba(255,255,255,0.65);margin-top:3px;text-align:right}
@@ -258,23 +276,24 @@
         #lightboxImg{max-width:100%;max-height:78vh;border-radius:14px;object-fit:contain;box-shadow:0 18px 45px rgba(0,0,0,0.9);}
         .lightbox-actions{display:flex;gap:10px;width:100%;max-width:360px;}
 
-        .reply-composer-bar{display:none;align-items:center;justify-content:space-between;gap:8px;background:rgba(230,92,0,0.14) !important;border:1px solid rgba(230,92,0,0.45) !important;border-left:3px solid #e65c00 !important;border-radius:11px;padding:6px 10px;margin-bottom:6px;font-size:12px}
+        .reply-composer-bar{display:none;align-items:center;justify-content:space-between;gap:8px;background:rgba(230,92,0,0.14) !important;border:1px solid rgba(230,92,0,0.45) !important;border-left:3px solid #e65c00 !important;border-radius:10px;padding:5px 9px;margin-bottom:4px;font-size:11px;flex-shrink:0}
         .reply-composer-bar.open{display:flex}
         .reply-composer-info{min-width:0;flex:1}
         .reply-composer-author{font-weight:800;color:#ff7a14 !important;font-size:11px}
         .reply-composer-text{color:#e5e7eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
         .reply-composer-close{background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;padding:2px 6px;flex-shrink:0}
         
-        .typing-indicator{font-size:11px;color:#ff7a14 !important;min-height:13px;margin-bottom:4px;font-style:italic}
+        .typing-indicator{font-size:10px;color:#ff7a14 !important;min-height:0;max-height:14px;line-height:14px;margin-bottom:2px;font-style:italic;flex-shrink:0}
 
-        .chat-input-area{display:flex;gap:6px;align-items:center;margin-top:2px;margin-bottom:0}
-        .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff7a14 !important;width:40px;height:40px;border-radius:12px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+        /* Прижатая максимально к нижнему краю плашка ввода сообщений */
+        .chat-input-area{display:flex;gap:5px;align-items:center;margin-top:0;margin-bottom:0;padding-top:2px;flex-shrink:0}
+        .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff7a14 !important;width:36px;height:36px;border-radius:11px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .attach-btn.has-file{background:rgba(230,92,0,0.25) !important;border-color:#e65c00 !important;color:#fff !important}
-        .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px 12px;color:#fff;font-size:13px;outline:none;min-width:0}
+        .chat-input-area input[type="text"]{flex:1;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);border-radius:11px;padding:8px 11px;color:#fff;font-size:13px;outline:none;min-width:0;height:36px}
         .chat-input-area input[type="text"]:focus{border-color:#e65c00 !important}
-        .send-btn{background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff;border:none;border-radius:12px;height:40px;padding:0 15px;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0}
+        .send-btn{background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff;border:none;border-radius:11px;height:36px;padding:0 13px;font-size:14px;font-weight:800;cursor:pointer;flex-shrink:0}
 
-        .emoji-picker-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+        .emoji-picker-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
         .emoji-pick-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(230,92,0,0.45) !important;border-radius:14px;width:46px;height:46px;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
         .emoji-pick-btn:active{transform:scale(0.9);background:rgba(230,92,0,0.25) !important}
         
@@ -283,7 +302,7 @@
         .modal-card{background:#140f0c !important;border:1px solid rgba(230,92,0,0.45) !important;border-radius:24px;padding:20px;width:100%;max-width:420px;box-shadow:0 30px 60px rgba(0,0,0,0.9);max-height:88vh;overflow-y:auto;display:flex;flex-direction:column}
         .modal-card h3{font-size:20px;margin-bottom:14px;font-weight:800}
         .modal-card input,.modal-card textarea,.modal-card select{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px;color:#fff;font-size:14px;margin-bottom:10px;outline:none}
-        .city-list-scroll{max-height:46vh;overflow-y:auto;padding-right:2px;margin-bottom:10px}
+        .city-list-scroll{max-height:48vh;overflow-y:auto;padding-right:2px;margin-bottom:10px}
         .city-option{width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:11px 14px;border-radius:14px;font-size:14px;font-weight:600;margin-bottom:7px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:space-between}
         .city-option:hover{background:rgba(230,92,0,0.15) !important;border-color:#e65c00 !important}
         .city-option.selected{background:rgba(230,92,0,0.22) !important;border-color:#ff7a14 !important;color:#ff9440 !important}
@@ -308,19 +327,19 @@
         .support-ticket-topic{display:inline-block;background:rgba(230,92,0,0.2) !important;color:#ff7a14 !important;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px}
         .support-ticket-msg{font-size:12px;color:#f3f4f6;line-height:1.4;white-space:pre-line;word-break:break-word;margin-bottom:6px}
 
-        .nav-wrapper{position:fixed;bottom:8px;left:12px;right:12px;z-index:1000}
-        nav{background:linear-gradient(180deg,rgba(20,14,10,0.97),rgba(10,7,5,0.99)) !important;backdrop-filter:blur(24px);border:1px solid rgba(230,92,0,0.28) !important;border-radius:22px;display:flex;padding:4px;box-shadow:0 12px 28px rgba(0,0,0,0.85);gap:5px}
-        nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:17px;padding:6px 4px;color:#9ca3af;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:.2s;min-height:46px}
-        nav button span.icon{font-size:19px;line-height:1.05}
+        .nav-wrapper{position:fixed;bottom:6px;left:12px;right:12px;z-index:1000}
+        nav{background:linear-gradient(180deg,rgba(20,14,10,0.97),rgba(10,7,5,0.99)) !important;backdrop-filter:blur(24px);border:1px solid rgba(230,92,0,0.28) !important;border-radius:20px;display:flex;padding:3px;box-shadow:0 12px 28px rgba(0,0,0,0.85);gap:5px}
+        nav button{flex:1;background:rgba(255,255,255,0.02);border:1px solid transparent;border-radius:15px;padding:5px 4px;color:#9ca3af;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:.2s;min-height:42px}
+        nav button span.icon{font-size:18px;line-height:1.05}
         nav button.active{background:linear-gradient(135deg,#e65c00,#ff7300) !important;color:#fff !important;border-color:rgba(255,255,255,0.25);box-shadow:0 6px 16px rgba(230,92,0,0.38) !important}
 
         @media (max-width: 380px) {
-            .nav-wrapper{bottom:6px;left:8px;right:8px}
-            nav{padding:3px;gap:4px;border-radius:18px}
-            nav button{padding:5px 2px;font-size:10px;min-height:42px;border-radius:14px}
-            nav button span.icon{font-size:17px}
-            #fabAddNews{bottom:72px;right:12px;width:44px;height:44px;font-size:22px}
-            .container{padding-bottom:92px}
+            .nav-wrapper{bottom:5px;left:8px;right:8px}
+            nav{padding:3px;gap:4px;border-radius:16px}
+            nav button{padding:4px 2px;font-size:10px;min-height:40px;border-radius:13px}
+            nav button span.icon{font-size:16px}
+            #fabAddNews{bottom:70px;right:12px;width:44px;height:44px;font-size:22px}
+            .container{padding-bottom:84px}
         }
     </style>
 </head>
@@ -399,21 +418,21 @@
             <div class="chat-header-bar">
                 <div class="chat-header-left">
                     <button type="button" id="dmBackChatsBtn" class="back-chats-link" onclick="backToConversationsList()">← Чаты</button>
-                    <h3 id="chatTitle" style="margin:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Городской чат • Иркутск</h3>
+                    <h3 id="chatTitle" style="margin:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Городской чат • Иркутск</h3>
                 </div>
             </div>
             
-            <input type="text" id="chatSearchInput" class="search-input" placeholder="🔍 Поиск по сообщениям..." oninput="filterChatSearch()" style="margin-bottom:8px;padding:9px 12px;font-size:13px;">
+            <input type="text" id="chatSearchInput" class="search-input" placeholder="🔍 Поиск по сообщениям..." oninput="filterChatSearch()" style="margin-bottom:5px;padding:7px 11px;font-size:12px;border-radius:11px;flex-shrink:0;">
 
             <div id="pinnedMsgContainer" class="pinned-msg-box" style="display:none;">
                 <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;padding-right:8px;">
                     📌 <strong style="color:#ff7a14">Закреплено:</strong> <span id="pinnedMsgText" style="color:#e5e7eb">...</span>
                 </div>
-                <button onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;display:none;">✕ Снять</button>
+                <button onclick="unpinMessage()" id="unpinBtn" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px;display:none;">✕ Снять</button>
             </div>
             
-            <div id="privateSectionContainer" style="display:none;margin-bottom:6px;">
-                <div id="conversationsList" style="display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow-y:auto;"></div>
+            <div id="privateSectionContainer" style="display:none;margin-bottom:4px;flex:1;min-height:0;overflow-y:auto;">
+                <div id="conversationsList" style="display:flex;flex-direction:column;gap:7px;"></div>
             </div>
 
             <div class="chat-box" id="chatMessages"></div>
@@ -431,7 +450,7 @@
             <div class="chat-input-area" id="chatInputAreaWrapper">
                 <input type="file" id="publicMediaInput" accept="image/*,video/*" style="display:none" onchange="handleMediaUpload(this)">
                 <button class="attach-btn" onclick="document.getElementById('publicMediaInput').click()">📎</button>
-                <input type="text" id="messageInput" placeholder="Сообщение или фото/видео..." oninput="notifyTyping()" onkeydown="if(event.key==='Enter')sendPublicMessage()">
+                <input type="text" id="messageInput" placeholder="Написать сообщение..." oninput="notifyTyping()" onkeydown="if(event.key==='Enter')sendPublicMessage()">
                 <button class="send-btn" onclick="sendPublicMessage()">➤</button>
             </div>
         </div>
@@ -464,13 +483,14 @@
 </div>
 
 <div id="msgReactionPickerModal" class="modal" onclick="if(event.target===this)closeModal('msgReactionPickerModal')">
-    <div class="modal-card" style="max-width:300px;text-align:center;">
+    <div class="modal-card" style="max-width:320px;text-align:center;">
         <h3 style="font-size:17px;margin-bottom:12px;">Реакция на сообщение</h3>
         <div class="emoji-picker-row">
             <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('🔥')">🔥</button>
             <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('👍')">👍</button>
             <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('😂')">😂</button>
             <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('❤️')">❤️</button>
+            <button type="button" class="emoji-pick-btn" onclick="pickMessageReaction('👏')">👏</button>
         </div>
         <button type="button" class="btn-sec" onclick="closeModal('msgReactionPickerModal')" style="margin-bottom:0;padding:10px;">Отмена</button>
     </div>
@@ -804,7 +824,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = 'BIhsxzHD_xzNi6mQOajxyzNpklL-3uFmetWJeJ7PqAnpPhnBGR76X2j72MF4vVXhMs0WZl01K1SHgxLtk2-fQnk';
-    const THEME_REVISION = 'orange_v11_reactions_cities';
+    const THEME_REVISION = 'orange_v12_views_msgreacts_cities';
 
     const MAJOR_CITIES = [
         'Иркутск',
@@ -829,13 +849,90 @@
         'Краснодар',
         'Томск',
         'Кемерово',
+        'Новокузнецк',
         'Барнаул',
+        'Бийск',
+        'Ижевск',
+        'Ульяновск',
+        'Ярославль',
+        'Саратов',
+        'Тольятти',
+        'Махачкала',
+        'Оренбург',
+        'Набережные Челны',
+        'Рязань',
+        'Астрахань',
+        'Пенза',
+        'Липецк',
+        'Киров',
+        'Чебоксары',
+        'Калининград',
+        'Тула',
+        'Курск',
+        'Ставрополь',
+        'Сочи',
+        'Братск',
+        'Ангарск',
+        'Усть-Илимск',
+        'Шелехов',
+        'Усолье-Сибирское',
+        'Тайшет',
         'Улан-Удэ',
         'Чита',
         'Якутск',
         'Мирный',
-        'Калининград',
-        'Сочи'
+        'Нерюнгри',
+        'Благовещенск',
+        'Южно-Сахалинск',
+        'Петропавловск-Камчатский',
+        'Магадан',
+        'Абакан',
+        'Кызыл',
+        'Горно-Алтайск',
+        'Мурманск',
+        'Архангельск',
+        'Северодвинск',
+        'Сыктывкар',
+        'Вологда',
+        'Череповец',
+        'Петрозаводск',
+        'Псков',
+        'Великий Новгород',
+        'Смоленск',
+        'Тверь',
+        'Калуга',
+        'Брянск',
+        'Орёл',
+        'Тамбов',
+        'Белгород',
+        'Владимир',
+        'Иваново',
+        'Кострома',
+        'Сургут',
+        'Нижневартовск',
+        'Ханты-Мансийск',
+        'Новый Уренгой',
+        'Ноябрьск',
+        'Норильск',
+        'Ачинск',
+        'Канск',
+        'Магнитогорск',
+        'Нижний Тагил',
+        'Стерлитамак',
+        'Салават',
+        'Орск',
+        'Энгельс',
+        'Балаково',
+        'Волжский',
+        'Таганрог',
+        'Шахты',
+        'Новороссийск',
+        'Армавир',
+        'Пятигорск',
+        'Кисловодск',
+        'Грозный',
+        'Владикавказ',
+        'Нальчик'
     ];
 
     function openCityModal() {
@@ -874,7 +971,7 @@
 
     // Состояние раскрытия реакций для постов и сообщений
     const expandedPostReactions = new Set();
-    const pickedPostReactionOnly = {}; // postId -> emoji (если выбрана одна реакция и плашка свернута)
+    const pickedPostReactionOnly = {}; // postId -> emoji
     const expandedMsgReactions = new Set();
     const pickedMsgReactionOnly = {};  // msgId -> emoji
 
@@ -901,7 +998,7 @@
         if (!msgId) return;
         if (event) {
             const tag = event.target?.tagName?.toLowerCase();
-            if (['button', 'a', 'input', 'video', 'img'].includes(tag)) return;
+            if (['button', 'a', 'input', 'textarea', 'video', 'img'].includes(tag)) return;
             if (event.target?.closest('button, a, video, .msg-mini-actions, .msg-quote-box')) return;
         }
         const key = String(msgId);
@@ -1007,6 +1104,8 @@
     let challengeReactsMap = JSON.parse(localStorage.getItem('pulseCity_challenge_reacts') || '{}');
     let currentCommentsRows = [];
     let lightboxPhotoUrl = '';
+    let commentViewsMap = JSON.parse(localStorage.getItem('pulseCity_comment_views') || '{}');
+    let viewedCommentsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_viewed_comments') || '[]'));
 
     function getDateKeyByOffset(daysOffset = 0) {
         const d = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000);
@@ -2553,6 +2652,8 @@
         const cacheKeysToRemove = [
             'pulseCity_notified_keys',
             'pulseCity_viewed_posts',
+            'pulseCity_viewed_comments',
+            'pulseCity_comment_views',
             'pulseCity_msg_reactions',
             'pulseCity_poll_votes',
             'pulseCity_local_support',
@@ -2577,6 +2678,8 @@
 
         notifiedEventKeys = new Set();
         viewedPostsSet = new Set();
+        viewedCommentsSet = new Set();
+        commentViewsMap = {};
         messageReactionsMap = {};
         challengeReactsMap = {};
 
@@ -2835,8 +2938,12 @@
             document.getElementById('headerSearchDrop').classList.remove('open');
         }
 
-        if (t === 'chat' && chatMode === 'private' && !privateRecipient) {
-            loadConversationsList();
+        if (t === 'chat') {
+            if (chatMode === 'private' && !privateRecipient) {
+                loadConversationsList();
+            } else {
+                loadPublicMessages();
+            }
         }
     }
 
@@ -3044,7 +3151,8 @@
 
                 if (!error && Array.isArray(data)) {
                     ids.forEach(id => {
-                        nextMap[String(id)] = {};
+                        const key = String(id);
+                        if (!nextMap[key]) nextMap[key] = {};
                     });
                     data.forEach(r => {
                         if (!r || !r.message_id || !r.emoji || !r.username) return;
@@ -3093,44 +3201,37 @@
         saveLocalMessageReactions();
         renderMessagesList(globalMessagesData);
 
-        const tableReady = await checkMessageReactionsTable();
-        let syncedToTable = false;
+        const targetMsg = globalMessagesData.find(m => String(m.id) === String(msgId));
+        if (targetMsg) {
+            const updatedText = attachReactionsMarkerToText(targetMsg.text || '', currentEmojis);
+            targetMsg.text = updatedText;
+            await supabaseClient
+                .from('messages')
+                .update({ text: updatedText })
+                .eq('id', Number(msgId));
+        }
 
+        const tableReady = await checkMessageReactionsTable();
         if (tableReady) {
             if (alreadyReacted) {
-                const { error } = await supabaseClient
+                await supabaseClient
                     .from('message_reactions')
                     .delete()
                     .eq('message_id', Number(msgId))
                     .eq('emoji', emoji)
                     .eq('username', myUsername);
-                syncedToTable = !error;
             } else {
-                const { error } = await supabaseClient
+                await supabaseClient
                     .from('message_reactions')
                     .insert([{
                         message_id: Number(msgId),
                         emoji: emoji,
                         username: myUsername
                     }]);
-                syncedToTable = !error;
             }
         }
 
-        if (!syncedToTable) {
-            const targetMsg = globalMessagesData.find(m => String(m.id) === String(msgId));
-            if (targetMsg) {
-                const updatedText = attachReactionsMarkerToText(targetMsg.text || '', currentEmojis);
-                targetMsg.text = updatedText;
-                await supabaseClient
-                    .from('messages')
-                    .update({ text: updatedText })
-                    .eq('id', Number(msgId));
-            }
-        }
-
-        await syncReactionsForMessages(globalMessagesData);
-        renderMessagesList(globalMessagesData);
+        await loadPublicMessages();
     }
 
     async function loadConversationsList() {
@@ -3304,22 +3405,45 @@
     let viewedPostsSet = new Set(JSON.parse(localStorage.getItem('pulseCity_viewed_posts') || '[]'));
 
     async function trackPostView(post) {
-        if (!supabaseClient || !post || !post.id) return;
-        if (viewedPostsSet.has(post.id)) return;
+        if (!post || !post.id) return;
+        const postKey = String(post.id);
+        if (viewedPostsSet.has(postKey)) return;
 
-        viewedPostsSet.add(post.id);
+        viewedPostsSet.add(postKey);
         localStorage.setItem('pulseCity_viewed_posts', JSON.stringify([...viewedPostsSet]));
 
-        const nextViews = (post.views || 0) + 1;
+        const currentViews = Number(post.views) || 0;
+        const nextViews = currentViews + 1;
         post.views = nextViews;
 
         const badge = document.getElementById(`views-count-${post.id}`);
         if (badge) badge.textContent = nextViews;
 
-        await supabaseClient
-            .from('posts')
-            .update({ views: nextViews })
-            .eq('id', post.id);
+        if (supabaseClient) {
+            await supabaseClient
+                .from('posts')
+                .update({ views: nextViews })
+                .eq('id', post.id);
+        }
+    }
+
+    function trackCommentView(comment) {
+        if (!comment || !comment.id) return;
+        const cKey = String(comment.id);
+        const baseCount = Number(comment.views) || Number(commentViewsMap[cKey]) || 0;
+
+        if (!viewedCommentsSet.has(cKey)) {
+            viewedCommentsSet.add(cKey);
+            localStorage.setItem('pulseCity_viewed_comments', JSON.stringify([...viewedCommentsSet]));
+            const nextCount = Math.max(1, baseCount + 1);
+            commentViewsMap[cKey] = nextCount;
+            localStorage.setItem('pulseCity_comment_views', JSON.stringify(commentViewsMap));
+            if (supabaseClient) {
+                supabaseClient.from('comments').update({ views: nextCount }).eq('id', Number(comment.id)).then(() => {});
+            }
+            return nextCount;
+        }
+        return Math.max(1, baseCount);
     }
 
     let globalPostsData = [];
@@ -3404,6 +3528,20 @@
 
         if (forced || isLengthChanged || document.getElementById('newsItemsContainer').children.length === 0) {
             renderPostsList(globalPostsData);
+        } else {
+            // Обновляем счётчики реакций и просмотров на месте даже при фоновом обновлении
+            regularPosts.forEach(p => {
+                const vEl = document.getElementById(`views-count-${p.id}`);
+                if (vEl && p.views) vEl.textContent = p.views;
+                const pReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0 };
+                ['🔥', '👍', '😂', '🚀'].forEach(emo => {
+                    const bEl = document.getElementById(`react-btn-${p.id}-${emo}`);
+                    if (bEl) {
+                        const cnt = pReacts[emo] || 0;
+                        bEl.innerHTML = `${emo} ${cnt > 0 ? cnt : ''}`;
+                    }
+                });
+            });
         }
     }
 
@@ -3581,7 +3719,7 @@
             btnEl.classList.add('pop');
         }
 
-        loadPostsFromCloud(true);
+        await loadPostsFromCloud(true);
     }
 
     async function votePoll(postId, optIdx) {
@@ -3690,6 +3828,7 @@
         }
 
         rows.forEach(c => {
+            const cViews = trackCommentView(c);
             const avatarHtml = isSafeMediaUrl(c.avatar_url) 
                 ? `<img src="${escapeHtml(c.avatar_url)}">` 
                 : escapeHtml(c.sender && c.sender.length > 1 ? c.sender[1].toUpperCase() : 'U');
@@ -3729,7 +3868,10 @@
                 <div class="msg-bubble" style="flex:1;">
                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                         <div class="msg-author">${escapeHtml(c.sender)}${isLeader ? '<span class="leader-badge">🏆 Лидер дня</span>' : ''}</div>
-                        ${canDeleteComment ? `<button class="delete-btn" style="padding:2px 6px;font-size:10px;" onclick="deleteComment(${Number(c.id)}, '${safeSender}')">Удалить</button>` : ''}
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="comment-views-badge">👁️ ${cViews}</span>
+                            ${canDeleteComment ? `<button class="delete-btn" style="padding:2px 6px;font-size:10px;" onclick="deleteComment(${Number(c.id)}, '${safeSender}')">Удалить</button>` : ''}
+                        </div>
                     </div>
                     ${displayText ? `<div style="margin-top:4px;white-space:pre-line;">${escapeHtml(displayText)}</div>` : ''}
                     ${mediaHtml}
@@ -3865,7 +4007,7 @@
         IMPULSE_GUARD.markSent(title + ':' + text);
 
         if (data && data[0]) {
-            viewedPostsSet.add(data[0].id);
+            viewedPostsSet.add(String(data[0].id));
             localStorage.setItem('pulseCity_viewed_posts', JSON.stringify([...viewedPostsSet]));
             markEventNotified(`post_${data[0].id}`);
             if (data[0].id > lastKnownMaxPostId) lastKnownMaxPostId = data[0].id;
@@ -4091,10 +4233,17 @@
                 }
             });
 
+            const quickEmojisHtml = ['🔥', '👍', '😂', '❤️'].map(emo => {
+                const usersList = Array.isArray(msgReacts[emo]) ? msgReacts[emo] : [];
+                if (usersList.length > 0) return '';
+                return `<button type="button" class="msg-quick-react-btn" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')" title="Реакция ${emo}">${emo}</button>`;
+            }).join('');
+
             const reactionsRowHtml = `
                 <div class="msg-reactions-row">
                     ${pillsHtml}
-                    <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker('${escapeHtml(msgKey)}')" title="Поставить реакцию">+😀</button>
+                    ${quickEmojisHtml}
+                    <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker('${escapeHtml(msgKey)}')" title="Другая реакция">+😀</button>
                 </div>
             `;
 
@@ -4194,6 +4343,9 @@
                     });
                 }
             })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
+                loadPostsFromCloud(true);
+            })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, (payload) => {
                 const post = payload?.new;
                 if (post && post.city === selectedCity && post.category !== 'challenge' && post.author_username !== myUsername) {
@@ -4205,6 +4357,9 @@
                         jumpToFeedTab
                     );
                 }
+                loadPostsFromCloud(true);
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' }, () => {
                 loadPostsFromCloud(true);
             })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, () => {
