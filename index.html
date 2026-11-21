@@ -183,20 +183,11 @@
         .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;flex-wrap:wrap;gap:8px}
         .card-actions-left{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 
-        /* Реакции на посты:
-           - Показываем ТОЛЬКО реакцию текущего пользователя (если выбрана).
-           - Чужие реакции и остальные кнопки не показываются в свёрнутом виде.
-           - По клику на карточку (.reactions-expanded) открывается полный выбор реакций. */
-        .post-reactions-tray{display:none;gap:6px;flex-wrap:wrap;align-items:center}
-        .card.reactions-expanded .post-reactions-tray,
-        .card.has-my-post-reaction .post-reactions-tray{display:flex}
-
-        .card:not(.reactions-expanded) .post-reactions-tray .action-btn.my-picked{display:inline-flex}
-        .card:not(.reactions-expanded) .post-reactions-tray .action-btn:not(.my-picked){display:none}
-        .card.reactions-expanded .post-reactions-tray .action-btn{display:inline-flex}
+        .post-reactions-tray{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
         
         .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:6px 11px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transform-origin:center;transition:background 0.2s ease;}
         .action-btn:active{transform:scale(0.9)}
+        .action-btn.active{background:rgba(230,92,0,0.32) !important;border-color:#e65c00 !important;color:#ff9440 !important;}
         .action-btn.pop{animation:popAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.45) !important;}
         @keyframes popAnim{
             0%{transform:scale(1)}
@@ -252,23 +243,7 @@
         .msg-row.mine .msg-quote-author{color:#fff !important}
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-        /* Реакции на сообщения:
-           - Показываем ТОЛЬКО реакцию самого пользователя (если выбрана).
-           - Чужие реакции не показываются.
-           - По клику на сообщение (.reactions-open) открывается полный выбор реакций. */
-        .msg-reactions-row{display:none;align-items:center;flex-wrap:wrap;gap:5px;padding:2px 2px}
-        .msg-row.reactions-open .msg-reactions-row,
-        .msg-row.has-my-msg-reaction .msg-reactions-row{display:flex}
-
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill.my-picked{display:inline-flex}
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill:not(.my-picked),
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-add-react-btn,
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-quick-react-btn{display:none}
-
-        .msg-row.reactions-open .msg-reactions-row .msg-react-pill,
-        .msg-row.reactions-open .msg-reactions-row .msg-add-react-btn,
-        .msg-row.reactions-open .msg-reactions-row .msg-quick-react-btn{display:inline-flex}
-
+        .msg-reactions-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding:2px 2px}
         .msg-quick-react-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:10px;padding:3px 7px;font-size:12px;cursor:pointer;transition:.15s}
         .msg-quick-react-btn:active{transform:scale(0.88);background:rgba(230,92,0,0.28) !important;border-color:#e65c00 !important}
 
@@ -880,7 +855,7 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = 'BIhsxzHD_xzNi6mQOajxyzNpklL-3uFmetWJeJ7PqAnpPhnBGR76X2j72MF4vVXhMs0WZl01K1SHgxLtk2-fQnk';
-    const THEME_REVISION = 'orange_v14_only_my_reactions';
+    const THEME_REVISION = 'orange_v15_synced_reactions_comments';
 
     const MAJOR_CITIES = [
         'Иркутск', 'Новосибирск', 'Москва', 'Санкт-Петербург', 'Екатеринбург', 'Казань',
@@ -935,50 +910,6 @@
             btn.innerHTML = `<span>📍 ${escapeHtml(city)}</span>${isSelected ? '<span style="font-size:12px;font-weight:800;">✓ Выбран</span>' : ''}`;
             listEl.appendChild(btn);
         });
-    }
-
-    // Состояние раскрытия реакций и выбора самого пользователя
-    const expandedPostReactions = new Set();
-    const myPickedPostReaction = {}; // postId -> emoji
-    const expandedMsgReactions = new Set();
-    const myPickedMsgReaction = {};  // msgId -> emoji
-
-    function togglePostReactionsTray(postId, event) {
-        if (!postId) return;
-        if (event) {
-            const tag = event.target?.tagName?.toLowerCase();
-            if (['button', 'a', 'input', 'textarea', 'video', 'img'].includes(tag)) return;
-            if (event.target?.closest('button, a, video, .poll-box, .media-download-bar, .news-author-info')) return;
-        }
-        const key = String(postId);
-        if (expandedPostReactions.has(key)) {
-            expandedPostReactions.delete(key);
-        } else {
-            expandedPostReactions.add(key);
-        }
-        const card = document.getElementById(`post-card-${key}`);
-        if (card) {
-            card.classList.toggle('reactions-expanded', expandedPostReactions.has(key));
-        }
-    }
-
-    function toggleMsgReactionsTray(msgId, event) {
-        if (!msgId) return;
-        if (event) {
-            const tag = event.target?.tagName?.toLowerCase();
-            if (['button', 'a', 'input', 'textarea', 'video', 'img'].includes(tag)) return;
-            if (event.target?.closest('button, a, video, .msg-mini-actions, .msg-quote-box, .msg-avatar, .msg-author')) return;
-        }
-        const key = String(msgId);
-        if (expandedMsgReactions.has(key)) {
-            expandedMsgReactions.delete(key);
-        } else {
-            expandedMsgReactions.add(key);
-        }
-        const row = document.getElementById(`msg-row-${key}`);
-        if (row) {
-            row.classList.toggle('reactions-open', expandedMsgReactions.has(key));
-        }
     }
 
     function escapeHtml(value) {
@@ -1068,7 +999,7 @@
     let toastTimer = null;
     let pendingToastAction = null;
     let isChallengeMode = false;
-    let challengeReactsMap = JSON.parse(localStorage.getItem('pulseCity_challenge_reacts') || '{}');
+    let challengeReactsMap = {};
     let currentCommentsRows = [];
     let lightboxPhotoUrl = '';
     let commentViewsMap = JSON.parse(localStorage.getItem('pulseCity_comment_views') || '{}');
@@ -1097,16 +1028,11 @@
         downloadMediaWithProgress(lightboxPhotoUrl, null, null);
     }
 
-    function saveChallengeReactsLocal() {
-        localStorage.setItem('pulseCity_challenge_reacts', JSON.stringify(challengeReactsMap));
-    }
-
     function getChallengeCommentReacts(commentObj) {
         const key = String(commentObj.id);
         const embedded = parseReactionsFromMessageText(commentObj.text || '');
         if (embedded) {
             challengeReactsMap[key] = embedded;
-            saveChallengeReactsLocal();
             return embedded;
         }
         return challengeReactsMap[key] || {};
@@ -1207,7 +1133,6 @@
         }
 
         challengeReactsMap[key] = currentEmojis;
-        saveChallengeReactsLocal();
 
         const updatedText = attachReactionsMarkerToText(target.text || '', currentEmojis);
         target.text = updatedText;
@@ -1937,7 +1862,7 @@
     let activePostIdForComments = null;
     let activeReplyTarget = null;
     let activeReactionMsgId = null;
-    let messageReactionsMap = JSON.parse(localStorage.getItem('pulseCity_msg_reactions') || '{}');
+    let messageReactionsMap = {};
     let messageReactionsTableReady = null;
     let isPasswordRecoveryFlow = false;
 
@@ -2663,6 +2588,8 @@
     function closeModal(id) {
         if (id === 'commentsModal') {
             isChallengeMode = false;
+            activePostIdForComments = null;
+            currentCommentsRows = [];
             document.getElementById('challengePrizeNote').style.display = 'none';
             document.getElementById('challengeLeaderBanner').style.display = 'none';
             document.getElementById('challengeYesterdayCard').style.display = 'none';
@@ -2895,8 +2822,8 @@
         showConfirm('Удаление комментария', 'Вы уверены, что хотите удалить этот комментарий?', async (res) => {
             if (!res) return;
             await supabaseClient.from('comments').delete().eq('id', commentId);
-            loadComments(activePostIdForComments);
-            loadPostsFromCloud(true);
+            await loadComments(activePostIdForComments);
+            await loadPostsFromCloud(true);
         });
     }
 
@@ -3099,10 +3026,6 @@
         await toggleMessageReaction(msgId, emoji);
     }
 
-    function saveLocalMessageReactions() {
-        localStorage.setItem('pulseCity_msg_reactions', JSON.stringify(messageReactionsMap));
-    }
-
     async function checkMessageReactionsTable() {
         if (!supabaseClient) return false;
         if (messageReactionsTableReady !== null) return messageReactionsTableReady;
@@ -3117,12 +3040,11 @@
     async function syncReactionsForMessages(msgs) {
         if (!Array.isArray(msgs) || msgs.length === 0) return;
 
-        const nextMap = { ...messageReactionsMap };
+        const nextMap = {};
         msgs.forEach(m => {
+            const key = String(m.id);
             const embedded = parseReactionsFromMessageText(m.text || '');
-            if (embedded) {
-                nextMap[String(m.id)] = embedded;
-            }
+            nextMap[key] = embedded ? { ...embedded } : {};
         });
 
         const tableReady = await checkMessageReactionsTable();
@@ -3135,17 +3057,20 @@
                     .in('message_id', ids);
 
                 if (!error && Array.isArray(data)) {
-                    ids.forEach(id => {
-                        const key = String(id);
-                        if (!nextMap[key]) nextMap[key] = {};
-                    });
+                    const dbGrouped = {};
                     data.forEach(r => {
                         if (!r || !r.message_id || !r.emoji || !r.username) return;
                         const key = String(r.message_id);
-                        if (!nextMap[key]) nextMap[key] = {};
-                        if (!nextMap[key][r.emoji]) nextMap[key][r.emoji] = [];
-                        if (!nextMap[key][r.emoji].includes(r.username)) {
-                            nextMap[key][r.emoji].push(r.username);
+                        if (!dbGrouped[key]) dbGrouped[key] = {};
+                        if (!dbGrouped[key][r.emoji]) dbGrouped[key][r.emoji] = [];
+                        if (!dbGrouped[key][r.emoji].includes(r.username)) {
+                            dbGrouped[key][r.emoji].push(r.username);
+                        }
+                    });
+                    ids.forEach(id => {
+                        const key = String(id);
+                        if (dbGrouped[key]) {
+                            nextMap[key] = dbGrouped[key];
                         }
                     });
                 }
@@ -3153,15 +3078,13 @@
         }
 
         messageReactionsMap = nextMap;
-        saveLocalMessageReactions();
     }
 
     async function toggleMessageReaction(msgId, emoji) {
         if (!myUsername || !msgId || !supabaseClient) return;
         const key = String(msgId);
-        if (!messageReactionsMap[key]) messageReactionsMap[key] = {};
-        const currentEmojis = { ...messageReactionsMap[key] };
-        const users = Array.isArray(currentEmojis[emoji]) ? [...currentEmojis[emoji]] : [];
+        const currentEmojis = { ...(messageReactionsMap[key] || {}) };
+        const users = Array.isArray(currentEmojis[emoji]) ? [...new Set(currentEmojis[emoji])] : [];
         const alreadyReacted = users.includes(myUsername);
 
         if (alreadyReacted) {
@@ -3171,18 +3094,11 @@
             } else {
                 delete currentEmojis[emoji];
             }
-            if (myPickedMsgReaction[key] === emoji) {
-                delete myPickedMsgReaction[key];
-            }
         } else {
             currentEmojis[emoji] = [...users, myUsername];
-            myPickedMsgReaction[key] = emoji;
         }
 
-        expandedMsgReactions.delete(key);
-
         messageReactionsMap[key] = currentEmojis;
-        saveLocalMessageReactions();
         renderMessagesList(globalMessagesData);
 
         const targetMsg = globalMessagesData.find(m => String(m.id) === String(msgId));
@@ -3506,6 +3422,9 @@
         const currentMaxId = regularPosts.length > 0 ? regularPosts[0].id : 0;
         const isLengthChanged = globalPostsData.length !== data.length;
 
+        const prevCommentsSnapshot = JSON.stringify(globalCommentsData);
+        const prevReactionsSnapshot = JSON.stringify(globalReactionsData);
+
         globalPostsData = data;
 
         if (lastKnownMaxPostId !== 0 && currentMaxId > lastKnownMaxPostId) {
@@ -3526,12 +3445,18 @@
 
         updateCityPulseIndex(data.length);
 
-        const { data: allComments } = await supabaseClient.from('comments').select('post_id');
+        const postIds = data.map(p => p.id).filter(Boolean);
         globalCommentsData = {};
-        if (allComments) {
-            allComments.forEach(c => {
-                globalCommentsData[c.post_id] = (globalCommentsData[c.post_id] || 0) + 1;
-            });
+        if (postIds.length > 0) {
+            const { data: allComments } = await supabaseClient
+                .from('comments')
+                .select('post_id')
+                .in('post_id', postIds);
+            if (allComments) {
+                allComments.forEach(c => {
+                    globalCommentsData[c.post_id] = (globalCommentsData[c.post_id] || 0) + 1;
+                });
+            }
         }
 
         const todayKey = getDateKeyByOffset(0);
@@ -3544,55 +3469,58 @@
         if (challengeBadge) challengeBadge.textContent = count;
         if (challengeMiniBadge) challengeMiniBadge.textContent = count;
 
-        const { data: allReactions } = await supabaseClient.from('post_reactions').select('*');
         globalReactionsData = {};
-        if (allReactions) {
-            allReactions.forEach(r => {
-                if (!globalReactionsData[r.post_id]) globalReactionsData[r.post_id] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
-                globalReactionsData[r.post_id][r.emoji] = (globalReactionsData[r.post_id][r.emoji] || 0) + 1;
-                if (r.username === myUsername) {
-                    globalReactionsData[r.post_id].userReacted = r.emoji;
-                    myPickedPostReaction[String(r.post_id)] = r.emoji;
-                }
-            });
+        if (postIds.length > 0) {
+            const { data: allReactions } = await supabaseClient
+                .from('post_reactions')
+                .select('*')
+                .in('post_id', postIds);
+            if (allReactions) {
+                allReactions.forEach(r => {
+                    if (!globalReactionsData[r.post_id]) {
+                        globalReactionsData[r.post_id] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
+                    }
+                    globalReactionsData[r.post_id][r.emoji] = (globalReactionsData[r.post_id][r.emoji] || 0) + 1;
+                    if (r.username === myUsername) {
+                        globalReactionsData[r.post_id].userReacted = r.emoji;
+                    }
+                });
+            }
         }
 
-        const { data: allPollVotes } = await supabaseClient.from('poll_votes').select('*');
         globalPollVotesData = {};
         let userVotedStorage = {};
-        if (allPollVotes) {
-            allPollVotes.forEach(v => {
-                if (!globalPollVotesData[v.post_id]) globalPollVotesData[v.post_id] = { "0": 0, "1": 0 };
-                globalPollVotesData[v.post_id][v.option_index] = (globalPollVotesData[v.post_id][v.option_index] || 0) + 1;
-                if (v.username === myUsername) {
-                    userVotedStorage[v.post_id] = v.option_index;
-                }
-            });
+        if (postIds.length > 0) {
+            const { data: allPollVotes } = await supabaseClient
+                .from('poll_votes')
+                .select('*')
+                .in('post_id', postIds);
+            if (allPollVotes) {
+                allPollVotes.forEach(v => {
+                    if (!globalPollVotesData[v.post_id]) globalPollVotesData[v.post_id] = { "0": 0, "1": 0 };
+                    globalPollVotesData[v.post_id][v.option_index] = (globalPollVotesData[v.post_id][v.option_index] || 0) + 1;
+                    if (v.username === myUsername) {
+                        userVotedStorage[v.post_id] = v.option_index;
+                    }
+                });
+            }
         }
         localStorage.setItem('pulseCity_poll_votes', JSON.stringify(userVotedStorage));
 
-        if (forced || isLengthChanged || document.getElementById('newsItemsContainer').children.length === 0) {
+        const commentsChanged = prevCommentsSnapshot !== JSON.stringify(globalCommentsData);
+        const reactionsChanged = prevReactionsSnapshot !== JSON.stringify(globalReactionsData);
+
+        if (forced || isLengthChanged || commentsChanged || reactionsChanged || document.getElementById('newsItemsContainer').children.length === 0) {
             renderPostsList(globalPostsData);
         } else {
             regularPosts.forEach(p => {
                 const vEl = document.getElementById(`views-count-${p.id}`);
                 if (vEl && p.views) vEl.textContent = p.views;
-                const pReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
-                const cardEl = document.getElementById(`post-card-${p.id}`);
-                const myEmoji = pReacts.userReacted || myPickedPostReaction[String(p.id)] || null;
-                if (cardEl) {
-                    cardEl.classList.toggle('has-my-post-reaction', Boolean(myEmoji));
-                }
-                ['🔥', '👍', '😂', '🚀'].forEach(emo => {
-                    const bEl = document.getElementById(`react-btn-${p.id}-${emo}`);
-                    if (bEl) {
-                        const isMineEmo = (myEmoji === emo);
-                        const cnt = isMineEmo ? 1 : (pReacts[emo] || 0);
-                        bEl.innerHTML = `${emo} ${isMineEmo ? 1 : (cnt > 0 ? cnt : '')}`;
-                        bEl.classList.toggle('my-picked', isMineEmo);
-                    }
-                });
             });
+        }
+
+        if (activePostIdForComments && document.getElementById('commentsModal')?.classList.contains('open')) {
+            await loadComments(activePostIdForComments);
         }
     }
 
@@ -3690,25 +3618,20 @@
 
             let postReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
             const postKey = String(p.id);
-            const isExpanded = expandedPostReactions.has(postKey);
-            const myEmoji = postReacts.userReacted || myPickedPostReaction[postKey] || null;
-            const hasMyReactionClass = myEmoji ? ' has-my-post-reaction' : '';
 
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
-                const isMineEmo = (myEmoji === emo);
-                const count = isMineEmo ? 1 : (postReacts[emo] || 0);
-                const activeStyle = isMineEmo ? 'background:rgba(230,92,0,0.32);border-color:#e65c00;' : '';
-                const myPickedClass = isMineEmo ? ' my-picked' : '';
-                reactionsHtml += `<button class="action-btn${myPickedClass}" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${isMineEmo ? 1 : (count > 0 ? count : '')}</button>`;
+                const count = postReacts[emo] || 0;
+                const isMineEmo = postReacts.userReacted === emo;
+                const activeClass = isMineEmo ? ' active' : '';
+                reactionsHtml += `<button type="button" class="action-btn${activeClass}" id="react-btn-${p.id}-${emo}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
             });
 
             let realViews = p.views || 1;
 
             const card = document.createElement('div');
             card.id = `post-card-${postKey}`;
-            card.className = 'card' + (isAdminPost ? ' admin-card' : '') + (isExpanded ? ' reactions-expanded' : '') + hasMyReactionClass;
-            card.onclick = (e) => togglePostReactionsTray(p.id, e);
+            card.className = 'card' + (isAdminPost ? ' admin-card' : '');
             card.innerHTML = `
                 <div class="news-header">
                     <div class="news-author-info" onclick="openUserProfileModal('${safeAuthorAttr}', '${safeAvatarAttr}')" style="cursor:pointer;" title="Открыть профиль ${escapeHtml(authorName)}">
@@ -3730,7 +3653,7 @@
                 <div class="card-actions">
                     <div class="card-actions-left">
                         <div class="post-reactions-tray">${reactionsHtml}</div>
-                        <button class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
+                        <button type="button" class="action-btn" onclick="openComments(${p.id})">💬 (${cCount})</button>
                     </div>
                     <div class="views-badge">👁️ <span id="views-count-${p.id}">${realViews}</span></div>
                 </div>
@@ -3744,12 +3667,11 @@
     async function reactPost(postId, emoji) {
         if (!supabaseClient || !myUsername) return;
         
-        const postKey = String(postId);
         if (!globalReactionsData[postId]) {
             globalReactionsData[postId] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
         }
         let postReacts = globalReactionsData[postId];
-        const prevEmoji = postReacts.userReacted || myPickedPostReaction[postKey] || null;
+        const prevEmoji = postReacts.userReacted || null;
         
         if (prevEmoji) {
             postReacts[prevEmoji] = Math.max(0, (postReacts[prevEmoji] || 1) - 1);
@@ -3758,13 +3680,10 @@
         if (prevEmoji !== emoji) {
             postReacts.userReacted = emoji;
             postReacts[emoji] = (postReacts[emoji] || 0) + 1;
-            myPickedPostReaction[postKey] = emoji;
         } else {
             postReacts.userReacted = null;
-            delete myPickedPostReaction[postKey];
         }
 
-        expandedPostReactions.delete(postKey);
         renderPostsList(globalPostsData);
 
         const btnEl = document.getElementById(`react-btn-${postId}-${emoji}`);
@@ -3948,8 +3867,32 @@
     }
 
     async function loadComments(postId) {
-        const { data } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('id', { ascending: false });
+        if (!supabaseClient || !postId) return;
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .select('*')
+            .eq('post_id', postId)
+            .order('id', { ascending: false });
+        if (error) return;
         currentCommentsRows = Array.isArray(data) ? data : [];
+        globalCommentsData[postId] = currentCommentsRows.length;
+
+        const postCardCommentBtn = document.querySelector(`#post-card-${postId} .card-actions-left > .action-btn`);
+        if (postCardCommentBtn) {
+            postCardCommentBtn.textContent = `💬 (${currentCommentsRows.length})`;
+        }
+
+        const todayKey = getDateKeyByOffset(0);
+        const todayChallengeTitle = `🎯 Вызов дня: ${todayKey} (${selectedCity})`;
+        const challengePost = globalPostsData.find(p => p.category === 'challenge' && p.title === todayChallengeTitle)
+            || globalPostsData.find(p => p.category === 'challenge');
+        if (challengePost && String(challengePost.id) === String(postId)) {
+            const challengeBadge = document.getElementById('challengeCommentsBadge');
+            const challengeMiniBadge = document.getElementById('challengeCommentsMiniBadge');
+            if (challengeBadge) challengeBadge.textContent = currentCommentsRows.length;
+            if (challengeMiniBadge) challengeMiniBadge.textContent = currentCommentsRows.length;
+        }
+
         renderCommentsRows(currentCommentsRows);
     }
 
@@ -4010,8 +3953,8 @@
         IMPULSE_GUARD.markSent(text || fallbackLabel);
         input.value = '';
         clearCommentMedia();
-        loadComments(activePostIdForComments);
-        loadPostsFromCloud(true);
+        await loadComments(activePostIdForComments);
+        await loadPostsFromCloud(true);
     }
 
     async function publishNews() {
@@ -4278,28 +4221,24 @@
             const safePinText = escapeHtml(displayText).replace(/'/g, '');
 
             const msgKey = String(m.id);
-            const isMsgOpen = expandedMsgReactions.has(msgKey);
             const msgReacts = messageReactionsMap[msgKey] || {};
-            let activeUserEmoji = myPickedMsgReaction[msgKey] || null;
-            if (!activeUserEmoji) {
-                Object.keys(msgReacts).forEach(emo => {
-                    const uList = Array.isArray(msgReacts[emo]) ? msgReacts[emo] : [];
-                    if (uList.includes(myUsername)) activeUserEmoji = emo;
-                });
-            }
+            const reactedEmojis = Object.keys(msgReacts).filter(emo => {
+                const uList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
+                return uList.length > 0;
+            });
 
             let pillsHtml = '';
-            Object.keys(msgReacts).forEach(emo => {
+            reactedEmojis.forEach(emo => {
                 const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
-                const isMineEmo = usersList.includes(myUsername) || (activeUserEmoji === emo);
-                if (isMineEmo) {
-                    pillsHtml += `<button type="button" class="msg-react-pill active my-picked" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')">${emo} <span>1</span></button>`;
-                }
+                const isMineEmo = usersList.includes(myUsername);
+                pillsHtml += `<button type="button" class="msg-react-pill${isMineEmo ? ' active' : ''}" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')">${emo} <span>${usersList.length}</span></button>`;
             });
 
             const quickEmojisHtml = ['🔥', '👍', '😂', '❤️'].map(emo => {
-                if (activeUserEmoji === emo) return '';
-                return `<button type="button" class="msg-quick-react-btn" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')" title="Реакция ${emo}">${emo}</button>`;
+                const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
+                const isMineEmo = usersList.includes(myUsername);
+                if (usersList.length > 0) return '';
+                return `<button type="button" class="msg-quick-react-btn${isMineEmo ? ' active' : ''}" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')" title="Реакция ${emo}">${emo}</button>`;
             }).join('');
 
             const reactionsRowHtml = `
@@ -4312,8 +4251,7 @@
 
             const row = document.createElement('div');
             row.id = `msg-row-${msgKey}`;
-            row.className = 'msg-row' + (isMine ? ' mine' : '') + (isMsgOpen ? ' reactions-open' : '') + (activeUserEmoji ? ' has-my-msg-reaction' : '');
-            row.onclick = (e) => toggleMsgReactionsTray(m.id, e);
+            row.className = 'msg-row' + (isMine ? ' mine' : '');
             
             row.innerHTML = `
                 <div class="msg-avatar" onclick="openUserProfileModal('${safeSender}', '${safeAvatar}')" title="Открыть профиль">${avatarHtml}</div>
@@ -4407,6 +4345,9 @@
                 }
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
+                loadPostsFromCloud(true);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, () => {
                 loadPostsFromCloud(true);
             })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, (payload) => {
