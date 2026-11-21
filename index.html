@@ -4943,7 +4943,87 @@
             loadConversationsList();
             checkTypingStatus();
         }
-    }, 3000);
+    }, 3000);let nativeFcmToken = localStorage.getItem('pulseCity_fcm_token') || '';
+
+async function syncNativeFcmTokenToCloud(tokenValue) {
+  if (!tokenValue) return;
+  nativeFcmToken = tokenValue;
+  localStorage.setItem('pulseCity_fcm_token', tokenValue);
+  if (!supabaseClient || !myUsername) return;
+  try {
+    await supabaseClient.from('push_subscriptions').upsert([{
+      username: myUsername,
+      city: selectedCity,
+      fcm_token: tokenValue,
+      platform: 'android',
+      updated_at: new Date().toISOString()
+    }], { onConflict: 'username' });
+  } catch (e) {}
+}
+
+async function initCapacitorAndroidPush() {
+  const cap = window.Capacitor;
+  const Push = cap?.Plugins?.PushNotifications;
+  if (!cap || !cap.isNativePlatform?.() || cap.getPlatform?.() !== 'android' || !Push) return;
+  if (!pushNotificationsEnabled) return;
+
+  try {
+    let perm = await Push.checkPermissions();
+    if (perm.receive === 'prompt') perm = await Push.requestPermissions();
+    if (perm.receive !== 'granted') return;
+
+    if (!window.__pulseCityCapPushBound) {
+      window.__pulseCityCapPushBound = true;
+
+      await Push.addListener('registration', async (token) => {
+        if (token && token.value) await syncNativeFcmTokenToCloud(token.value);
+      });
+
+      await Push.addListener('registrationError', (err) => {
+        console.warn('FCM registrationError:', err);
+      });
+
+      await Push.addListener('pushNotificationReceived', (notification) => {
+        showInAppToast(notification?.title || '⚡ PulseCity', notification?.body || 'Новое уведомление', '🔔');
+      });
+
+      await Push.addListener('pushNotificationActionPerformed', (action) => {
+        const data = action?.notification?.data || {};
+        if (data.target === 'dm' && data.partner) jumpToPrivateChat(data.partner);
+        else if (data.target === 'public') jumpToPublicChat();
+        else jumpToFeedTab();
+      });
+    }
+
+    await Push.register();
+  } catch (e) {}
+}
+
+const _origFinalizeUserLogin = finalizeUserLogin;
+finalizeUserLogin = async function(email, name, uname, avatarUrl) {
+  await _origFinalizeUserLogin(email, name, uname, avatarUrl);
+  await initCapacitorAndroidPush();
+  if (nativeFcmToken) await syncNativeFcmTokenToCloud(nativeFcmToken);
+};
+
+const _origRequestNotificationPermission = requestNotificationPermission;
+requestNotificationPermission = async function(showFeedback = false) {
+  const cap = window.Capacitor;
+  if (cap && cap.isNativePlatform?.() && cap.getPlatform?.() === 'android' && cap.Plugins?.PushNotifications) {
+    if (!pushNotificationsEnabled) {
+      pushNotificationsEnabled = true;
+      localStorage.setItem('pulseCity_push_enabled', 'true');
+      syncPushToggleUI();
+    }
+    await initCapacitorAndroidPush();
+    if (showFeedback) showPulseAlert('🔔 Запрос разрешений на системные уведомления Android отправлен.');
+    return;
+  }
+  return _origRequestNotificationPermission(showFeedback);
+};
+
+setTimeout(() => { initCapacitorAndroidPush(); }, 800);
+
 </script>
 </body>
 </html>
