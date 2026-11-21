@@ -62,7 +62,6 @@
         #scrollTopBtn{position:fixed;bottom:134px;right:19px;background:rgba(24,18,14,0.9);border:1px solid rgba(230,92,0,0.45) !important;color:#ff7a14 !important;width:38px;height:38px;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,0.6);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:900;transition:.2s}
         #scrollTopBtn:active{transform:scale(0.9)}
 
-        /* Плавное сворачивание/разворачивание Вызова дня без дёргания */
         .challenge-pinned-card {
             background: linear-gradient(145deg,#211308,#120b07) !important;
             border: 1px solid rgba(230,92,0,0.45) !important;
@@ -135,7 +134,6 @@
         .card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(30px);border-radius:22px;padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 32px rgba(0,0,0,0.6);position:relative;overflow:hidden}
         .card.admin-card{border:1px solid rgba(230,92,0,0.45) !important;background:linear-gradient(145deg,rgba(230,92,0,0.12),rgba(255,115,0,0.03)) !important;}
 
-        /* Карточка чата с правильной нижней границей над меню навигации */
         .chat-main-card{
             padding:9px 10px 8px;
             margin-bottom:0;
@@ -186,15 +184,15 @@
         .card-actions-left{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 
         /* Реакции на посты:
-           - Если у поста есть выбранная реакция или чужие реакции, они видны всегда в свёрнутом виде (или только выбранная пользователем).
-           - Если нажать на карточку поста, открывается вся линейка реакций.
-           - После выбора одной реакции линейка сворачивается, но ВЫБРАННАЯ реакция остаётся видимой! */
+           - Показываем ТОЛЬКО реакцию текущего пользователя (если выбрана).
+           - Чужие реакции и остальные кнопки не показываются в свёрнутом виде.
+           - По клику на карточку (.reactions-expanded) открывается полный выбор реакций. */
         .post-reactions-tray{display:none;gap:6px;flex-wrap:wrap;align-items:center}
         .card.reactions-expanded .post-reactions-tray,
-        .card.has-picked-reaction .post-reactions-tray{display:flex}
+        .card.has-my-post-reaction .post-reactions-tray{display:flex}
 
-        .card:not(.reactions-expanded) .post-reactions-tray .action-btn.picked-only{display:inline-flex}
-        .card:not(.reactions-expanded) .post-reactions-tray .action-btn:not(.picked-only){display:none}
+        .card:not(.reactions-expanded) .post-reactions-tray .action-btn.my-picked{display:inline-flex}
+        .card:not(.reactions-expanded) .post-reactions-tray .action-btn:not(.my-picked){display:none}
         .card.reactions-expanded .post-reactions-tray .action-btn{display:inline-flex}
         
         .action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:6px 11px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transform-origin:center;transition:background 0.2s ease;}
@@ -255,14 +253,15 @@
         .msg-quote-text{color:rgba(255,255,255,0.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
         /* Реакции на сообщения:
-           - Когда у сообщения есть реакции (.has-msg-reactions), поставленные реакции остаются видны.
-           - Когда нажали на сообщение (.reactions-open), открывается вся панель выбора реакций. */
+           - Показываем ТОЛЬКО реакцию самого пользователя (если выбрана).
+           - Чужие реакции не показываются.
+           - По клику на сообщение (.reactions-open) открывается полный выбор реакций. */
         .msg-reactions-row{display:none;align-items:center;flex-wrap:wrap;gap:5px;padding:2px 2px}
         .msg-row.reactions-open .msg-reactions-row,
-        .msg-row.has-msg-reactions .msg-reactions-row{display:flex}
+        .msg-row.has-my-msg-reaction .msg-reactions-row{display:flex}
 
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill.picked-only{display:inline-flex}
-        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill:not(.picked-only),
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill.my-picked{display:inline-flex}
+        .msg-row:not(.reactions-open) .msg-reactions-row .msg-react-pill:not(.my-picked),
         .msg-row:not(.reactions-open) .msg-reactions-row .msg-add-react-btn,
         .msg-row:not(.reactions-open) .msg-reactions-row .msg-quick-react-btn{display:none}
 
@@ -311,7 +310,6 @@
         
         .typing-indicator{font-size:10px;color:#ff7a14 !important;min-height:0;max-height:14px;line-height:14px;margin-bottom:2px;font-style:italic;flex-shrink:0}
 
-        /* Аккуратная плашка ввода сообщений над нижней панелью */
         .chat-input-area{display:flex;gap:6px;align-items:center;margin-top:2px;margin-bottom:2px;padding-top:2px;flex-shrink:0}
         .attach-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ff7a14 !important;width:38px;height:38px;border-radius:12px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
         .attach-btn.has-file{background:rgba(230,92,0,0.25) !important;border-color:#e65c00 !important;color:#fff !important}
@@ -333,7 +331,6 @@
         .city-option:hover{background:rgba(230,92,0,0.15) !important;border-color:#e65c00 !important}
         .city-option.selected{background:rgba(230,92,0,0.22) !important;border-color:#ff7a14 !important;color:#ff9440 !important}
 
-        /* Карточка просмотра чужого профиля */
         .public-profile-avatar{width:84px;height:84px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,#e65c00,#ff7300);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff;overflow:hidden;border:3px solid rgba(230,92,0,0.55);box-shadow:0 10px 26px rgba(230,92,0,0.3)}
         .public-profile-avatar img{width:100%;height:100%;object-fit:cover}
         .public-profile-stats{display:flex;gap:8px;justify-content:center;margin:12px 0 16px}
@@ -520,7 +517,6 @@
     </div>
 </div>
 
-<!-- Модальное окно просмотра профиля пользователя при клике на аватарку -->
 <div id="userProfileModal" class="modal" onclick="if(event.target===this)closeModal('userProfileModal')">
     <div class="modal-card" style="max-width:350px;text-align:center;">
         <div id="pubProfAvatar" class="public-profile-avatar">👤</div>
@@ -884,114 +880,26 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = 'BIhsxzHD_xzNi6mQOajxyzNpklL-3uFmetWJeJ7PqAnpPhnBGR76X2j72MF4vVXhMs0WZl01K1SHgxLtk2-fQnk';
-    const THEME_REVISION = 'orange_v13_reacts_chatbar_profile_smooth';
+    const THEME_REVISION = 'orange_v14_only_my_reactions';
 
     const MAJOR_CITIES = [
-        'Иркутск',
-        'Новосибирск',
-        'Москва',
-        'Санкт-Петербург',
-        'Екатеринбург',
-        'Казань',
-        'Нижний Новгород',
-        'Красноярск',
-        'Челябинск',
-        'Самара',
-        'Уфа',
-        'Ростов-на-Дону',
-        'Омск',
-        'Воронеж',
-        'Пермь',
-        'Волгоград',
-        'Владивосток',
-        'Хабаровск',
-        'Тюмень',
-        'Краснодар',
-        'Томск',
-        'Кемерово',
-        'Новокузнецк',
-        'Барнаул',
-        'Бийск',
-        'Ижевск',
-        'Ульяновск',
-        'Ярославль',
-        'Саратов',
-        'Тольятти',
-        'Махачкала',
-        'Оренбург',
-        'Набережные Челны',
-        'Рязань',
-        'Астрахань',
-        'Пенза',
-        'Липецк',
-        'Киров',
-        'Чебоксары',
-        'Калининград',
-        'Тула',
-        'Курск',
-        'Ставрополь',
-        'Сочи',
-        'Братск',
-        'Ангарск',
-        'Усть-Илимск',
-        'Шелехов',
-        'Усолье-Сибирское',
-        'Тайшет',
-        'Улан-Удэ',
-        'Чита',
-        'Якутск',
-        'Мирный',
-        'Нерюнгри',
-        'Благовещенск',
-        'Южно-Сахалинск',
-        'Петропавловск-Камчатский',
-        'Магадан',
-        'Абакан',
-        'Кызыл',
-        'Горно-Алтайск',
-        'Мурманск',
-        'Архангельск',
-        'Северодвинск',
-        'Сыктывкар',
-        'Вологда',
-        'Череповец',
-        'Петрозаводск',
-        'Псков',
-        'Великий Новгород',
-        'Смоленск',
-        'Тверь',
-        'Калуга',
-        'Брянск',
-        'Орёл',
-        'Тамбов',
-        'Белгород',
-        'Владимир',
-        'Иваново',
-        'Кострома',
-        'Сургут',
-        'Нижневартовск',
-        'Ханты-Мансийск',
-        'Новый Уренгой',
-        'Ноябрьск',
-        'Норильск',
-        'Ачинск',
-        'Канск',
-        'Магнитогорск',
-        'Нижний Тагил',
-        'Стерлитамак',
-        'Салават',
-        'Орск',
-        'Энгельс',
-        'Балаково',
-        'Волжский',
-        'Таганрог',
-        'Шахты',
-        'Новороссийск',
-        'Армавир',
-        'Пятигорск',
-        'Кисловодск',
-        'Грозный',
-        'Владикавказ',
+        'Иркутск', 'Новосибирск', 'Москва', 'Санкт-Петербург', 'Екатеринбург', 'Казань',
+        'Нижний Новгород', 'Красноярск', 'Челябинск', 'Самара', 'Уфа', 'Ростов-на-Дону',
+        'Омск', 'Воронеж', 'Пермь', 'Волгоград', 'Владивосток', 'Хабаровск', 'Тюмень',
+        'Краснодар', 'Томск', 'Кемерово', 'Новокузнецк', 'Барнаул', 'Бийск', 'Ижевск',
+        'Ульяновск', 'Ярославль', 'Саратов', 'Тольятти', 'Махачкала', 'Оренбург',
+        'Набережные Челны', 'Рязань', 'Астрахань', 'Пенза', 'Липецк', 'Киров', 'Чебоксары',
+        'Калининград', 'Тула', 'Курск', 'Ставрополь', 'Сочи', 'Братск', 'Ангарск',
+        'Усть-Илимск', 'Шелехов', 'Усолье-Сибирское', 'Тайшет', 'Улан-Удэ', 'Чита',
+        'Якутск', 'Мирный', 'Нерюнгри', 'Благовещенск', 'Южно-Сахалинск',
+        'Петропавловск-Камчатский', 'Магадан', 'Абакан', 'Кызыл', 'Горно-Алтайск',
+        'Мурманск', 'Архангельск', 'Северодвинск', 'Сыктывкар', 'Вологда', 'Череповец',
+        'Петрозаводск', 'Псков', 'Великий Новгород', 'Смоленск', 'Тверь', 'Калуга',
+        'Брянск', 'Орёл', 'Тамбов', 'Белгород', 'Владимир', 'Иваново', 'Кострома',
+        'Сургут', 'Нижневартовск', 'Ханты-Мансийск', 'Новый Уренгой', 'Ноябрьск',
+        'Норильск', 'Ачинск', 'Канск', 'Магнитогорск', 'Нижний Тагил', 'Стерлитамак',
+        'Салават', 'Орск', 'Энгельс', 'Балаково', 'Волжский', 'Таганрог', 'Шахты',
+        'Новороссийск', 'Армавир', 'Пятигорск', 'Кисловодск', 'Грозный', 'Владикавказ',
         'Нальчик'
     ];
 
@@ -1029,11 +937,11 @@
         });
     }
 
-    // Состояние раскрытия реакций для постов и сообщений
+    // Состояние раскрытия реакций и выбора самого пользователя
     const expandedPostReactions = new Set();
-    const pickedPostReactionOnly = {}; // postId -> emoji
+    const myPickedPostReaction = {}; // postId -> emoji
     const expandedMsgReactions = new Set();
-    const pickedMsgReactionOnly = {};  // msgId -> emoji
+    const myPickedMsgReaction = {};  // msgId -> emoji
 
     function togglePostReactionsTray(postId, event) {
         if (!postId) return;
@@ -1087,7 +995,6 @@
         return /^https?:\/\//i.test(url.trim());
     }
 
-    // === МОДУЛЬ БЕЗОПАСНОСТИ И АНТИСПАМА ===
     const IMPULSE_GUARD = {
         authVerified: false,
         authUserEmail: '',
@@ -2791,7 +2698,6 @@
                 btn.style.display = 'none';
             }
 
-            // Гистерезис (> 56px сворачивает, < 14px разворачивает), чтобы не дёргалось при перестройке высоты
             if (challengeCard) {
                 if (!isChallengeCompact && scrollTop > 56) {
                     isChallengeCompact = true;
@@ -3265,15 +3171,14 @@
             } else {
                 delete currentEmojis[emoji];
             }
-            if (pickedMsgReactionOnly[key] === emoji) {
-                delete pickedMsgReactionOnly[key];
+            if (myPickedMsgReaction[key] === emoji) {
+                delete myPickedMsgReaction[key];
             }
         } else {
             currentEmojis[emoji] = [...users, myUsername];
-            pickedMsgReactionOnly[key] = emoji;
+            myPickedMsgReaction[key] = emoji;
         }
 
-        // После выбора реакции панель сворачивается, но выбранная реакция остаётся видимой
         expandedMsgReactions.delete(key);
 
         messageReactionsMap[key] = currentEmojis;
@@ -3647,7 +3552,7 @@
                 globalReactionsData[r.post_id][r.emoji] = (globalReactionsData[r.post_id][r.emoji] || 0) + 1;
                 if (r.username === myUsername) {
                     globalReactionsData[r.post_id].userReacted = r.emoji;
-                    pickedPostReactionOnly[String(r.post_id)] = r.emoji;
+                    myPickedPostReaction[String(r.post_id)] = r.emoji;
                 }
             });
         }
@@ -3674,16 +3579,17 @@
                 if (vEl && p.views) vEl.textContent = p.views;
                 const pReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
                 const cardEl = document.getElementById(`post-card-${p.id}`);
-                const activePicked = pReacts.userReacted || pickedPostReactionOnly[String(p.id)] || null;
+                const myEmoji = pReacts.userReacted || myPickedPostReaction[String(p.id)] || null;
                 if (cardEl) {
-                    cardEl.classList.toggle('has-picked-reaction', Boolean(activePicked));
+                    cardEl.classList.toggle('has-my-post-reaction', Boolean(myEmoji));
                 }
                 ['🔥', '👍', '😂', '🚀'].forEach(emo => {
                     const bEl = document.getElementById(`react-btn-${p.id}-${emo}`);
                     if (bEl) {
-                        const cnt = pReacts[emo] || 0;
-                        bEl.innerHTML = `${emo} ${cnt > 0 ? cnt : ''}`;
-                        bEl.classList.toggle('picked-only', activePicked === emo);
+                        const isMineEmo = (myEmoji === emo);
+                        const cnt = isMineEmo ? 1 : (pReacts[emo] || 0);
+                        bEl.innerHTML = `${emo} ${isMineEmo ? 1 : (cnt > 0 ? cnt : '')}`;
+                        bEl.classList.toggle('my-picked', isMineEmo);
                     }
                 });
             });
@@ -3785,23 +3691,23 @@
             let postReacts = globalReactionsData[p.id] || { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
             const postKey = String(p.id);
             const isExpanded = expandedPostReactions.has(postKey);
-            const onlyPickedEmoji = postReacts.userReacted || pickedPostReactionOnly[postKey] || null;
-            const hasPickedClass = onlyPickedEmoji ? ' has-picked-reaction' : '';
+            const myEmoji = postReacts.userReacted || myPickedPostReaction[postKey] || null;
+            const hasMyReactionClass = myEmoji ? ' has-my-post-reaction' : '';
 
             let reactionsHtml = '';
             ['🔥', '👍', '😂', '🚀'].forEach(emo => {
-                let count = postReacts[emo] || 0;
-                let isSelected = (postReacts.userReacted === emo) || (onlyPickedEmoji === emo);
-                let activeStyle = isSelected ? 'background:rgba(230,92,0,0.32);border-color:#e65c00;' : '';
-                let pickedClass = (onlyPickedEmoji === emo) ? ' picked-only' : '';
-                reactionsHtml += `<button class="action-btn${pickedClass}" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${count > 0 ? count : ''}</button>`;
+                const isMineEmo = (myEmoji === emo);
+                const count = isMineEmo ? 1 : (postReacts[emo] || 0);
+                const activeStyle = isMineEmo ? 'background:rgba(230,92,0,0.32);border-color:#e65c00;' : '';
+                const myPickedClass = isMineEmo ? ' my-picked' : '';
+                reactionsHtml += `<button class="action-btn${myPickedClass}" id="react-btn-${p.id}-${emo}" style="${activeStyle}" onclick="reactPost(${p.id}, '${emo}')">${emo} ${isMineEmo ? 1 : (count > 0 ? count : '')}</button>`;
             });
 
             let realViews = p.views || 1;
 
             const card = document.createElement('div');
             card.id = `post-card-${postKey}`;
-            card.className = 'card' + (isAdminPost ? ' admin-card' : '') + (isExpanded ? ' reactions-expanded' : '') + hasPickedClass;
+            card.className = 'card' + (isAdminPost ? ' admin-card' : '') + (isExpanded ? ' reactions-expanded' : '') + hasMyReactionClass;
             card.onclick = (e) => togglePostReactionsTray(p.id, e);
             card.innerHTML = `
                 <div class="news-header">
@@ -3843,7 +3749,7 @@
             globalReactionsData[postId] = { '🔥': 0, '👍': 0, '😂': 0, '🚀': 0, userReacted: null };
         }
         let postReacts = globalReactionsData[postId];
-        const prevEmoji = postReacts.userReacted || pickedPostReactionOnly[postKey] || null;
+        const prevEmoji = postReacts.userReacted || myPickedPostReaction[postKey] || null;
         
         if (prevEmoji) {
             postReacts[prevEmoji] = Math.max(0, (postReacts[prevEmoji] || 1) - 1);
@@ -3852,13 +3758,12 @@
         if (prevEmoji !== emoji) {
             postReacts.userReacted = emoji;
             postReacts[emoji] = (postReacts[emoji] || 0) + 1;
-            pickedPostReactionOnly[postKey] = emoji;
+            myPickedPostReaction[postKey] = emoji;
         } else {
             postReacts.userReacted = null;
-            delete pickedPostReactionOnly[postKey];
+            delete myPickedPostReaction[postKey];
         }
 
-        // Оставляем только выбранную реакцию и прячем остальные
         expandedPostReactions.delete(postKey);
         renderPostsList(globalPostsData);
 
@@ -4375,7 +4280,7 @@
             const msgKey = String(m.id);
             const isMsgOpen = expandedMsgReactions.has(msgKey);
             const msgReacts = messageReactionsMap[msgKey] || {};
-            let activeUserEmoji = pickedMsgReactionOnly[msgKey] || null;
+            let activeUserEmoji = myPickedMsgReaction[msgKey] || null;
             if (!activeUserEmoji) {
                 Object.keys(msgReacts).forEach(emo => {
                     const uList = Array.isArray(msgReacts[emo]) ? msgReacts[emo] : [];
@@ -4383,23 +4288,17 @@
                 });
             }
 
-            let hasVisiblePills = false;
             let pillsHtml = '';
             Object.keys(msgReacts).forEach(emo => {
                 const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
-                const cnt = usersList.length;
-                if (cnt > 0) {
-                    const isActive = usersList.includes(myUsername);
-                    const isPicked = (activeUserEmoji === emo) || (!activeUserEmoji && cnt > 0);
-                    if (isPicked) hasVisiblePills = true;
-                    const pickedClass = isPicked ? ' picked-only' : '';
-                    pillsHtml += `<button type="button" class="msg-react-pill ${isActive ? 'active' : ''}${pickedClass}" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')">${emo} <span>${cnt}</span></button>`;
+                const isMineEmo = usersList.includes(myUsername) || (activeUserEmoji === emo);
+                if (isMineEmo) {
+                    pillsHtml += `<button type="button" class="msg-react-pill active my-picked" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')">${emo} <span>1</span></button>`;
                 }
             });
 
             const quickEmojisHtml = ['🔥', '👍', '😂', '❤️'].map(emo => {
-                const usersList = Array.isArray(msgReacts[emo]) ? msgReacts[emo] : [];
-                if (usersList.length > 0) return '';
+                if (activeUserEmoji === emo) return '';
                 return `<button type="button" class="msg-quick-react-btn" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')" title="Реакция ${emo}">${emo}</button>`;
             }).join('');
 
@@ -4413,7 +4312,7 @@
 
             const row = document.createElement('div');
             row.id = `msg-row-${msgKey}`;
-            row.className = 'msg-row' + (isMine ? ' mine' : '') + (isMsgOpen ? ' reactions-open' : '') + (hasVisiblePills ? ' has-msg-reactions' : '');
+            row.className = 'msg-row' + (isMine ? ' mine' : '') + (isMsgOpen ? ' reactions-open' : '') + (activeUserEmoji ? ' has-my-msg-reaction' : '');
             row.onclick = (e) => toggleMsgReactionsTray(m.id, e);
             
             row.innerHTML = `
