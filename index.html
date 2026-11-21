@@ -23,7 +23,9 @@
         body{background:radial-gradient(circle at top right,#190f08,var(--dark-bg) 70%) !important;color:#fff;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
 
         header{background:rgba(16,11,7,0.95) !important;backdrop-filter:blur(25px);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(230,92,0,0.18) !important;z-index:25;flex-shrink:0}
-        .logo{font-size:20px;font-weight:900;background:linear-gradient(135deg,#e65c00,#ff7300) !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;letter-spacing:-0.5px}
+        .logo{font-size:20px;font-weight:900;background:linear-gradient(135deg,#e65c00,#ff7300) !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;letter-spacing:-0.5px;display:flex;align-items:center;gap:6px}
+        .draft-pill-badge{background:rgba(250,204,21,0.18);border:1px solid rgba(250,204,21,0.55);color:#fde047;-webkit-text-fill-color:#fde047;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;letter-spacing:0.3px;display:none}
+        .draft-pill-badge.visible{display:inline-block}
         
         .header-actions{display:flex;gap:6px;align-items:center}
         .city-btn{background:rgba(230,92,0,0.16) !important;color:#ff7a14 !important;font-size:12px;font-weight:700;padding:7px 11px;border-radius:16px;border:1px solid rgba(230,92,0,0.45) !important;cursor:pointer;display:flex;align-items:center;gap:4px}
@@ -31,6 +33,9 @@
         .top-mini-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ff7a14 !important;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:.2s}
         .top-mini-btn:active{transform:scale(0.9)}
         .top-mini-btn.active{background:rgba(230,92,0,0.25) !important;border-color:#e65c00 !important}
+
+        #globalNoticeBanner{display:none;background:linear-gradient(90deg,rgba(230,92,0,0.24),rgba(255,115,0,0.14));border-bottom:1px solid rgba(230,92,0,0.45);padding:7px 14px;font-size:12px;color:#ffd5b5;font-weight:700;text-align:center;flex-shrink:0}
+        #globalNoticeBanner.open{display:block}
 
         #headerSearchDrop{display:none;background:rgba(16,11,7,0.96);backdrop-filter:blur(20px);padding:10px 14px;border-bottom:1px solid rgba(230,92,0,0.45);z-index:20;animation:slideDown .2s ease}
         #headerSearchDrop.open{display:block}
@@ -331,6 +336,14 @@
         .support-ticket-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;font-size:11px;color:#ff7a14 !important;font-weight:700}
         .support-ticket-topic{display:inline-block;background:rgba(230,92,0,0.2) !important;color:#ff7a14 !important;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px}
         .support-ticket-msg{font-size:12px;color:#f3f4f6;line-height:1.4;white-space:pre-line;word-break:break-word;margin-bottom:6px}
+        .quick-reply-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+        .quick-tpl-btn{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#e5e7eb;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;cursor:pointer}
+        .quick-tpl-btn:active{background:rgba(230,92,0,0.28);border-color:#e65c00}
+
+        .dev-box{background:rgba(230,92,0,0.08);border:1px solid rgba(230,92,0,0.45);padding:12px;border-radius:14px;margin-bottom:12px}
+        .dev-box-yellow{background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.42);padding:12px;border-radius:14px;margin-bottom:12px}
+        .dev-box-red{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.35);padding:12px;border-radius:14px;margin-bottom:12px}
+        .ban-item-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:7px 10px;margin-bottom:6px;font-size:11px}
 
         .nav-wrapper{position:fixed;bottom:6px;left:12px;right:12px;z-index:1000}
         nav{background:linear-gradient(180deg,rgba(20,14,10,0.97),rgba(10,7,5,0.99)) !important;backdrop-filter:blur(24px);border:1px solid rgba(230,92,0,0.28) !important;border-radius:20px;display:flex;padding:3px;box-shadow:0 12px 28px rgba(0,0,0,0.85);gap:5px}
@@ -368,13 +381,18 @@
 </div>
 
 <header>
-    <div class="logo">⚡ PulseCity</div>
+    <div class="logo">
+        <span>⚡ PulseCity</span>
+        <span id="draftModeHeaderBadge" class="draft-pill-badge">ЧЕРНОВИК</span>
+    </div>
     <div class="header-actions">
         <button class="top-mini-btn" id="toggleSearchBtn" onclick="toggleHeaderSearch()" title="Поиск по ленте">🔍</button>
         <button class="top-mini-btn" onclick="openPulseModal()" title="Индекс пульса">⚡</button>
         <button class="city-btn" onclick="openCityModal()">📍 <span id="currentCity">Иркутск</span> ▾</button>
     </div>
 </header>
+
+<div id="globalNoticeBanner"></div>
 
 <div id="headerSearchDrop">
     <div style="display:flex;gap:8px;align-items:center;">
@@ -385,14 +403,14 @@
 
 <div class="container" id="mainContainer" onscroll="checkScrollPosition()">
     <button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
-    <button id="fabAddNews" onclick="openModal('newsModal')" title="Добавить новость">+</button>
+    <button id="fabAddNews" onclick="openNewPostModal()" title="Добавить новость">+</button>
 
     <div id="tab-feed" class="content active">
         <div class="challenge-pinned-card" id="pinnedChallengeCard" onclick="openDailyChallengeComments()">
             <div class="challenge-expand-grid">
                 <div class="challenge-expand-inner">
                     <div class="challenge-top-row">
-                        <div class="challenge-badge">🎯 Вызов дня • 🏆 Приз лидеру</div>
+                        <div class="challenge-badge" id="pinnedChallengeBadge">🎯 Вызов дня • 🏆 Приз лидеру</div>
                     </div>
                     <h4 id="pinnedChallengeText" style="font-size:13px;font-weight:700;color:#fff;line-height:1.35;margin:6px 0 8px;">Загрузка задания...</h4>
                     <button class="challenge-join-btn" type="button">
@@ -537,6 +555,7 @@
             <select id="contactTopicSelect" style="margin-bottom:8px;padding:10px 12px;font-size:13px;">
                 <option value="Предложение / идея">💡 Предложение или идея</option>
                 <option value="Ошибка в приложении">🐞 Сообщить об ошибке</option>
+                <option value="Проблема с аккаунтом / баном">🔐 Проблема с аккаунтом или баном</option>
                 <option value="Сотрудничество / реклама">🤝 Сотрудничество или реклама</option>
                 <option value="Жалоба / модерация">🛡️ Вопрос по модерации</option>
             </select>
@@ -679,37 +698,85 @@
 </div>
 
 <div id="adminModal" class="modal" onclick="if(event.target===this)closeModal('adminModal')">
-    <div class="modal-card" style="max-width:440px;">
-        <h3>👑 Кабинет разработчика</h3>
-        <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Панель управления и модерации:</p>
+    <div class="modal-card" style="max-width:450px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <h3 style="margin:0;">👑 Кабинет разработчика</h3>
+            <span id="devReleaseVersionTag" style="background:rgba(230,92,0,0.22);border:1px solid rgba(230,92,0,0.5);color:#ff9440;font-size:11px;font-weight:800;padding:3px 9px;border-radius:10px;">Релиз v1.0</span>
+        </div>
+        <p style="font-size:12px;color:#9ca3af;margin-bottom:12px">Безопасная настройка в черновике, выпуск обновлений, модерация и помощь пользователям:</p>
 
-        <div style="background:rgba(230,92,0,0.08);border:1px solid rgba(230,92,0,0.45);padding:12px;border-radius:14px;margin-bottom:12px;">
+        <div class="dev-box-yellow">
+            <div class="setting-row" style="margin-bottom:10px;background:rgba(0,0,0,0.35);border-color:rgba(250,204,21,0.35);">
+                <div>
+                    <p style="font-weight:800;font-size:13px;color:#fde047;">🧪 Режим черновика (песочница)</p>
+                    <p style="font-size:11px;color:#d1d5db;">Правки ниже видны только вам до выпуска</p>
+                </div>
+                <div id="draftModeToggle" class="toggle-switch" onclick="toggleDraftMode()"></div>
+            </div>
+
+            <p style="font-weight:700;font-size:12px;color:#fde047;margin-bottom:6px;">⚙️ Параметры черновика (не затрагивают людей до релиза):</p>
+            <input type="text" id="draftNoticeInput" placeholder="Баннер сверху для всех (например: Идёт обновление...)" style="margin-bottom:7px;font-size:12px;padding:10px;">
+            <input type="text" id="draftChallengeInput" placeholder="Свой текст «Вызова дня» (пусто = авто по дням)" style="margin-bottom:7px;font-size:12px;padding:10px;">
+
+            <div class="setting-row" style="margin-bottom:10px;padding:9px 12px;background:rgba(0,0,0,0.28);">
+                <div>
+                    <p style="font-weight:700;font-size:12px;color:#fff;">🚧 Пауза публикаций (техработы)</p>
+                    <p style="font-size:10px;color:#9ca3af;">Временно запретить посты/сообщения обычным пользователям</p>
+                </div>
+                <div id="draftMaintenanceToggle" class="toggle-switch" onclick="toggleDraftMaintenance()"></div>
+            </div>
+
+            <div style="display:flex;gap:7px;margin-bottom:7px;">
+                <button type="button" class="btn-sec" onclick="saveDraftConfig()" style="margin:0;padding:10px;font-size:12px;border-color:rgba(250,204,21,0.45);color:#fde047;">💾 Сохранить черновик</button>
+                <button type="button" class="btn-main" onclick="publishDraftRelease()" style="margin:0;padding:10px;font-size:12px;">🚀 Выпустить обновление</button>
+            </div>
+            <button type="button" class="btn-sec" onclick="revertDraftToLive()" style="margin:0;padding:8px;font-size:11px;color:#9ca3af;">↩ Сбросить черновик до текущего релиза</button>
+        </div>
+
+        <div class="dev-box">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <p style="font-weight:700;font-size:13px;color:#ff7a14;margin:0;">📩 Обращения пользователей</p>
+                <p style="font-weight:700;font-size:13px;color:#ff7a14;margin:0;">📩 Помощь и обращения пользователей</p>
                 <button type="button" onclick="loadSupportTickets()" style="background:rgba(230,92,0,0.18);border:1px solid rgba(230,92,0,0.45);color:#ff7a14;padding:4px 9px;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;">🔄 Обновить</button>
             </div>
-            <div id="supportTicketsList" style="max-height:200px;overflow-y:auto;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <input type="text" id="devDirectHelpUserInput" placeholder="Написать любому @никнейму в ЛС..." style="margin:0;padding:9px 11px;font-size:12px;">
+                <button type="button" onclick="openDirectHelpChat()" style="background:rgba(230,92,0,0.22);border:1px solid rgba(230,92,0,0.45);color:#ff9440;padding:0 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">💬 ЛС</button>
+            </div>
+            <div id="supportTicketsList" style="max-height:220px;overflow-y:auto;">
                 <p style="color:#9ca3af;font-size:12px;">Загрузка обращений...</p>
             </div>
         </div>
+
+        <div class="dev-box-red">
+            <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ef4444">🚫 Блокировка пользователей (временно или навсегда)</p>
+            <input type="text" id="adminBanInput" placeholder="Введите @никнейм..." style="margin-bottom:7px;padding:10px;font-size:13px;">
+            <select id="adminBanDurationSelect" style="margin-bottom:7px;padding:10px;font-size:13px;">
+                <option value="3600000">⏳ На 1 час</option>
+                <option value="86400000">⏳ На 24 часа</option>
+                <option value="604800000">⏳ На 7 дней</option>
+                <option value="2592000000">⏳ На 30 дней</option>
+                <option value="permanent">⛔ Навсегда</option>
+            </select>
+            <input type="text" id="adminBanReasonInput" placeholder="Причина бана (необязательно)..." style="margin-bottom:8px;padding:10px;font-size:12px;">
+            <button class="btn-sec" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);margin-bottom:10px;padding:10px;font-size:13px;" onclick="banUser()">Заблокировать пользователя</button>
+
+            <p style="font-weight:700;font-size:11px;color:#fca5a5;margin-bottom:6px;">📋 Активные блокировки:</p>
+            <div id="activeBansList" style="max-height:140px;overflow-y:auto;">
+                <p style="color:#9ca3af;font-size:11px;">Заблокированных пользователей нет.</p>
+            </div>
+        </div>
         
-        <div style="background:rgba(230,92,0,0.08);padding:12px;border-radius:14px;margin-bottom:12px;">
+        <div class="dev-box">
             <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ff7a14">✨ Опубликовать от PulseCity в ленту</p>
             <input type="text" id="adminFeedTitleInput" placeholder="Заголовок..." style="margin-bottom:8px;">
             <textarea id="adminFeedTextInput" placeholder="Текст официальной новости..." style="height:64px;margin-bottom:8px;"></textarea>
             <button class="btn-main" style="padding:11px;font-size:13px;margin:0;" onclick="publishAdminFeedPost()">Опубликовать в ленту</button>
         </div>
 
-        <div style="background:rgba(230,92,0,0.08);padding:12px;border-radius:14px;margin-bottom:12px;">
+        <div class="dev-box">
             <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ff7a14">📢 Написать объявление в чат</p>
             <input type="text" id="adminBroadcastInput" placeholder="Текст объявления..." style="margin-bottom:8px;">
             <button class="btn-main" style="padding:11px;font-size:13px;margin:0;" onclick="sendAdminBroadcast()">Отправить в общий чат</button>
-        </div>
-
-        <div style="background:rgba(239,68,68,0.06);padding:12px;border-radius:14px;margin-bottom:12px;">
-            <p style="font-weight:700;font-size:13px;margin-bottom:8px;color:#ef4444">🚫 Заблокировать пользователя</p>
-            <input type="text" id="adminBanInput" placeholder="Введите @никнейм..." style="margin-bottom:8px;">
-            <button class="btn-sec" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);margin:0;" onclick="banUser()">Заблокировать навсегда</button>
         </div>
         
         <button class="btn-sec" onclick="adminClearChat()" style="background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);">🗑️ Очистить весь городской чат</button>
@@ -855,7 +922,8 @@
     const SUPPORT_RECIPIENT = '@andrey';
     const FOUNDER_EMAILS = ['andreilevkov5@yandex.ru', 'levkovandrej5@gmail.com'];
     const VAPID_PUBLIC_KEY = 'BIhsxzHD_xzNi6mQOajxyzNpklL-3uFmetWJeJ7PqAnpPhnBGR76X2j72MF4vVXhMs0WZl01K1SHgxLtk2-fQnk';
-    const THEME_REVISION = 'orange_v15_synced_reactions_comments';
+    const THEME_REVISION = 'orange_v16_dev_draft_release';
+    const SYSTEM_STATE_KEY = '__pulsecity_release__';
 
     const MAJOR_CITIES = [
         'Иркутск', 'Новосибирск', 'Москва', 'Санкт-Петербург', 'Екатеринбург', 'Казань',
@@ -994,6 +1062,378 @@
         }
     };
 
+    let systemReleaseState = {
+        version: 1,
+        draftEnabled: false,
+        live: {
+            noticeBanner: '',
+            challengeOverride: '',
+            maintenanceMode: false
+        },
+        draft: {
+            noticeBanner: '',
+            challengeOverride: '',
+            maintenanceMode: false
+        },
+        bans: {}
+    };
+
+    function normalizeBanMap(rawBans) {
+        const clean = {};
+        if (!rawBans || typeof rawBans !== 'object') return clean;
+        const now = Date.now();
+        Object.keys(rawBans).forEach(k => {
+            const item = rawBans[k];
+            if (!item || typeof item !== 'object') return;
+            if (item.until && Number(item.until) > 0 && Number(item.until) <= now) {
+                return;
+            }
+            clean[k.toLowerCase()] = {
+                username: item.username || k,
+                until: item.until ? Number(item.until) : 0,
+                reason: item.reason || '',
+                bannedAt: item.bannedAt || now
+            };
+        });
+        return clean;
+    }
+
+    function getActiveConfigForCurrentUser() {
+        if (isFounderAccount() && systemReleaseState.draftEnabled) {
+            return systemReleaseState.draft || systemReleaseState.live;
+        }
+        return systemReleaseState.live;
+    }
+
+    function formatBanRemaining(untilMs) {
+        if (!untilMs || Number(untilMs) <= 0) return 'Навсегда';
+        const diff = Number(untilMs) - Date.now();
+        if (diff <= 0) return 'Истёк';
+        const mins = Math.ceil(diff / 60000);
+        if (mins < 60) return `осталось ${mins} мин`;
+        const hours = Math.ceil(diff / 3600000);
+        if (hours < 48) return `осталось ${hours} ч`;
+        const days = Math.ceil(diff / 86400000);
+        return `осталось ${days} дн`;
+    }
+
+    function checkCurrentUserBan(showAlertIfBanned = true) {
+        if (isFounderAccount() || !myUsername) return false;
+        const key = myUsername.toLowerCase().trim();
+        const banRecord = systemReleaseState.bans?.[key];
+        if (!banRecord) return false;
+        if (banRecord.until && Number(banRecord.until) > 0 && Number(banRecord.until) <= Date.now()) {
+            delete systemReleaseState.bans[key];
+            return false;
+        }
+        if (showAlertIfBanned) {
+            const term = formatBanRemaining(banRecord.until);
+            const reasonTxt = banRecord.reason ? `\nПричина: ${banRecord.reason}` : '';
+            showPulseAlert(`⛔ Ваш аккаунт ${myUsername} временно или навсегда ограничен (${term}).${reasonTxt}\n\nЕсли считаете это ошибкой — напишите в «Связь с PulseCity».`);
+        }
+        return true;
+    }
+
+    function checkMaintenanceGuard() {
+        if (isFounderAccount()) return false;
+        const cfg = getActiveConfigForCurrentUser();
+        if (cfg && cfg.maintenanceMode) {
+            showPulseAlert('🚧 Сейчас в PulseCity идёт плановое обновление. Отправка сообщений и публикаций временно на паузе — попробуйте через пару минут!');
+            return true;
+        }
+        return false;
+    }
+
+    function applyActiveReleaseConfigToUI() {
+        const cfg = getActiveConfigForCurrentUser() || {};
+        const bannerEl = document.getElementById('globalNoticeBanner');
+        if (bannerEl) {
+            const bannerText = (cfg.noticeBanner || '').trim();
+            if (bannerText) {
+                bannerEl.textContent = bannerText;
+                bannerEl.classList.add('open');
+            } else if (cfg.maintenanceMode && !isFounderAccount()) {
+                bannerEl.textContent = '🚧 В приложении идут технические работы — скоро вернёмся!';
+                bannerEl.classList.add('open');
+            } else {
+                bannerEl.textContent = '';
+                bannerEl.classList.remove('open');
+            }
+        }
+
+        const draftBadge = document.getElementById('draftModeHeaderBadge');
+        if (draftBadge) {
+            draftBadge.classList.toggle('visible', Boolean(isFounderAccount() && systemReleaseState.draftEnabled));
+        }
+
+        initPinnedChallengeCard();
+        syncAdminDevPanelUI();
+    }
+
+    function syncAdminDevPanelUI() {
+        const verTag = document.getElementById('devReleaseVersionTag');
+        if (verTag) {
+            verTag.textContent = `Релиз v1.${systemReleaseState.version || 1}`;
+        }
+        const draftSwitch = document.getElementById('draftModeToggle');
+        if (draftSwitch) {
+            draftSwitch.classList.toggle('active', Boolean(systemReleaseState.draftEnabled));
+        }
+        const draftNoticeInp = document.getElementById('draftNoticeInput');
+        if (draftNoticeInp && document.activeElement !== draftNoticeInp) {
+            draftNoticeInp.value = systemReleaseState.draft?.noticeBanner || '';
+        }
+        const draftChalInp = document.getElementById('draftChallengeInput');
+        if (draftChalInp && document.activeElement !== draftChalInp) {
+            draftChalInp.value = systemReleaseState.draft?.challengeOverride || '';
+        }
+        const maintSwitch = document.getElementById('draftMaintenanceToggle');
+        if (maintSwitch) {
+            maintSwitch.classList.toggle('active', Boolean(systemReleaseState.draft?.maintenanceMode));
+        }
+        renderActiveBansList();
+    }
+
+    async function persistSystemReleaseState() {
+        systemReleaseState.bans = normalizeBanMap(systemReleaseState.bans);
+        localStorage.setItem('pulseCity_system_release_state', JSON.stringify(systemReleaseState));
+        if (!supabaseClient) return;
+
+        const serialized = JSON.stringify(systemReleaseState);
+        await supabaseClient
+            .from('pins')
+            .upsert([{
+                city: SYSTEM_STATE_KEY,
+                message_id: Number(systemReleaseState.version) || 1,
+                text: serialized
+            }], { onConflict: 'city' });
+    }
+
+    async function loadSystemReleaseState() {
+        try {
+            const localCached = JSON.parse(localStorage.getItem('pulseCity_system_release_state') || 'null');
+            if (localCached && typeof localCached === 'object') {
+                systemReleaseState = {
+                    ...systemReleaseState,
+                    ...localCached,
+                    bans: normalizeBanMap(localCached.bans)
+                };
+            }
+        } catch (e) {}
+
+        if (supabaseClient) {
+            const { data } = await supabaseClient
+                .from('pins')
+                .select('*')
+                .eq('city', SYSTEM_STATE_KEY)
+                .maybeSingle();
+
+            if (data && data.text) {
+                try {
+                    const parsed = JSON.parse(data.text);
+                    if (parsed && typeof parsed === 'object') {
+                        systemReleaseState = {
+                            version: Number(parsed.version) || 1,
+                            draftEnabled: Boolean(parsed.draftEnabled),
+                            live: {
+                                noticeBanner: parsed.live?.noticeBanner || '',
+                                challengeOverride: parsed.live?.challengeOverride || '',
+                                maintenanceMode: Boolean(parsed.live?.maintenanceMode)
+                            },
+                            draft: {
+                                noticeBanner: parsed.draft?.noticeBanner || '',
+                                challengeOverride: parsed.draft?.challengeOverride || '',
+                                maintenanceMode: Boolean(parsed.draft?.maintenanceMode)
+                            },
+                            bans: normalizeBanMap(parsed.bans)
+                        };
+                        localStorage.setItem('pulseCity_system_release_state', JSON.stringify(systemReleaseState));
+                    }
+                } catch (e) {}
+            }
+        }
+
+        applyActiveReleaseConfigToUI();
+    }
+
+    async function toggleDraftMode() {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        if (!isFounderAccount()) return;
+
+        systemReleaseState.draftEnabled = !systemReleaseState.draftEnabled;
+        if (systemReleaseState.draftEnabled && !systemReleaseState.draft) {
+            systemReleaseState.draft = { ...systemReleaseState.live };
+        }
+        await persistSystemReleaseState();
+        applyActiveReleaseConfigToUI();
+        showPulseAlert(systemReleaseState.draftEnabled
+            ? '🧪 Режим черновика ВКЛЮЧЕН. Все изменения видны только вам, обычные пользователи видят прошлый стабильный релиз.'
+            : '✅ Режим черновика ВЫКЛЮЧЕН. Вы смотрите живую версию приложения как обычные пользователи.');
+    }
+
+    function toggleDraftMaintenance() {
+        if (!isFounderAccount()) return;
+        if (!systemReleaseState.draft) systemReleaseState.draft = { ...systemReleaseState.live };
+        systemReleaseState.draft.maintenanceMode = !systemReleaseState.draft.maintenanceMode;
+        syncAdminDevPanelUI();
+    }
+
+    async function saveDraftConfig() {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        if (!isFounderAccount()) return;
+
+        const noticeVal = (document.getElementById('draftNoticeInput')?.value || '').trim();
+        const chalVal = (document.getElementById('draftChallengeInput')?.value || '').trim();
+        const maintVal = Boolean(systemReleaseState.draft?.maintenanceMode);
+
+        systemReleaseState.draft = {
+            noticeBanner: noticeVal,
+            challengeOverride: chalVal,
+            maintenanceMode: maintVal
+        };
+        systemReleaseState.draftEnabled = true;
+
+        await persistSystemReleaseState();
+        applyActiveReleaseConfigToUI();
+        showPulseAlert('💾 Черновик сохранён! Проверьте изменения на своём экране — для остальных пользователей ничего не изменилось до нажатия «Выпустить обновление».');
+    }
+
+    async function publishDraftRelease() {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        if (!isFounderAccount()) return;
+
+        const noticeVal = (document.getElementById('draftNoticeInput')?.value || '').trim();
+        const chalVal = (document.getElementById('draftChallengeInput')?.value || '').trim();
+        const maintVal = Boolean(systemReleaseState.draft?.maintenanceMode);
+
+        const nextConfig = {
+            noticeBanner: noticeVal,
+            challengeOverride: chalVal,
+            maintenanceMode: maintVal
+        };
+
+        systemReleaseState.draft = { ...nextConfig };
+        systemReleaseState.live = { ...nextConfig };
+        systemReleaseState.version = (Number(systemReleaseState.version) || 1) + 1;
+        systemReleaseState.draftEnabled = false;
+
+        await persistSystemReleaseState();
+        applyActiveReleaseConfigToUI();
+        playSystemSound('send');
+        showPulseAlert(`🚀 Обновление v1.${systemReleaseState.version} выпущено! Все пользователи получили актуальную версию.`);
+    }
+
+    async function revertDraftToLive() {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        if (!isFounderAccount()) return;
+
+        systemReleaseState.draft = { ...systemReleaseState.live };
+        await persistSystemReleaseState();
+        applyActiveReleaseConfigToUI();
+        showPulseAlert('↩ Черновик сброшен до текущего опубликованного релиза.');
+    }
+
+    function renderActiveBansList() {
+        const box = document.getElementById('activeBansList');
+        if (!box) return;
+        systemReleaseState.bans = normalizeBanMap(systemReleaseState.bans);
+        const keys = Object.keys(systemReleaseState.bans);
+
+        if (keys.length === 0) {
+            box.innerHTML = '<p style="color:#9ca3af;font-size:11px;margin:0;">Активных блокировок нет.</p>';
+            return;
+        }
+
+        box.innerHTML = '';
+        keys.forEach(k => {
+            const b = systemReleaseState.bans[k];
+            const safeUser = escapeHtml(b.username || k);
+            const term = formatBanRemaining(b.until);
+            const row = document.createElement('div');
+            row.className = 'ban-item-row';
+            row.innerHTML = `
+                <div style="min-width:0;flex:1;">
+                    <strong style="color:#fca5a5;">${safeUser}</strong> • <span style="color:#fde047;">${escapeHtml(term)}</span>
+                    ${b.reason ? `<div style="color:#9ca3af;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(b.reason)}</div>` : ''}
+                </div>
+                <button type="button" onclick="unbanUser('${safeUser.replace(/'/g, '&#39;')}')" style="background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.45);color:#34d399;padding:4px 8px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;">Снять бан</button>
+            `;
+            box.appendChild(row);
+        });
+    }
+
+    async function unbanUser(targetUsername) {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        if (!isFounderAccount()) return;
+        const clean = (targetUsername || '').trim();
+        const key = clean.toLowerCase();
+        if (systemReleaseState.bans && systemReleaseState.bans[key]) {
+            delete systemReleaseState.bans[key];
+            await persistSystemReleaseState();
+            renderActiveBansList();
+            showPulseAlert(`✅ Блокировка с пользователя ${clean} снята.`);
+        }
+    }
+
+    function openDirectHelpChat() {
+        const inp = document.getElementById('devDirectHelpUserInput');
+        let target = (inp?.value || '').trim();
+        if (!target) {
+            showPulseAlert('Введите @никнейм пользователя, которому нужно помочь.');
+            return;
+        }
+        if (!target.startsWith('@')) target = '@' + target;
+        inp.value = '';
+        closeModal('adminModal');
+        jumpToPrivateChat(target);
+    }
+
+    async function sendQuickSupportTemplate(senderTag, tplType) {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        if (!isFounderAccount() || !supabaseClient) return;
+
+        let target = (senderTag || '').trim();
+        if (!target || !target.startsWith('@')) {
+            showPulseAlert('У этого обращения не указан @никнейм для личного сообщения.');
+            return;
+        }
+
+        const templates = {
+            help_account: '👋 Здравствуйте! Это команда PulseCity. Мы получили ваше обращение и уже помогаем разобраться. Подскажите, пожалуйста, какие именно детали возникли — мы всё поправим!',
+            unban_done: '✅ Здравствуйте! Ограничения с вашего аккаунта сняты. Пожалуйста, соблюдайте правила городского чата и ленты PulseCity.',
+            bug_thanks: '⚡ Спасибо за сообщение об ошибке! Мы уже взяли её в работу и скоро выпустим обновление.'
+        };
+
+        if (tplType === 'unban_done') {
+            await unbanUser(target);
+        }
+
+        const replyText = templates[tplType] || templates.help_account;
+        const { error } = await supabaseClient.from('messages').insert([{
+            chat_type: 'private',
+            city: selectedCity,
+            sender: myUsername || '⚡ PulseCity',
+            recipient: target,
+            text: replyText,
+            avatar_url: myAvatar || 'https://cdn-icons-png.flaticon.com/512/1828/1828644.png'
+        }]);
+
+        if (error) {
+            showPulseAlert('Не удалось отправить ответ: ' + error.message);
+            return;
+        }
+
+        triggerRemotePush({
+            recipient: target,
+            city: selectedCity,
+            title: '⚡ Ответ поддержки PulseCity',
+            body: replyText.slice(0, 110)
+        });
+
+        playSystemSound('send');
+        showPulseAlert(`✓ Быстрый ответ отправлен пользователю ${target} в ЛС!`);
+    }
+
     let pushNotificationsEnabled = localStorage.getItem('pulseCity_push_enabled') !== 'false';
     let notifiedEventKeys = new Set(JSON.parse(localStorage.getItem('pulseCity_notified_keys') || '[]'));
     let toastTimer = null;
@@ -1115,6 +1555,7 @@
     }
 
     async function toggleChallengeCommentReaction(commentId, emoji) {
+        if (checkCurrentUserBan(true)) return;
         if (!myUsername || !commentId || !supabaseClient) return;
         const target = currentCommentsRows.find(c => String(c.id) === String(commentId));
         if (!target) return;
@@ -1535,6 +1976,7 @@
             card.className = 'support-ticket-card';
             const canReply = t.sender && t.sender !== 'Гость' && t.sender.startsWith('@');
             const safeSender = escapeHtml(t.sender);
+            const isCurrentlyBanned = Boolean(systemReleaseState.bans?.[t.sender.toLowerCase()]);
             card.innerHTML = `
                 <div class="support-ticket-head">
                     <span>${safeSender} ${t.city ? '• ' + escapeHtml(t.city) : ''}</span>
@@ -1542,8 +1984,14 @@
                 </div>
                 <div class="support-ticket-topic">${escapeHtml(t.topic)}</div>
                 <div class="support-ticket-msg">${escapeHtml(t.message)}</div>
+                ${canReply ? `
+                <div class="quick-reply-row">
+                    <button type="button" class="quick-tpl-btn" onclick="sendQuickSupportTemplate('${safeSender}', 'help_account')">🤝 Помочь в ЛС</button>
+                    <button type="button" class="quick-tpl-btn" onclick="sendQuickSupportTemplate('${safeSender}', 'bug_thanks')">🐞 Спасибо за баг</button>
+                    ${isCurrentlyBanned ? `<button type="button" class="quick-tpl-btn" style="color:#34d399;border-color:rgba(16,185,129,0.4);" onclick="sendQuickSupportTemplate('${safeSender}', 'unban_done')">🔓 Снять бан и ответить</button>` : ''}
+                </div>` : ''}
                 <div style="display:flex;gap:8px;justify-content:flex-end;">
-                    ${canReply ? `<button type="button" onclick="replyToSupportSender('${safeSender}')" style="background:rgba(230,92,0,0.25);border:1px solid rgba(230,92,0,0.45);color:#fff;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">💬 Ответить в ЛС</button>` : ''}
+                    ${canReply ? `<button type="button" onclick="replyToSupportSender('${safeSender}')" style="background:rgba(230,92,0,0.25);border:1px solid rgba(230,92,0,0.45);color:#fff;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">💬 Диалог в ЛС</button>` : ''}
                     <button type="button" onclick="removeSupportTicket('${escapeHtml(t.source)}', '${escapeHtml(String(t.id))}')" style="background:rgba(239,68,68,0.16);border:1px solid rgba(239,68,68,0.35);color:#ef4444;padding:5px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
                 </div>
             `;
@@ -1696,6 +2144,10 @@
     ];
 
     function getCurrentChallengeText() {
+        const cfg = getActiveConfigForCurrentUser();
+        if (cfg && cfg.challengeOverride && cfg.challengeOverride.trim()) {
+            return cfg.challengeOverride.trim();
+        }
         const todayIdx = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % challengesList.length;
         return challengesList[todayIdx];
     }
@@ -1770,6 +2222,12 @@
 
     function openPulseModal() {
         openModal('pulseModal');
+    }
+
+    function openNewPostModal() {
+        if (checkCurrentUserBan(true)) return;
+        if (checkMaintenanceGuard()) return;
+        openModal('newsModal');
     }
 
     function toggleHeaderSearch() {
@@ -1873,13 +2331,6 @@
         avatarUrl: ''
     };
 
-    let bannedList = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
-    if (bannedList.includes(myUsername)) {
-        showPulseAlert('Ваш аккаунт заблокирован администратором.');
-        localStorage.clear();
-        location.reload();
-    }
-
     document.getElementById('currentCity').textContent = selectedCity;
     document.getElementById('profileCity').textContent = selectedCity;
     document.getElementById('chatTitle').textContent = 'Городской чат • ' + selectedCity;
@@ -1896,6 +2347,7 @@
             document.getElementById('adminPanelBtn').style.display = 'none';
             document.getElementById('userBadge').textContent = '⭐ Местный эксперт';
         }
+        applyActiveReleaseConfigToUI();
     }
 
     function updateProfileUI() {
@@ -2289,7 +2741,7 @@
         }, 15000);
     }
 
-    function finalizeUserLogin(email, name, uname, avatarUrl) {
+    async function finalizeUserLogin(email, name, uname, avatarUrl) {
         myName = name;
         myUsername = uname;
         myEmail = email;
@@ -2301,7 +2753,9 @@
         localStorage.setItem('pulseCity_v4_avatar', myAvatar);
 
         document.getElementById('authModal').classList.remove('open');
+        await loadSystemReleaseState();
         updateProfileUI();
+        checkCurrentUserBan(true);
         requestNotificationPermission(false);
         registerServiceWorkerAndPush();
         loadPostsFromCloud(true);
@@ -2550,7 +3004,8 @@
             'pulseCity_msg_reactions',
             'pulseCity_poll_votes',
             'pulseCity_local_support',
-            'pulseCity_challenge_reacts'
+            'pulseCity_challenge_reacts',
+            'pulseCity_system_release_state'
         ];
         cacheKeysToRemove.forEach(k => localStorage.removeItem(k));
         sessionStorage.clear();
@@ -2579,6 +3034,7 @@
         closeModal('settingsModal');
         showPulseAlert('🧹 Локальный кэш очищен! Аккаунт и город сохранены.');
         if (myUsername) {
+            await loadSystemReleaseState();
             loadPostsFromCloud(true);
             loadPublicMessages();
         }
@@ -2602,6 +3058,8 @@
             showPulseAlert('Доступ к кабинету разработчика есть только у создателя PulseCity.');
             return;
         }
+        await loadSystemReleaseState();
+        syncAdminDevPanelUI();
         openModal('adminModal');
         loadSupportTickets();
     }
@@ -2767,23 +3225,42 @@
         loadPublicMessages();
     }
 
-    function banUser() {
+    async function banUser() {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
         if (!isFounderAccount()) return;
         const input = document.getElementById('adminBanInput');
+        const durationVal = document.getElementById('adminBanDurationSelect')?.value || 'permanent';
+        const reasonVal = (document.getElementById('adminBanReasonInput')?.value || '').trim();
         let target = input.value.trim();
-        if (!target) return;
+        if (!target) {
+            showPulseAlert('Введите @никнейм пользователя для блокировки.');
+            return;
+        }
         if (!target.startsWith('@')) target = '@' + target;
 
-        showConfirm('Блокировка', `Заблокировать пользователя ${target} навсегда?`, (res) => {
+        if (target.toLowerCase() === (myUsername || '').toLowerCase() || target.toLowerCase() === '@andrey') {
+            showPulseAlert('Нельзя заблокировать аккаунт основателя.');
+            return;
+        }
+
+        const untilMs = durationVal === 'permanent' ? 0 : (Date.now() + Number(durationVal));
+        const termText = formatBanRemaining(untilMs);
+
+        showConfirm('Блокировка пользователя', `Заблокировать ${target} (${termText})?`, async (res) => {
             if (!res) return;
-            let list = JSON.parse(localStorage.getItem('pulseCity_banned') || '[]');
-            if (!list.includes(target)) {
-                list.push(target);
-                localStorage.setItem('pulseCity_banned', JSON.stringify(list));
-            }
-            showPulseAlert(`Пользователь ${target} заблокирован.`);
+            if (!systemReleaseState.bans) systemReleaseState.bans = {};
+            systemReleaseState.bans[target.toLowerCase()] = {
+                username: target,
+                until: untilMs,
+                reason: reasonVal,
+                bannedAt: Date.now()
+            };
+            await persistSystemReleaseState();
+            renderActiveBansList();
+            showPulseAlert(`⛔ Пользователь ${target} заблокирован (${termText}).`);
             input.value = '';
-            closeModal('adminModal');
+            const rInp = document.getElementById('adminBanReasonInput');
+            if (rInp) rInp.value = '';
         });
     }
 
@@ -3081,6 +3558,7 @@
     }
 
     async function toggleMessageReaction(msgId, emoji) {
+        if (checkCurrentUserBan(true)) return;
         if (!myUsername || !msgId || !supabaseClient) return;
         const key = String(msgId);
         const currentEmojis = { ...(messageReactionsMap[key] || {}) };
@@ -3665,6 +4143,7 @@
     }
 
     async function reactPost(postId, emoji) {
+        if (checkCurrentUserBan(true)) return;
         if (!supabaseClient || !myUsername) return;
         
         if (!globalReactionsData[postId]) {
@@ -3706,6 +4185,7 @@
     }
 
     async function votePoll(postId, optIdx) {
+        if (checkCurrentUserBan(true)) return;
         if (!supabaseClient || !myUsername) return;
 
         let pollVotesStorage = JSON.parse(localStorage.getItem('pulseCity_poll_votes') || '{}');
@@ -3897,6 +4377,8 @@
     }
 
     async function sendComment() {
+        if (checkCurrentUserBan(true)) return;
+        if (checkMaintenanceGuard()) return;
         const input = document.getElementById('commentInput');
         if (!activePostIdForComments) return;
 
@@ -3958,6 +4440,8 @@
     }
 
     async function publishNews() {
+        if (checkCurrentUserBan(true)) return;
+        if (checkMaintenanceGuard()) return;
         let title = document.getElementById('newsTitleInput').value.trim().slice(0, 160);
         const check = IMPULSE_GUARD.validateText(document.getElementById('newsTextInput').value, {
             maxLength: 2500,
@@ -3988,7 +4472,12 @@
             finalAuthorAvatar = randomPersona.avatar;
         }
 
-        let postData = {
+        let pollOptionsJson = null;
+        if (pollQ && poll1 && poll2) {
+            pollOptionsJson = JSON.stringify([poll1, poll2]);
+        }
+
+        const { error } = await supabaseClient.from('posts').insert([{
             city: selectedCity,
             category: 'general',
             title: title,
@@ -3996,35 +4485,23 @@
             media_url: publicMediaUrl,
             author_username: finalAuthorName,
             author_avatar: finalAuthorAvatar,
+            poll_question: pollQ || null,
+            poll_options: pollOptionsJson,
             views: 1
-        };
-
-        if (pollQ && poll1 && poll2) {
-            postData.poll_question = pollQ;
-            postData.poll_options = [poll1, poll2];
-        }
-
-        const { data, error } = await supabaseClient.from('posts').insert([postData]).select();
+        }]);
 
         document.getElementById('loadingModal').classList.remove('open');
-        if (error) {
-            showPulseAlert('Ошибка публикации: ' + error.message);
-            return;
+
+        if (error) { 
+            showPulseAlert('Ошибка публикации: ' + error.message); 
+            return; 
         }
 
-        IMPULSE_GUARD.markSent(title + ':' + text);
-
-        if (data && data[0]) {
-            viewedPostsSet.add(String(data[0].id));
-            localStorage.setItem('pulseCity_viewed_posts', JSON.stringify([...viewedPostsSet]));
-            markEventNotified(`post_${data[0].id}`);
-            if (data[0].id > lastKnownMaxPostId) lastKnownMaxPostId = data[0].id;
-        }
-
+        IMPULSE_GUARD.markSent(text);
         triggerRemotePush({
             city: selectedCity,
-            title: `📰 ${title} • ${selectedCity}`,
-            body: `${finalAuthorName}: ${text.slice(0, 110)}`
+            title: `📰 Новая новость • ${selectedCity}`,
+            body: `${title} (${finalAuthorName})`
         });
 
         playSystemSound('send');
@@ -4033,267 +4510,30 @@
         document.getElementById('pollQuestionInput').value = '';
         document.getElementById('pollOpt1Input').value = '';
         document.getElementById('pollOpt2Input').value = '';
-        document.getElementById('newsMediaInput').value = '';
-        document.getElementById('newsMediaPreview').style.display = 'none';
-        
+        selectedNewsFile = null;
         isAnonymousPost = false;
         document.getElementById('anonToggle').classList.remove('active');
-
-        selectedNewsFile = null;
+        document.getElementById('newsMediaPreview').style.display = 'none';
         closeModal('newsModal');
         loadPostsFromCloud(true);
     }
 
-    function processIncomingMessagesForNotifications(allCityAndDmMsgs) {
-        if (!myUsername || !Array.isArray(allCityAndDmMsgs)) return;
-
-        const chatTabActive = document.getElementById('tab-chat')?.classList.contains('active');
-
-        allCityAndDmMsgs.forEach(m => {
-            if (!m || !m.id || m.sender === myUsername) return;
-            const cleanBody = parseReplyFromMessageText(m.text || '').body || 'Вложение';
-
-            if (m.chat_type === 'private' && m.recipient === myUsername) {
-                const isViewingThisDm = chatTabActive && chatMode === 'private' && privateRecipient === m.sender;
-                if (!isViewingThisDm) {
-                    dispatchSmartNotification(
-                        `dm_${m.id}`,
-                        `💬 Личное сообщение от ${m.sender}`,
-                        cleanBody,
-                        '💬',
-                        () => jumpToPrivateChat(m.sender)
-                    );
-                } else {
-                    markEventNotified(`dm_${m.id}`);
-                }
-            } else if (m.chat_type === 'public' && m.city === selectedCity) {
-                const isViewingPublicChat = chatTabActive && chatMode === 'public';
-                if (!isViewingPublicChat) {
-                    dispatchSmartNotification(
-                        `pub_${m.id}`,
-                        `🌍 Общий чат • ${selectedCity}`,
-                        `${m.sender}: ${cleanBody}`,
-                        '🌍',
-                        jumpToPublicChat
-                    );
-                } else {
-                    markEventNotified(`pub_${m.id}`);
-                }
-            }
-        });
-    }
-
-    async function pollBackgroundNotifications() {
-        if (!supabaseClient || !myUsername) return;
-        const { data } = await supabaseClient
-            .from('messages')
-            .select('*')
-            .or(`and(chat_type.eq.public,city.eq.${selectedCity}),and(chat_type.eq.private,recipient.eq.${myUsername})`)
-            .order('id', { ascending: false })
-            .limit(20);
-
-        if (data && data.length > 0) {
-            processIncomingMessagesForNotifications(data);
-            if (document.getElementById('tab-chat')?.classList.contains('active') && chatMode === 'private' && !privateRecipient) {
-                loadConversationsList();
-            }
-        }
-    }
-
-    let globalMessagesData = [];
-    let lastKnownMaxMsgId = 0;
-
-    async function loadPublicMessages() {
-        if (!supabaseClient || !myUsername) return;
-        
-        let query = supabaseClient.from('messages').select('*').order('id', { ascending: false });
-
-        if (chatMode === 'public') {
-            query = query.eq('city', selectedCity).eq('chat_type', 'public');
-        } else {
-            if (!privateRecipient) {
-                document.getElementById('chatMessages').innerHTML = '';
-                loadConversationsList();
-                return;
-            }
-            query = query.eq('chat_type', 'private');
-        }
-
-        const { data, error } = await query;
-        if (error || !data) return;
-
-        let filteredData = data;
-        if (chatMode === 'private' && privateRecipient) {
-            filteredData = data.filter(m => 
-                (m.sender === myUsername && m.recipient === privateRecipient) ||
-                (m.sender === privateRecipient && m.recipient === myUsername)
-            );
-        }
-
-        filteredData = [...filteredData].reverse();
-        
-        const prevMaxId = lastKnownMaxMsgId;
-        globalMessagesData = filteredData;
-        await syncReactionsForMessages(globalMessagesData);
-
-        const currentMaxMsgId = filteredData.length > 0 ? filteredData[filteredData.length - 1].id : 0;
-
-        if (prevMaxId !== 0 && currentMaxMsgId > prevMaxId) {
-            const latestMsg = filteredData[filteredData.length - 1];
-            if (latestMsg && latestMsg.sender !== myUsername) {
-                playSystemSound('receive');
-            }
-        }
-        if (currentMaxMsgId > lastKnownMaxMsgId) {
-            lastKnownMaxMsgId = currentMaxMsgId;
-        }
-
-        renderMessagesList(globalMessagesData);
-
-        if (currentMaxMsgId > prevMaxId) {
-            const chatBoxEl = document.getElementById('chatMessages');
-            chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
-        }
-
-        if (chatMode === 'private' && !privateRecipient) {
-            loadConversationsList();
-        }
-    }
-
-    function renderMessagesList(msgs) {
-        const box = document.getElementById('chatMessages');
-        const prevScrollTop = box.scrollTop;
-        const wasNearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 80;
-
-        box.innerHTML = '';
-        if (msgs.length === 0) {
-            box.innerHTML = `<p style="color:#9ca3af;text-align:center;font-size:14px;margin:20px 0;">Сообщений пока нет.</p>`;
-            return;
-        }
-
-        msgs.forEach(m => {
-            const parsed = parseReplyFromMessageText(m.text || '');
-            const displayText = parsed.body;
-
-            let quoteHtml = '';
-            if (parsed.reply) {
-                quoteHtml = `
-                    <div class="msg-quote-box" onclick="startReplyToMessage('${escapeHtml(String(m.id))}')">
-                        <div class="msg-quote-author">↩ ${escapeHtml(parsed.reply.author)}</div>
-                        <div class="msg-quote-text">${escapeHtml(parsed.reply.text || 'Сообщение')}</div>
-                    </div>
-                `;
-            }
-
-            let mediaTag = '';
-            if (isSafeMediaUrl(m.media_url)) {
-                const safeUrl = escapeHtml(m.media_url);
-                const isVid = m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video');
-                mediaTag = isVid 
-                    ? `
-                      <div class="media-download-bar" id="download-bar-msg-${m.id}" style="margin-top:8px;">
-                          <div class="download-progress-fill" id="download-fill-msg-${m.id}"></div>
-                          <span>📎 Видеофайл</span>
-                          <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${safeUrl}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
-                      </div>
-                      <video src="${safeUrl}" class="msg-media" controls playsinline preload="metadata" style="margin-top:6px;"></video>
-                    `
-                    : `
-                      <div class="media-download-bar" id="download-bar-msg-${m.id}" style="margin-top:8px;">
-                          <div class="download-progress-fill" id="download-fill-msg-${m.id}"></div>
-                          <span>📎 Фотография</span>
-                          <button class="download-quick-btn" id="download-btn-msg-${m.id}" onclick="downloadMediaWithProgress('${safeUrl}', 'download-btn-msg-${m.id}', 'download-fill-msg-${m.id}')">📥 Сохранить</button>
-                      </div>
-                      <img src="${safeUrl}" class="msg-media" loading="lazy" onclick="openLightbox('${safeUrl}')" style="margin-top:6px;cursor:zoom-in;">
-                    `;
-            }
-
-            const avatarHtml = isSafeMediaUrl(m.avatar_url) 
-                ? `<img src="${escapeHtml(m.avatar_url)}">` 
-                : escapeHtml(m.sender && m.sender[1] ? m.sender[1].toUpperCase() : 'U');
-
-            const isMine = m.sender === myUsername;
-            const canDeleteMsg = (m.sender === myUsername) || isFounderAccount();
-            const canPin = isFounderAccount();
-            const msgTimeFormatted = formatNiceTime(m.created_at);
-            const safeSender = escapeHtml(m.sender || '').replace(/'/g, '&#39;');
-            const safeAvatar = isSafeMediaUrl(m.avatar_url) ? escapeHtml(m.avatar_url).replace(/'/g, '&#39;') : '';
-            const safePinText = escapeHtml(displayText).replace(/'/g, '');
-
-            const msgKey = String(m.id);
-            const msgReacts = messageReactionsMap[msgKey] || {};
-            const reactedEmojis = Object.keys(msgReacts).filter(emo => {
-                const uList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
-                return uList.length > 0;
-            });
-
-            let pillsHtml = '';
-            reactedEmojis.forEach(emo => {
-                const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
-                const isMineEmo = usersList.includes(myUsername);
-                pillsHtml += `<button type="button" class="msg-react-pill${isMineEmo ? ' active' : ''}" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')">${emo} <span>${usersList.length}</span></button>`;
-            });
-
-            const quickEmojisHtml = ['🔥', '👍', '😂', '❤️'].map(emo => {
-                const usersList = Array.isArray(msgReacts[emo]) ? [...new Set(msgReacts[emo])] : [];
-                const isMineEmo = usersList.includes(myUsername);
-                if (usersList.length > 0) return '';
-                return `<button type="button" class="msg-quick-react-btn${isMineEmo ? ' active' : ''}" onclick="toggleMessageReaction('${escapeHtml(msgKey)}', '${emo}')" title="Реакция ${emo}">${emo}</button>`;
-            }).join('');
-
-            const reactionsRowHtml = `
-                <div class="msg-reactions-row">
-                    ${pillsHtml}
-                    ${quickEmojisHtml}
-                    <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker('${escapeHtml(msgKey)}')" title="Другая реакция">+😀</button>
-                </div>
-            `;
-
-            const row = document.createElement('div');
-            row.id = `msg-row-${msgKey}`;
-            row.className = 'msg-row' + (isMine ? ' mine' : '');
-            
-            row.innerHTML = `
-                <div class="msg-avatar" onclick="openUserProfileModal('${safeSender}', '${safeAvatar}')" title="Открыть профиль">${avatarHtml}</div>
-                <div class="msg-col">
-                    <div class="msg-bubble">
-                        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:2px;">
-                            <span class="msg-author" onclick="openUserProfileModal('${safeSender}', '${safeAvatar}')">${escapeHtml(m.sender)}</span>
-                            <div class="msg-mini-actions">
-                                <button type="button" class="msg-icon-btn" onclick="startReplyToMessage('${escapeHtml(msgKey)}')" title="Ответить">↩</button>
-                                ${canPin ? `<button type="button" class="msg-icon-btn" style="color:#ff7a14;" onclick="pinMessage(${Number(m.id)}, '${safePinText}')" title="Закрепить">📌</button>` : ''}
-                                ${canDeleteMsg ? `<button type="button" class="msg-icon-btn" style="color:#ef4444;" onclick="deleteMessage(${Number(m.id)}, '${safeSender}')" title="Удалить">✕</button>` : ''}
-                            </div>
-                        </div>
-                        ${quoteHtml}
-                        ${escapeHtml(displayText)}${mediaTag}
-                        <div class="msg-time">${escapeHtml(msgTimeFormatted)}</div>
-                    </div>
-                    ${reactionsRowHtml}
-                </div>`;
-            box.appendChild(row);
-        });
-
-        box.scrollTop = wasNearBottom ? box.scrollHeight : prevScrollTop;
-        initVideoManager();
-    }
-
-    function filterChatSearch() {
-        const q = document.getElementById('chatSearchInput').value.toLowerCase().trim();
-        if (!q) {
-            renderMessagesList(globalMessagesData);
-            return;
-        }
-        const filtered = globalMessagesData.filter(m => parseReplyFromMessageText(m.text || '').body.toLowerCase().includes(q));
-        renderMessagesList(filtered);
-    }
+    let pinnedMessageId = null;
 
     async function pinMessage(msgId, text) {
         await IMPULSE_GUARD.syncSession(supabaseClient);
         if (!isFounderAccount()) return;
-        await supabaseClient.from('pins').upsert([{ city: selectedCity, message_id: msgId, text: text }]);
-        loadPinnedMessage();
-        showPulseAlert('📌 Сообщение закреплено!');
+        pinnedMessageId = msgId;
+        const cleanPinText = parseReplyFromMessageText(text || '').body;
+        const { error } = await supabaseClient.from('pins').upsert([{
+            city: selectedCity,
+            message_id: msgId,
+            text: cleanPinText
+        }], { onConflict: 'city' });
+
+        if (!error) {
+            loadPinnedMessage();
+        }
     }
 
     async function unpinMessage() {
@@ -4304,215 +4544,406 @@
     }
 
     async function loadPinnedMessage() {
+        if (!supabaseClient) return;
         const { data } = await supabaseClient.from('pins').select('*').eq('city', selectedCity).maybeSingle();
-        const box = document.getElementById('pinnedMsgContainer');
-        const txt = document.getElementById('pinnedMsgText');
-        const btn = document.getElementById('unpinBtn');
-
-        if (data) {
-            txt.textContent = data.text;
-            box.style.display = 'flex';
-            if (isFounderAccount()) {
-                btn.style.display = 'block';
-            }
+        if (data && data.text) {
+            document.getElementById('pinnedMsgContainer').style.display = 'flex';
+            document.getElementById('pinnedMsgText').textContent = parseReplyFromMessageText(data.text).body;
+            document.getElementById('unpinBtn').style.display = isFounderAccount() ? 'inline-block' : 'none';
         } else {
-            box.style.display = 'none';
+            document.getElementById('pinnedMsgContainer').style.display = 'none';
         }
     }
 
-    function notifyTyping() {
+    let typingTimeout = null;
+    async function notifyTyping() {
+        if (!supabaseClient || !myUsername || privacyHideStatus) return;
+        await supabaseClient.from('typing_status').upsert([{
+            city: selectedCity,
+            username: myUsername,
+            updated_at: new Date().toISOString()
+        }], { onConflict: 'username' });
+    }
+
+    async function checkTypingStatus() {
         if (!supabaseClient || !myUsername) return;
-        if (privacyHideStatus) return;
-        supabaseClient.from('typing').upsert([{ username: myUsername, city: selectedCity, updated_at: new Date() }]).then(()=>{});
+        const fiveSecAgo = new Date(Date.now() - 5000).toISOString();
+        const { data } = await supabaseClient
+            .from('typing_status')
+            .select('username')
+            .eq('city', selectedCity)
+            .neq('username', myUsername)
+            .gte('updated_at', fiveSecAgo);
+
+        const indicator = document.getElementById('typingIndicator');
+        if (data && data.length > 0) {
+            const names = data.map(d => d.username).join(', ');
+            indicator.textContent = `✍️ ${names} печатает...`;
+        } else {
+            indicator.textContent = '';
+        }
     }
 
-    function setupRealtimeSubscriptions() {
-        if (!supabaseClient) return;
-        
-        supabaseClient
-            .channel('public:db_changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
-                if (payload?.eventType === 'INSERT' && payload?.new) {
-                    processIncomingMessagesForNotifications([payload.new]);
-                }
-                loadPublicMessages();
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, () => {
-                if (globalMessagesData.length > 0) {
-                    syncReactionsForMessages(globalMessagesData).then(() => {
-                        renderMessagesList(globalMessagesData);
-                    });
-                }
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
-                loadPostsFromCloud(true);
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, () => {
-                loadPostsFromCloud(true);
-            })
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, (payload) => {
-                const post = payload?.new;
-                if (post && post.city === selectedCity && post.category !== 'challenge' && post.author_username !== myUsername) {
-                    dispatchSmartNotification(
-                        `post_${post.id}`,
-                        `📰 Новая новость • ${selectedCity}`,
-                        `${post.title || 'Без заголовка'} (${post.author_username || 'Горожанин'})`,
-                        '📰',
-                        jumpToFeedTab
-                    );
-                }
-                loadPostsFromCloud(true);
-            })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' }, () => {
-                loadPostsFromCloud(true);
-            })
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pins' }, () => {
-                loadPinnedMessage();
-            })
-            .subscribe();
+    let globalMessagesData = [];
+    let lastKnownMaxMsgId = 0;
 
-        setInterval(async () => {
-            if (!selectedCity || privacyHideStatus) return;
-            const { data } = await supabaseClient.from('typing').select('*').eq('city', selectedCity);
-            if (!data) return;
-            const now = new Date();
-            let activeTypers = data.filter(t => t.username !== myUsername && (now - new Date(t.updated_at)) < 3000);
-            
-            const indicator = document.getElementById('typingIndicator');
-            if (activeTypers.length > 0) {
-                let names = activeTypers.map(t => t.username).join(', ');
-                indicator.textContent = `${names} печатает...`;
-            } else {
-                indicator.textContent = '';
+    async function loadPublicMessages() {
+        if (!supabaseClient || !myUsername) return;
+        let query = supabaseClient.from('messages').select('*').order('id', { ascending: false }).limit(50);
+
+        if (chatMode === 'public') {
+            query = query.eq('city', selectedCity).eq('chat_type', 'public');
+        } else if (privateRecipient) {
+            query = query.eq('chat_type', 'private').or(`and(sender.eq.${myUsername},recipient.eq.${privateRecipient}),and(sender.eq.${privateRecipient},recipient.eq.${myUsername})`);
+        } else {
+            syncChatControlsUI();
+            loadConversationsList();
+            return;
+        }
+
+        const { data, error } = await query;
+        if (error) return;
+
+        const prevMessagesSnapshot = JSON.stringify(globalMessagesData.map(m => ({ id: m.id, text: m.text })));
+        globalMessagesData = data.reverse();
+
+        if (globalMessagesData.length > 0) {
+            let newestMsg = globalMessagesData[globalMessagesData.length - 1];
+            if (lastKnownMaxMsgId !== 0 && newestMsg.id > lastKnownMaxMsgId && newestMsg.sender !== myUsername) {
+                const isPriv = newestMsg.chat_type === 'private';
+                const cleanBody = parseReplyFromMessageText(newestMsg.text || '').body;
+                dispatchSmartNotification(
+                    `msg_${newestMsg.id}`,
+                    isPriv ? `💬 Личное сообщение от ${newestMsg.sender}` : `🌍 Чат ${selectedCity} • ${newestMsg.sender}`,
+                    cleanBody || 'Отправлен медиафайл',
+                    isPriv ? '💬' : '🌍',
+                    isPriv ? () => jumpToPrivateChat(newestMsg.sender) : jumpToPublicChat
+                );
             }
-        }, 2000);
+            if (newestMsg.id > lastKnownMaxMsgId) {
+                lastKnownMaxMsgId = newestMsg.id;
+            }
+        }
+
+        await syncReactionsForMessages(globalMessagesData);
+
+        const nextMessagesSnapshot = JSON.stringify(globalMessagesData.map(m => ({ id: m.id, text: m.text })));
+        if (prevMessagesSnapshot !== nextMessagesSnapshot || document.getElementById('chatMessages').children.length === 0) {
+            renderMessagesList(globalMessagesData);
+        }
     }
 
-    function composeMessageTextWithReply(baseText) {
-        const clean = (baseText || '').trim();
-        if (!activeReplyTarget) return clean;
-        const safeAuthor = activeReplyTarget.author.replace(/[|\]]/g, '');
-        const safeSnippet = activeReplyTarget.text.replace(/[|\]]/g, '').slice(0, 75);
-        return `[reply:${safeAuthor}|${safeSnippet}] ${clean}`;
+    function renderMessagesList(msgsToRender) {
+        const box = document.getElementById('chatMessages');
+        const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 100;
+        box.innerHTML = '';
+
+        const founder = isFounderAccount();
+        const quickEmojis = ['🔥', '👍', '❤️'];
+
+        msgsToRender.forEach(m => {
+            const isMine = m.sender === myUsername;
+            const safeSender = escapeHtml(m.sender || 'Автор').replace(/'/g, '&#39;');
+            const safeAvatar = isSafeMediaUrl(m.avatar_url) ? escapeHtml(m.avatar_url).replace(/'/g, '&#39;') : '';
+            const row = document.createElement('div');
+            row.className = 'msg-row' + (isMine ? ' mine' : '');
+            const isVid = m.media_url && (m.media_url.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i) || m.media_url.includes('video'));
+            const safeMedia = isSafeMediaUrl(m.media_url) ? escapeHtml(m.media_url) : '';
+            const mediaHtml = safeMedia ? (isVid ? `<video src="${safeMedia}" class="msg-media" controls playsinline preload="metadata"></video>` : `<img src="${safeMedia}" class="msg-media" loading="lazy" onclick="openLightbox('${safeMedia}')" style="cursor:zoom-in;">`) : '';
+            const avatarHtml = isSafeMediaUrl(m.avatar_url) ? `<img src="${escapeHtml(m.avatar_url)}">` : escapeHtml(m.sender && m.sender.length > 1 ? m.sender[1].toUpperCase() : 'U');
+            const canDeleteMsg = isMine || founder;
+            const timeStr = m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+            const parsed = parseReplyFromMessageText(m.text || '');
+            const cleanBody = parsed.body;
+            const quoteHtml = parsed.reply
+                ? `<div class="msg-quote-box" onclick="startReplyToMessage(${Number(m.id)})">
+                        <div class="msg-quote-author">↩ ${escapeHtml(parsed.reply.author)}</div>
+                        <div class="msg-quote-text">${escapeHtml(parsed.reply.text)}</div>
+                   </div>`
+                : '';
+
+            const msgKey = String(m.id);
+            const reactionsObj = messageReactionsMap[msgKey] || {};
+            const activeEmojis = Object.keys(reactionsObj).filter(e => Array.isArray(reactionsObj[e]) && reactionsObj[e].length > 0);
+            const quickBarHtml = quickEmojis.map(emo =>
+                `<button type="button" class="msg-quick-react-btn" onclick="toggleMessageReaction(${Number(m.id)}, '${emo}')" title="Быстрая реакция ${emo}">${emo}</button>`
+            ).join('');
+
+            let reactionsBarHtml = '';
+            if (activeEmojis.length > 0) {
+                const pillsHtml = activeEmojis.map(emo => {
+                    const users = [...new Set(reactionsObj[emo])];
+                    const active = users.includes(myUsername);
+                    return `<button type="button" class="msg-react-pill${active ? ' active' : ''}" onclick="toggleMessageReaction(${Number(m.id)}, '${emo}')">${emo} <span>${users.length}</span></button>`;
+                }).join('');
+                reactionsBarHtml = `
+                    <div class="msg-reactions-row">
+                        ${pillsHtml}
+                        <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker(${Number(m.id)})" title="Добавить реакцию">+</button>
+                    </div>
+                `;
+            } else {
+                reactionsBarHtml = `
+                    <div class="msg-reactions-row">
+                        ${quickBarHtml}
+                        <button type="button" class="msg-add-react-btn" onclick="openMessageReactionPicker(${Number(m.id)})" title="Другая реакция">+</button>
+                    </div>
+                `;
+            }
+
+            const miniControls = `
+                <div class="msg-mini-actions">
+                    <button type="button" class="msg-icon-btn" onclick="startReplyToMessage(${Number(m.id)})" title="Ответить">↩</button>
+                    ${founder && chatMode === 'public' ? `<button type="button" class="msg-icon-btn" onclick="pinMessage(${Number(m.id)}, '${escapeHtml(cleanBody).replace(/'/g, '&#39;')}')" title="Закрепить">📌</button>` : ''}
+                    ${canDeleteMsg ? `<button type="button" class="msg-icon-btn" style="color:#ef4444;" onclick="deleteMessage(${Number(m.id)}, '${safeSender}')" title="Удалить">✕</button>` : ''}
+                </div>
+            `;
+
+            row.innerHTML = `
+                <div class="msg-avatar" onclick="openUserProfileModal('${safeSender}', '${safeAvatar}')" title="Открыть профиль ${escapeHtml(m.sender)}">${avatarHtml}</div>
+                <div class="msg-col">
+                    <div class="msg-bubble" onclick="if(!event.target.closest('button,video,img,.msg-quote-box'))startReplyToMessage(${Number(m.id)})">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px;">
+                            <div class="msg-author" onclick="openUserProfileModal('${safeSender}', '${safeAvatar}')">${escapeHtml(m.sender)}</div>
+                            ${miniControls}
+                        </div>
+                        ${quoteHtml}
+                        <div style="white-space:pre-line;">${escapeHtml(cleanBody)}</div>
+                        ${mediaHtml}
+                        <div class="msg-time">${escapeHtml(timeStr)}</div>
+                    </div>
+                    ${reactionsBarHtml}
+                </div>
+            `;
+            box.appendChild(row);
+        });
+
+        initVideoManager();
+        if (wasAtBottom) { box.scrollTop = box.scrollHeight; }
+    }
+
+    function filterChatSearch() {
+        const query = document.getElementById('chatSearchInput').value.toLowerCase().trim();
+        if (!query) {
+            renderMessagesList(globalMessagesData);
+            return;
+        }
+        const filtered = globalMessagesData.filter(m => 
+            (m.text && m.text.toLowerCase().includes(query)) || 
+            (m.sender && m.sender.toLowerCase().includes(query))
+        );
+        renderMessagesList(filtered);
     }
 
     async function sendPublicMessage() {
+        if (checkCurrentUserBan(true)) return;
+        if (checkMaintenanceGuard()) return;
         const input = document.getElementById('messageInput');
-        const check = IMPULSE_GUARD.validateText(input.value, { maxLength: 1200, cooldownMs: 900 });
+        if (!supabaseClient) return;
+
+        const check = IMPULSE_GUARD.validateText(input.value, { maxLength: 1500, cooldownMs: 800 });
         if (!check.ok) {
-            showPulseAlert(check.reason);
+            if (check.reason !== 'Текст не может быть пустым.') {
+                showPulseAlert(check.reason);
+            }
             return;
         }
         const text = check.text;
 
-        if (chatMode === 'private' && !privateRecipient) {
-            showPulseAlert('Сначала выберите пользователя для личного сообщения!');
-            return;
-        }
+        const replyPrefix = activeReplyTarget
+            ? `[reply:${activeReplyTarget.author.replace(/[\|\]]/g, '')}|${activeReplyTarget.text.replace(/[\|\]]/g, '')}] `
+            : '';
+        const payloadText = replyPrefix + text;
 
         playSystemSound('send');
-        const finalText = composeMessageTextWithReply(text);
-        
-        const msgData = {
-            chat_type: chatMode,
-            city: selectedCity,
-            sender: myUsername,
-            recipient: chatMode === 'private' ? privateRecipient : 'public',
-            text: finalText,
-            avatar_url: myAvatar
+        const msgData = { 
+            chat_type: chatMode, 
+            city: selectedCity, 
+            sender: myUsername, 
+            recipient: chatMode === 'private' ? privateRecipient : 'public', 
+            text: payloadText, 
+            avatar_url: myAvatar 
         };
-
-        const { data, error } = await supabaseClient.from('messages').insert([msgData]).select();
+        const { error } = await supabaseClient.from('messages').insert([msgData]);
         if (error) {
             showPulseAlert('Ошибка отправки сообщения: ' + error.message);
             return;
         }
 
         IMPULSE_GUARD.markSent(text);
-
-        if (data && data[0]) {
-            const prefix = msgData.chat_type === 'private' ? 'dm_' : 'pub_';
-            markEventNotified(`${prefix}${data[0].id}`);
-        }
-
         triggerRemotePush({
             recipient: chatMode === 'private' ? privateRecipient : '',
             city: selectedCity,
-            title: chatMode === 'private' ? `💬 Сообщение от ${myUsername}` : `🌍 Чат ${selectedCity}`,
-            body: `${chatMode === 'private' ? '' : myUsername + ': '}${text.slice(0, 110)}`
+            title: chatMode === 'private' ? `💬 ${myUsername}` : `🌍 Чат ${selectedCity} • ${myUsername}`,
+            body: text.slice(0, 120)
         });
 
         input.value = '';
         cancelReplyTarget();
-        loadPublicMessages();
+        await loadPublicMessages();
     }
 
     async function handleMediaUpload(input) {
+        if (checkCurrentUserBan(true)) {
+            input.value = '';
+            return;
+        }
+        if (checkMaintenanceGuard()) {
+            input.value = '';
+            return;
+        }
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
 
-        document.getElementById('loadingTitle').textContent = '⚡ Обработка и отправка файла...';
+        document.getElementById('loadingTitle').textContent = '⚡ Загрузка медиафайла...';
         document.getElementById('loadingModal').classList.add('open');
 
         const publicMediaUrl = await uploadFileToSupabase(file);
         document.getElementById('loadingModal').classList.remove('open');
+        input.value = '';
 
         if (!publicMediaUrl) return;
 
+        const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|mov|webm|ogg|m4v|3gp|mkv|avi)$/i);
+        const mediaText = isVideo ? '🎥 Видео' : '🖼️ Фото';
+
+        const replyPrefix = activeReplyTarget
+            ? `[reply:${activeReplyTarget.author.replace(/[\|\]]/g, '')}|${activeReplyTarget.text.replace(/[\|\]]/g, '')}] `
+            : '';
+
         playSystemSound('send');
-        const isVideo = file.type.startsWith('video/');
-        const mediaLabel = isVideo ? '🎥 Видео' : '🖼️ Фото';
-        const finalText = composeMessageTextWithReply(mediaLabel);
-
-        const msgData = {
-            chat_type: chatMode,
-            city: selectedCity,
-            sender: myUsername,
-            recipient: chatMode === 'private' ? privateRecipient : 'public',
-            text: finalText,
+        const msgData = { 
+            chat_type: chatMode, 
+            city: selectedCity, 
+            sender: myUsername, 
+            recipient: chatMode === 'private' ? privateRecipient : 'public', 
+            text: replyPrefix + mediaText, 
             media_url: publicMediaUrl,
-            avatar_url: myAvatar
+            avatar_url: myAvatar 
         };
-
-        const { data, error } = await supabaseClient.from('messages').insert([msgData]).select();
+        const { error } = await supabaseClient.from('messages').insert([msgData]);
         if (error) {
-            showPulseAlert('Ошибка отправки: ' + error.message);
+            showPulseAlert('Не удалось отправить медиафайл: ' + error.message);
             return;
-        }
-
-        if (data && data[0]) {
-            const prefix = msgData.chat_type === 'private' ? 'dm_' : 'pub_';
-            markEventNotified(`${prefix}${data[0].id}`);
         }
 
         triggerRemotePush({
             recipient: chatMode === 'private' ? privateRecipient : '',
             city: selectedCity,
-            title: chatMode === 'private' ? `💬 Медиа от ${myUsername}` : `🌍 Чат ${selectedCity}`,
-            body: `${myUsername}: ${mediaLabel}`
+            title: chatMode === 'private' ? `💬 ${myUsername}` : `🌍 Чат ${selectedCity} • ${myUsername}`,
+            body: mediaText
         });
 
-        input.value = '';
         cancelReplyTarget();
-        loadPublicMessages();
+        await loadPublicMessages();
     }
 
-    handleRecoveryLinkOnLoad();
-    IMPULSE_GUARD.syncSession(supabaseClient).then(() => {
+    let realtimeChannel = null;
+
+    function setupRealtimeSubscriptions() {
+        if (!supabaseClient || !myUsername) return;
+        if (realtimeChannel) {
+            supabaseClient.removeChannel(realtimeChannel);
+        }
+
+        realtimeChannel = supabaseClient.channel('pulsecity-live-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
+                const row = payload.new || payload.old;
+                if (!row) return;
+
+                if (payload.eventType === 'INSERT' && row.sender !== myUsername) {
+                    if (row.chat_type === 'private' && row.recipient === myUsername) {
+                        const cleanBody = parseReplyFromMessageText(row.text || '').body;
+                        dispatchSmartNotification(
+                            `msg_${row.id}`,
+                            `💬 Новое сообщение от ${row.sender}`,
+                            cleanBody || 'Медиафайл',
+                            '💬',
+                            () => jumpToPrivateChat(row.sender)
+                        );
+                        loadConversationsList();
+                    } else if (row.chat_type === 'public' && row.city === selectedCity) {
+                        const cleanBody = parseReplyFromMessageText(row.text || '').body;
+                        dispatchSmartNotification(
+                            `msg_${row.id}`,
+                            `🌍 Чат ${selectedCity} • ${row.sender}`,
+                            cleanBody || 'Медиафайл',
+                            '🌍',
+                            jumpToPublicChat
+                        );
+                    }
+                }
+
+                if (row.chat_type === 'private') {
+                    loadConversationsList();
+                }
+                if ((chatMode === 'public' && row.chat_type === 'public' && row.city === selectedCity) ||
+                    (chatMode === 'private' && row.chat_type === 'private')) {
+                    loadPublicMessages();
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, () => {
+                loadPublicMessages();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, (payload) => {
+                const row = payload.new || payload.old;
+                if (payload.eventType === 'INSERT' && row && row.city === selectedCity && row.category !== 'challenge' && row.author_username !== myUsername) {
+                    dispatchSmartNotification(
+                        `post_${row.id}`,
+                        `📰 Новая новость • ${selectedCity}`,
+                        `${row.title || 'Без заголовка'} (${row.author_username || 'Горожанин'})`,
+                        '📰',
+                        jumpToFeedTab
+                    );
+                }
+                loadPostsFromCloud(true);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, () => {
+                loadPostsFromCloud(true);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, (payload) => {
+                const row = payload.new || payload.old;
+                loadPostsFromCloud(true);
+                if (activePostIdForComments && row && String(row.post_id) === String(activePostIdForComments)) {
+                    loadComments(activePostIdForComments);
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'pins' }, (payload) => {
+                const row = payload.new || payload.old;
+                if (row && row.city === SYSTEM_STATE_KEY) {
+                    loadSystemReleaseState();
+                } else {
+                    loadPinnedMessage();
+                }
+            })
+            .subscribe();
+    }
+
+    (async () => {
+        await IMPULSE_GUARD.syncSession(supabaseClient);
+        await loadSystemReleaseState();
         checkAdminAccess();
-    });
-
-    if (myName && myUsername) {
-        loadPostsFromCloud(true);
-        loadPublicMessages();
-        loadPinnedMessage();
-        setupRealtimeSubscriptions();
-        setInterval(() => { 
-            loadPostsFromCloud(false); 
+        await handleRecoveryLinkOnLoad();
+        if (myName && myUsername && !isPasswordRecoveryFlow) {
+            checkCurrentUserBan(true);
+            loadPostsFromCloud(true);
             loadPublicMessages();
-            pollBackgroundNotifications();
-        }, 3000);
-    }
+            loadPinnedMessage();
+            loadConversationsList();
+            setupRealtimeSubscriptions();
+        }
+    })();
+
+    setInterval(() => {
+        if (myName && myUsername && !isPasswordRecoveryFlow) {
+            loadSystemReleaseState();
+            loadPostsFromCloud();
+            loadPublicMessages();
+            loadConversationsList();
+            checkTypingStatus();
+        }
+    }, 3000);
 </script>
 </body>
 </html>
